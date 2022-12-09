@@ -1,3 +1,4 @@
+import os
 import numpy as np
 import pandas as pd
 from nilearn import image
@@ -64,12 +65,17 @@ def permute_similarity(nii_list, thresh=1.5, type='Dice'):
     var_permutes = list(combinations(nii_list, 2))
 
     coef_dat = []
+    coef_label = []
 
     for r in var_permutes:
         val = similarity(r[0], r[1], thresh=thresh, type=type)
-        coef_dat.append([val, r])
+        coef_dat.append([val])
 
-    return coef_dat
+        path1 = os.path.basename(os.path.normpath(r[0]))
+        path2 = os.path.basename(os.path.normpath(r[1]))
+        coef_label.append([path1, path2])
+
+    return coef_dat,coef_label
 
 
 def Calc_icc(wide, sub_var, sess_vars, icc_type='icc_2'):
