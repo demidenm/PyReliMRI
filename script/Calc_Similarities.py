@@ -116,6 +116,48 @@ def permute_images(nii_list, img_mask, thresh=1.5, similar_type='Dice'):
 
     return coef_df
 
+def sumsq_total(df_long):
+    """
+    calculates the sum of square total
+    the difference between each value and the global mean
+    :param df_long:
+    :return:
+    """
+    np.square(
+        np.subtract(df_long["vals"], df_long["vals"].mean())
+    ).sum()
+
+def sumsq_within(df_long, n):
+    """
+    calculates the sum of squared Intra-subj variance,
+    the average session value subtracted from overall avg of values
+    :param df_long: long df
+    :param n: sample n
+    :return: returns sumsqured within
+    """
+    return np.multiply(
+        np.square(
+            np.subtract(df_long['vals'].mean(),
+                        df_long[['sess', 'vals']].groupby(by='sess')['vals'].mean()
+                        )),
+        n
+    ).sum()
+
+def sumsq_btwn(df_long, c):
+    """
+    calculates the sum of squared between-subj variance,
+    the average subject value subtracted from overall avg of values
+    :param df_long: long df
+    :param n: sample n
+    :return: returns sumsqured within
+    """
+    return np.multiply(
+        np.square(
+            np.subtract(df_long['vals'].mean(),
+                        df_long[[sub_var, 'vals']].groupby(by=sub_var)['vals'].mean()
+                        )),
+        c
+    ).sum()
 
 def calc_icc(wide, sub_var, sess_vars, icc_type='icc_2'):
     """
@@ -144,28 +186,14 @@ def calc_icc(wide, sub_var, sess_vars, icc_type='icc_2'):
     DF_r = (n - 1) * (c - 1)
 
     # Sum of Square Vals
-    # sum of squared total, the difference between each value & the overall mean
-    SS_T = np.square(
-        np.subtract(df_long["vals"], df_long["vals"].mean())
-    ).sum()
+    # sum of squared total
+    SS_T = sumsq_total(df_long)
 
-    # the sum of squared inter-subj variance, the average subject value subtracted from overall avg of values
-    SS_R = np.multiply(
-        np.square(
-            np.subtract(df_long['vals'].mean(),
-                        df_long[[sub_var, 'vals']].groupby(by=sub_var)['vals'].mean()
-                        )),
-        c
-    ).sum()
+    # the sum of squared inter-subj variance (c = sessions)
+    SS_R = sumsq_btwn(df_long, c)
 
-    # the sum of squared Intra-subj variance, the average session value subtracted from overall avg of values
-    SS_C = np.multiply(
-        np.square(
-            np.subtract(df_long['vals'].mean(),
-                        df_long[['sess', 'vals']].groupby(by='sess')['vals'].mean()
-                        )),
-        n
-    ).sum()
+    # the sum of squared Intra-subj variance (n = sample of subjects)
+    SS_C = sumsq_c(df_long, n)
 
     # Sum Square Errors
     SSE = SS_T - SS_R - SS_C
