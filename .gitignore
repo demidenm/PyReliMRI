@@ -1,2 +1,10 @@
 
 .DS_Store
+.idea/inspectionProfiles/profiles_settings.xml
+.idea/inspectionProfiles/Project_Default.xml
+.idea/modules.xml
+.idea/misc.xml
+.idea/MRI_Reliability.iml
+.idea/vcs.xml
+.ipynb_checkpoints/Reliability_calcs-checkpoint.ipynb
+Reliability_calcs.ipynb
