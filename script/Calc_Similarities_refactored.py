@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 from nilearn import image
 from itertools import combinations
+from nilearn.maskers import NiftiMasker
 
 # some general/overall comments:
 # first - nice job overall! 
@@ -23,7 +24,7 @@ from itertools import combinations
 # I am not actually sure 
 # type is a reserved term in python, and you should also be more specific about
 # what the parameter means
-def similarity(img1, img2, thresh=0, type='Dice'):
+def image_similarity(imgfile1, imgfile2, mask=None, thresh=None, similarity_type='Dice'):
     """
 
     :param imgs: list of paths to nii files
@@ -32,64 +33,24 @@ def similarity(img1, img2, thresh=0, type='Dice'):
     :param type: specify calculation, can be Dice or Jaccards, Default = Dice
     :return: similarity coefficient
     """
+    assert similarity_type in ['Dice', 'Jaccard'], 'similarity_type must be "Dice" or "Jaccard"'
+
     # there was a lot of repeated code here
+    imagefiles = [imgfile1, imgfile2]
+    img = [image.load_img(i) for i in imagefiles]
 
-    # probably best to set thresh to None in the function definition
-    if thresh == 0:
-        img_1st = image.load_img(img1)
-        img_2nd = image.load_img(img2)
+    if thresh is not None:
+        img = [image.threshold_img(i, threshold=thresh, two_sided=False) for i in img]
 
-        # everything from here down in the if statement is repeated in the else statement
-        # so you can just do this once
-        img1_dat = image.get_data(img_1st)
-        img2_dat = image.get_data(img_2nd)
+    masker = NiftiMasker(mask_img=mask)
+    imgdata = masker.fit_transform(img)
 
-        if img1_dat.shape != img1_dat.shape:
-            # if you are going to raise an exception it should be as specific as possible,
-            # e.g. ValueError
-            raise Exception('Image shapes are no equal. Please check shape of input files.')
-        else:
-            # this section doesn't need to go into an else statement
-            # you can just do it after the if statement
-            # since the if statement will exit the function if it is true
-            intersect = np.logical_and(img1_dat, img2_dat)
-            union = np.logical_or(img1_dat, img2_dat)
-            # what is the intended purpose of rounding here?
-            dice_coeff = round((intersect.sum()) / (float(union.sum()) + np.finfo(float).eps), 3)
+    intersect = np.logical_and(imgdata[0, :], imgdata[1, :])
+    union = np.logical_or(imgdata[0, :], imgdata[1, :])
+    dice_coeff = (intersect.sum()) / (float(union.sum()) + np.finfo(float).eps)
 
-    # what if I wanted to use a negative threshold? this method wouldn't work
-    elif thresh > 0:
-        img1_thresh = image.threshold_img(img1, threshold=thresh)
-        img2_thresh = image.threshold_img(img2, threshold=thresh)
-        # should check to make sure that the thresholded images are not empty
+    return dice_coeff if similarity_type == 'Dice' else dice_coeff / (2 - dice_coeff)
 
-        img1_dat = image.get_data(img1_thresh)
-        img2_dat = image.get_data(img2_thresh)
-
-        # it would be more pythonic to do this in a try/catch block
-        if img1_dat.shape == img2_dat.shape:
-            intersect = np.logical_and(img1_dat, img2_dat)
-            union = np.logical_or(img1_dat, img2_dat)
-            dice_coeff = round(intersect.sum() / (float(union.sum()) + np.finfo(float).eps), 3)
-
-        else:
-            # would be nice to actually print the shapes of the mismatching images
-            raise Exception('Image shapes are no equal. Please check shape of input files.')
-    else:
-        # what I would do is have a test at the very top for the value of the threshold (if needed)
-        raise Exception('[thresh]should be integer >0. \n Value provided: {}'.format(thresh))
-
-    if type == 'Dice':
-        coef = dice_coeff
-    # it is usually called the Jaccard coefficient, not Jaccard's coefficient
-    elif type == 'Jaccards':
-        jaccards = dice_coeff / (2 - dice_coeff)
-        coef = jaccards
-    else:
-        # what I would do is have a test at the very top for the value of the coefficient type
-        raise Exception('[type] should be string Dice or Jaccards. \n Value provided: {}'.format(type))
-
-    return coef
 
 # the naming here doesn't seem exactly right, since it implies that you are 
 # permuting the similarity values when you are actually permuting the images
