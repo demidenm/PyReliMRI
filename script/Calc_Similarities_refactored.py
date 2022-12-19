@@ -57,7 +57,7 @@ def permute_images(nii_filelist, mask, thresh=None, similarity_type='Dice'):
     :return: returns similarity coefficient & labels in pandas dataframe
     """
     # test whether function type is of 'Dice' or 'Jaccard', case insensitive
-    assert similarity_type in ['Dice', 'Jaccard'], 'similarity_type must be "Dice" or "Jaccard, ' \
+    assert similarity_type.casefold() in ['dice', 'jaccard'], 'similarity_type must be "Dice" or "Jaccard", ' \
                                                    '{} entered'.format(similarity_type)
 
     var_permutes = list(combinations(nii_filelist, 2))
@@ -66,10 +66,8 @@ def permute_images(nii_filelist, mask, thresh=None, similarity_type='Dice'):
     for r in var_permutes:
         # select basename of file name(s)
         path = [os.path.basename(i) for i in r]
-
         # calculate simiarlity
-        val = image_similarity(imgfile1=r[0], imgfile2=r[1], mask=mask,
-                               thresh=thresh, similarity_type=similarity_type)
+        val = image_similarity(imgfile1=r[0], imgfile2=r[1], mask=mask, thresh=thresh, similarity_type=similarity_type)
 
         # for each permutation, save value + label to pandas df
         similarity_data = pd.DataFrame(np.column_stack((val, " ~ ".join([path[0], path[1]]))),
