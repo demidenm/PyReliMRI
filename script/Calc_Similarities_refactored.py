@@ -200,7 +200,7 @@ def mri_voxel_icc(paths_sess1, paths_sess2, mask, paths_sess3=None, icc='icc_3')
 
     :param paths_sess1: paths to session 2 nii MNI files
     :param paths_sess2: paths to session 2 nii MNI files
-    :param paths_sess3: Default = none. If there are more than 3 sessions, paths to session 3 nii MNI files
+    :param paths_sess3: If there are more than 3 sessions, paths to session 3 nii MNI files
     :param mask: path to nii MNI path object
     :param icc: provide icc type, default is icc_3, options: icc_1, icc_2, icc_3
     :return: returns 3D shaped array of ICCs in shape of provided 3D  mask
@@ -218,7 +218,7 @@ def mri_voxel_icc(paths_sess1, paths_sess2, mask, paths_sess3=None, icc='icc_3')
     masker = NiftiMasker(mask_img=mask)
     imgdata = [masker.fit_transform(i) for i in session_data]
 
-    # get subj details per session to use w/ pandas df
+    # get subj details per session to use in pandas df
     subjs = imgdata[0].shape[:-1]
     sub_n = np.array(np.arange(start=0, stop=subjs[0], step=1))
 
@@ -226,12 +226,9 @@ def mri_voxel_icc(paths_sess1, paths_sess2, mask, paths_sess3=None, icc='icc_3')
 
     if paths_sess3 is None:
         for v in range(len(imgdata[0].T)):
-            # sub sample v voxel for all subjects for each session
-            sess1_voxs = imgdata[0][:, v]
-            sess2_voxs = imgdata[1][:, v]
-
-            # stack columns to create np array that includes voxels and sub labels
-            np_voxdata = np.column_stack((sub_n, sess1_voxs, sess2_voxs))
+            # sub sample v voxel for all subjects for each session. Stack columns to create np array
+            #  that includes voxels and sub labels for session 1 [0] & session 2 [1]
+            np_voxdata = np.column_stack((sub_n, imgdata[0][:, v], imgdata[1][:, v]))
 
             # create dataframe that is then used with ICC function to calculate specified ICC
             vox_pd = pd.DataFrame(data=np_voxdata, columns=["subj", "sess1", "sess2"])
@@ -243,13 +240,9 @@ def mri_voxel_icc(paths_sess1, paths_sess2, mask, paths_sess3=None, icc='icc_3')
 
     elif paths_sess3 is not None:
         for v in range(len(imgdata[0].T)):
-            # sub sample v voxel for all subjects for each session
-            sess1_voxs = imgdata[0][:, v]
-            sess2_voxs = imgdata[1][:, v]
-            sess3_voxs = imgdata[2][:, v]
-
-            # stack columns to create np array that includes voxels and sub labels
-            np_voxdata = np.column_stack((sub_n, sess1_voxs, sess2_voxs, sess3_voxs))
+            # sub sample v voxel for all subjects for each session. Stack columns to create np array
+            #  that includes voxels and sub labels for session 1 [0] & session 2 [1], session [3]
+            np_voxdata = np.column_stack((sub_n, imgdata[0][:, v], imgdata[1][:, v], imgdata[2][:, v]))
 
             # create dataframe that is then used with ICC function to calculate specified ICC
             vox_pd = pd.DataFrame(data=np_voxdata, columns=["subj", "sess1", "sess2", "sess3"])
