@@ -5,117 +5,118 @@ from nilearn import image
 from itertools import combinations
 from nilearn.maskers import NiftiMasker
 
-# some general/overall comments:
-# first - nice job overall! 
-
-# generally, it would be nice for all of your functions to have the same interface
-# e.g. they all take a list of images and a mask, and return a similarity coefficient
-# I would be inclined to follow the scikit-learn interface model, though it requires
-# writing classes rather than plain functions.
-# I would get it working with plain functions first, then refactor to classes
-
-# It would be nice to have a description of the intended purpose of each function
-# within the docstring
-
-# in general, putting indices into variable names is a bad practice
-# it would be better to put the images into a list
-
-# use a more descriptive function name
-# I am not actually sure 
-# type is a reserved term in python, and you should also be more specific about
-# what the parameter means
 def image_similarity(imgfile1, imgfile2, mask=None, thresh=None, similarity_type='Dice'):
     """
-
-    :param imgs: list of paths to nii files
+    :param imgfile1: nii path to first image
+    :param imgfile2: nii path to second image
     :param mask: path to image mask for voxel selection
     :param thresh: specify voxel threshold to use, if any, values >0. Default = 0
-    :param type: specify calculation, can be Dice or Jaccards, Default = Dice
+    :param similarity_type: specify calculation, can be Dice or Jaccards, Default = Dice
     :return: similarity coefficient
     """
-    assert similarity_type in ['Dice', 'Jaccard'], 'similarity_type must be "Dice" or "Jaccard"'
+    assert similarity_type.casefold() in ['dice','jaccard'], 'similarity_type must be "Dice" or "Jaccard". ' \
+                                                             'Provided: {}"'.format(similarity_type)
 
-    # there was a lot of repeated code here
+    # load list of images
     imagefiles = [imgfile1, imgfile2]
     img = [image.load_img(i) for i in imagefiles]
 
-    if thresh is not None:
-        img = [image.threshold_img(i, threshold=thresh, two_sided=False) for i in img]
+    assert img[0].shape == img[1].shape, 'images of different shape, ' \
+                                         'image 1 {} and image 2 {}'.format(img[0].shape,img[1].shape)
 
+    # mask image
     masker = NiftiMasker(mask_img=mask)
     imgdata = masker.fit_transform(img)
+
+    # threshold image, make compatible for positive & negative values
+    # (i.e., some may want similarity in (de)activation)
+    if thresh is not None:
+        if thresh > 0:
+            imgdata = imgdata > thresh
+
+        elif thresh < 0:
+            imgdata = imgdata < thresh
 
     intersect = np.logical_and(imgdata[0, :], imgdata[1, :])
     union = np.logical_or(imgdata[0, :], imgdata[1, :])
     dice_coeff = (intersect.sum()) / (float(union.sum()) + np.finfo(float).eps)
 
-    return dice_coeff if similarity_type == 'Dice' else dice_coeff / (2 - dice_coeff)
+    return dice_coeff if similarity_type.casefold() == 'dice' else dice_coeff / (2 - dice_coeff)
 
 
-# the naming here doesn't seem exactly right, since it implies that you are 
-# permuting the similarity values when you are actually permuting the images
-def permute_similarity(nii_list, thresh=1.5, type='Dice'):
+def permute_images(nii_filelist, mask, thresh=None, similarity_type='Dice'):
     """
-    :param nii_list: list of paths to NII files
-    :param tresh: threshold to use on NII files, default 1.5
-    :param type: type of similarity calc, Dice or Jaccards, default Dice
-    :return: returns similarity coefficient for all nii permutations
-    """
-    var_permutes = list(combinations(nii_list, 2))
+    This permutation takes in a list of paths to Nifti images and creates a comparsion that covers all possible
+    combinations. For each combination, it calculates the specified similarity and
+    returns the coefficients & string combo.
 
-    # I don't love this way of storing the results since it somewhat separates
-    # the data from the labels. I would use a pandas dataframe or dictionary instead
-    coef_dat = []
-    coef_label = []
+    :param nii_filelist: list of paths to NII files
+    :param mask: path to image mask for brain mask
+    :param thresh: threshold to use on NII files, default 1.5
+    :param similarity_type: type of similarity calc, Dice or Jaccards, default Dice
+    :return: returns similarity coefficient & labels in pandas dataframe
+    """
+    # test whether function type is of 'Dice' or 'Jaccard', case insensitive
+    assert similarity_type in ['Dice', 'Jaccard'], 'similarity_type must be "Dice" or "Jaccard, ' \
+                                                   '{} entered'.format(similarity_type)
+
+    var_permutes = list(combinations(nii_filelist, 2))
+    coef_df = pd.DataFrame(columns=['similar_coef', 'image_labels'])
 
     for r in var_permutes:
-        val = similarity(r[0], r[1], thresh=thresh, type=type)
-        coef_dat.append([val])
+        # select basename of file name(s)
+        path = [os.path.basename(i) for i in r]
 
-        path1 = os.path.basename(os.path.normpath(r[0]))
-        path2 = os.path.basename(os.path.normpath(r[1]))
-        coef_label.append([path1, path2])
+        # calculate simiarlity
+        val = image_similarity(imgfile1=r[0], imgfile2=r[1], mask=mask,
+                               thresh=thresh, similarity_type=similarity_type)
 
-    return coef_dat,coef_label
+        # for each permutation, save value + label to pandas df
+        similarity_data = pd.DataFrame(np.column_stack((val, " ~ ".join([path[0], path[1]]))),
+                                       columns=['similar_coef', 'image_labels'])
+        coef_df = pd.concat([coef_df, similarity_data], axis=0, ignore_index=True)
 
-# shoudl follow python function naming conventions by using camel case: https://peps.python.org/pep-0008/#function-and-variable-names
+    return coef_df
 
-def Calc_icc(wide, sub_var, sess_vars, icc_type='icc_2'):
+
+def sumsq_total(df_long):
     """
-    This ICC calculation employs the ANOVA technique.
-    It converts a wide data.frame into a long format, where subjects repeat for sessions
-    The total variance (SS_T) is squared difference each value and the overall mean.
-    This is then decomposed into INTER (between) and INTRA (within) subject variance.
-
-
-    :param wide: Data of subjects & sessions, wide format.
-    :param sub_var: list of variables in dataframe that subject identifying variable
-    :param sess_vars: list of in dataframe that are repeat session variables
-    :param icc_type: default is ICC(2,1), alternative is ICC(1,1) via icc_1 or ICC(3,1) via icc_3
-    :return: ICC calculation
+    calculates the sum of square total
+    the difference between each value and the global mean
+    :param df_long:
+    :return:
     """
-    df_long = pd.melt(wide,
-                      id_vars=sub_var,
-                      value_vars=sess_vars,
-                      var_name='sess',
-                      value_name='vals')
-
-    # for the sake of modularity I would separate out the computatoin of the
-    # sums of squares into a separate function
-    # Calc DF
-    [n, c] = wide.drop([sub_var], axis=1).shape
-    DF_n = n - 1
-    DF_c = c - 1
-    DF_r = (n - 1) * (c - 1)
-
-    # Sum of Square Vals
-    # sum of squared total, the difference between each value & the overall mean
-    SS_T = np.square(
+    np.square(
         np.subtract(df_long["vals"], df_long["vals"].mean())
     ).sum()
 
-    # the sum of squared inter-subj variance, the average subject value subtracted from overall avg of values
-    SS_R = np.multiply(
+
+def sumsq_within(df_long, n):
+    """
+    calculates the sum of squared Intra-subj variance,
+    the average session value subtracted from overall avg of values
+    :param df_long: long df
+    :param n: sample n
+    :return: returns sumsqured within
+    """
+    return np.multiply(
+        np.square(
+            np.subtract(df_long['vals'].mean(),
+                        df_long[['sess', 'vals']].groupby(by='sess')['vals'].mean()
+                        )),
+        n
+    ).sum()
+
+
+def sumsq_btwn(df_long, c):
+    """
+    calculates the sum of squared between-subj variance,
+    the average subject value subtracted from overall avg of values
+    :param df_long: long df
+    :param n: sample n
+    :return: returns sumsqured within
+    """
+    return np.multiply(
         np.square(
             np.subtract(df_long['vals'].mean(),
                         df_long[[sub_var, 'vals']].groupby(by=sub_var)['vals'].mean()
@@ -123,14 +124,45 @@ def Calc_icc(wide, sub_var, sess_vars, icc_type='icc_2'):
         c
     ).sum()
 
-    # the sum of squared Intra-subj variance, the average session value subtracted from overall avg of values
-    SS_C = np.multiply(
-        np.square(
-            np.subtract(df_long['vals'].mean(),
-                        df_long[['sess', 'vals']].groupby(by='sess')['vals'].mean()
-                        )),
-        n
-    ).sum()
+
+def calculate_icc(df_wide, sub_var, sess_vars, icc_type='icc_3'):
+    """
+    This ICC calculation employs the ANOVA technique.
+    It converts a wide data.frame into a long format, where subjects repeat for sessions
+    The total variance (SS_T) is squared difference each value and the overall mean.
+    This is then decomposed into INTER (between) and INTRA (within) subject variance.
+
+
+    :param df_wide: Data of subjects & sessions, wide format.
+    :param sub_var: list of variables in dataframe that subject identifying variable
+    :param sess_vars: list of in dataframe that are repeat session variables
+    :param icc_type: default is ICC(3,1), alternative is ICC(1,1) via icc_1 or ICC(2,1) via icc_2
+    :return: ICC calculation
+    """
+    assert icc_type in ['icc_1', 'icc_2','icc_3'], 'ICC type should be icc_1, icc_2,icc_3, ' \
+                                                   '{} entered'.format(icc_type)
+
+    df_long = pd.melt(df_wide,
+                      id_vars=sub_var,
+                      value_vars=sess_vars,
+                      var_name='sess',
+                      value_name='vals')
+
+    # Calc degrees of freedom
+    [n, c] = df_wide.drop([sub_var], axis=1).shape
+    DF_n = n - 1
+    DF_c = c - 1
+    DF_r = (n - 1) * (c - 1)
+
+    # Calculating different sum of squared values
+    # sum of squared total
+    SS_T = sumsq_total(df_long)
+
+    # the sum of squared inter-subj variance (c = sessions)
+    SS_R = sumsq_btwn(df_long, c)
+
+    # the sum of squared Intra-subj variance (n = sample of subjects)
+    SS_C = sumsq_within(df_long, n)
 
     # Sum Square Errors
     SSE = SS_T - SS_R - SS_C
@@ -144,131 +176,89 @@ def Calc_icc(wide, sub_var, sess_vars, icc_type='icc_2'):
     MSE = SSE / (DF_r)
     MSW = SSW / (n * (DF_c))
 
-    if icc_type == 'icc_2':
+    if icc_type == 'icc_1':
+        # ICC(1), Model 1
+        ICC_est = (MSR - MSW) / (MSR + (DF_c * MSW))
+
+    elif icc_type == 'icc_2':
         # ICC(2,1)
         ICC_est = (MSR - MSE) / (MSR + (DF_c) * MSE + (c) * (MSC - MSE) / n)
 
-    elif icc_type == 'icc_1':
-        # ICC(1), Model 1
-        ICC_est = (MSR - MSW) / (MSR + (DF_c * MSW))
     elif icc_type == 'icc_3':
         # ICC(3,1)
         ICC_est = (MSR - MSE) / (MSR + (DF_c) * MSE)
-    else:
-        # I would put this at the top of the function
-        raise Exception('[icc_type] should be of icc_1, icc_2 or icc_3. \n Value type provided: {}'.format(icc_type))
 
     return ICC_est
 
 
-# I don't think you need this, as you could use nilearn.maskers.niftimasker
-# which would also deal with masking and other preprocessing operations
-def convrt_4Dto2D(img):
+def mri_voxel_icc(paths_sess1, paths_sess2, mask, paths_sess3=None, icc='icc_3'):
     """
-    This is used to conver the 4D to 2D image
-    :param img: provide a 4D numpy array (i.e., converted 4D nifti)
-    :return: reshape 2D volume, 1-3 collapsed to dim 1 and 4 is now dim 2
-    """
-    # Get length of concatenated images & create array of pseudo subject labels 1 - N sub imgs
-    subjs = img.shape[-1]
-
-    # Get the 3D shape of the images, then calculate the number of voxels
-    shape_3d = img.shape[:-1]
-    vox_n = np.prod(shape_3d)
-
-    # reshape the session images into voxels (length) by subject (columns)
-    img_vox_by_sub = np.reshape(img, (vox_n, img.shape[-1]))
-
-    return img_vox_by_sub
-
-# the naming here is a bit unclear - should be clearer on exactly what this function does
-# what is the purpose of sess3? 
-# if sess3 is not required then I would define it as None
-# then you wouldn't actually need the n_sessions variable, you could just check if sess3 is None
-def MRI_ICCs(sess1, sess2, sess3, n_sessions=2, icc='icc_2'):
-    """
-    MRI_ICCs calculates the ICC for specified input files. The path to the subject's data should be provided as a list
-    for each session, i.e.
+    mri_voxel_icc: calculates the ICC by voxel for specified input files.
+    The path to the subject's data should be provided as a list for each session, i.e.
     dat_ses1 = ["./ses1/sub-00_Contrast-A_bold.nii.gz","./ses1/sub-01_Contrast-A_bold.nii.gz", "./ses1/sub-00_Contrast-A_bold.nii.gz"]
     dat_ses2 = ["./ses2/sub-00_Contrast-A_bold.nii.gz","./ses2/sub-01_Contrast-A_bold.nii.gz", "./ses2/sub-03_Contrast-A_bold.nii.gz"]
     Inter-subject variance would be: between subjects in session 1 & between subjects in session 2
     Intra-subject variance would be: within subject across session 1 and session 2.
 
-    :param sess1:
-    :param sess2:
-    :param sess3:
-    :param sess4:
-    :param n_sessions:
-    :param icc: provide icc type, default is icc_2, options: icc_1, icc_2, icc_3
-    :return: returns list of calculated ICCs in shape of 3D img
+    :param paths_sess1: paths to session 2 nii MNI files
+    :param paths_sess2: paths to session 2 nii MNI files
+    :param paths_sess3: Default = none. If there are more than 3 sessions, paths to session 3 nii MNI files
+    :param mask: path to nii MNI path object
+    :param icc: provide icc type, default is icc_3, options: icc_1, icc_2, icc_3
+    :return: returns 3D shaped array of ICCs in shape of provided 3D  mask
     """
 
-    if n_sessions == 2:
-        # concatenate the paths to 3D images into a 4D nifti image (4th dimension are subjs) using image concat
-        # get data for this new 4D volume
-        sess1_dat = image.concat_imgs(sess1)
-        sess1_img = image.get_data(sess1_dat)
-        sess2_dat = image.concat_imgs(sess2)
-        sess2_img = image.get_data(sess2_dat)
+    assert len(paths_sess1) == len(paths_sess2), 'sessions lists do not match, ' \
+                                                 'session 1 length: {} and session 2 length: {}'.format(
+        len(paths_sess1), len(paths_sess2))
 
-        # get subj details per session list to confirm size is equal
-        subjs = sess1.shape[-1]
-        shape3D_img = sess1_img.shape[:-1]
-        sub_n = np.array(np.arange(start=0, stop=subjs, step=1))
+    # concatenate the paths to 3D images into a 4D nifti image (4th dimension are subjs) using image concat
+    session_files = [paths_sess1, paths_sess2] if paths_sess3 is None else [paths_sess1, paths_sess2, paths_sess3]
+    session_data = [image.concat_imgs(i) for i in session_files]
 
-        # convert session vols to 2D
-        sess1_img_2d = convrt_4Dto2D(sess1_img)
-        sess2_img_2d = convrt_4Dto2D(sess2_img)
+    # mask images
+    masker = NiftiMasker(mask_img=mask)
+    imgdata = [masker.fit_transform(i) for i in session_data]
 
-        for i in range(len(sess1_img_2d)):
-            # sub sample i voxel for all subjects for each session
-            sess1_voxs = sess1_img_2d[i, :]
-            sess2_voxs = sess2_img_2d[i, :]
+    # get subj details per session to use w/ pandas df
+    subjs = imgdata[0].shape[:-1]
+    sub_n = np.array(np.arange(start=0, stop=subjs[0], step=1))
+
+    ICC = []
+
+    if paths_sess3 is None:
+        for v in range(len(imgdata[0].T)):
+            # sub sample v voxel for all subjects for each session
+            sess1_voxs = imgdata[0][:, v]
+            sess2_voxs = imgdata[1][:, v]
 
             # stack columns to create np array that includes voxels and sub labels
             np_voxdata = np.column_stack((sub_n, sess1_voxs, sess2_voxs))
 
-            # create dataframe that is then used with ICC function to calculate ICC
-            ICC_data = pd.DataFrame(data=np_voxdata, columns=["subj", "sess1", "sess2"])
-            ICCs.append(Calc_icc(ICC_data, "subj", ["sess1", "sess2"], icc_type=icc))
+            # create dataframe that is then used with ICC function to calculate specified ICC
+            vox_pd = pd.DataFrame(data=np_voxdata, columns=["subj", "sess1", "sess2"])
+            ICC.append(calculate_icc(vox_pd, "subj", ["sess1", "sess2"], icc_type=icc))
 
-    # there is a lot of repeated code here
-    # you should figure out what exactly is unique to this case
-    # the code looks similar enough between the 2 and 3 session cases that you could 
-    # probably combine them
+        # using unmask to reshape the 1D voxels back to 3D specified mask
+        icc_array = np.array(ICC)
+        icc_brain = masker.inverse_transform(icc_array)
 
-    if n_sessions == 3:
-        # concatenate the paths to 3D images into a 4D nifti image (4th dimension are subjs) using image concat
-        # get data for this new 4D volume
-        sess1_dat = image.concat_imgs(sess1)
-        sess1_img = image.get_data(sess1_dat)
-        sess2_dat = image.concat_imgs(sess2)
-        sess2_img = image.get_data(sess2_dat)
-        sess3_dat = image.concat_imgs(sess3)
-        sess3_img = image.get_data(sess3_dat)
-
-        # get subj details per session list to confirm size is equal
-        subjs = sess1.shape[-1]
-        shape3D_img = sess1_img.shape[:-1]
-        # doesn't np.arange already return an array?
-        sub_n = np.array(np.arange(start=0, stop=subjs, step=1))
-
-        # convert session vols to 2D
-        sess1_img_2d = convrt_4Dto2D(sess1_img)
-        sess2_img_2d = convrt_4Dto2D(sess2_img)
-        sess3_img_2d = convrt_4Dto2D(sess3_img)
-
-        for i in range(len(sess1_img_2d)):
-            # sub sample i voxel for all subjects for each session
-            sess1_voxs = sess1_img_2d[i, :]
-            sess2_voxs = sess2_img_2d[i, :]
-            sess3_voxs = sess3_img_2d[i, :]
+    elif paths_sess3 is not None:
+        for v in range(len(imgdata[0].T)):
+            # sub sample v voxel for all subjects for each session
+            sess1_voxs = imgdata[0][:, v]
+            sess2_voxs = imgdata[1][:, v]
+            sess3_voxs = imgdata[2][:, v]
 
             # stack columns to create np array that includes voxels and sub labels
             np_voxdata = np.column_stack((sub_n, sess1_voxs, sess2_voxs, sess3_voxs))
 
-            # create dataframe that is then used with ICC function to calculate ICC
-            ICC_data = pd.DataFrame(data=np_voxdata, columns=["subj", "sess1", "sess2", "sess3"])
-            ICCs.append(Calc_icc(ICC_data, "subj", ["sess1", "sess2", "sess3"], icc_type=icc))
+            # create dataframe that is then used with ICC function to calculate specified ICC
+            vox_pd = pd.DataFrame(data=np_voxdata, columns=["subj", "sess1", "sess2", "sess3"])
+            ICC.append(calculate_icc(vox_pd, "subj", ["sess1", "sess2", "sess3"], icc_type=icc))
 
-    return ICCs.reshape(shape3D_img)
+        # using unmask to reshape the 1D voxels back to 3D specified mask
+        icc_array = np.array(ICC)
+        icc_brain = masker.inverse_transform(icc_array)
+
+    return icc_brain
