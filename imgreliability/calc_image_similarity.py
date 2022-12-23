@@ -4,8 +4,11 @@ import pandas as pd
 from nilearn import image
 from itertools import combinations
 from nilearn.maskers import NiftiMasker
+from numpy.typing import NDArray
 
-def image_similarity(imgfile1, imgfile2, mask=None, thresh=None, similarity_type='Dice'):
+def image_similarity(imgfile1: str, imgfile2: str, 
+                     mask: str = None, thresh: float = None,
+                     similarity_type: str = 'Dice') -> float:
     """
     :param imgfile1: nii path to first image
     :param imgfile2: nii path to second image
@@ -44,7 +47,8 @@ def image_similarity(imgfile1, imgfile2, mask=None, thresh=None, similarity_type
     return dice_coeff if similarity_type.casefold() == 'dice' else dice_coeff / (2 - dice_coeff)
 
 
-def permute_images(nii_filelist, mask, thresh=None, similarity_type='Dice'):
+def permute_images(nii_filelist: list, mask: str, 
+                   thresh: float = None, similarity_type: str='Dice'):
     """
     This permutation takes in a list of paths to Nifti images and creates a comparsion that covers all possible
     combinations. For each combination, it calculates the specified similarity and
@@ -76,20 +80,20 @@ def permute_images(nii_filelist, mask, thresh=None, similarity_type='Dice'):
 
     return coef_df
 
-
-def sumsq_total(df_long):
+# should pass a numpy array rather than a data frame
+# since this requires the data frame to have a specific name that
+# is embedded in the function
+# also - use simpler computation
+def sumsq_total(data: NDArray):
     """
     calculates the sum of square total
     the difference between each value and the global mean
     :param df_long:
     :return:
     """
-    np.square(
-        np.subtract(df_long["vals"], df_long["vals"].mean())
-    ).sum()
+    return np.sum((data - data.mean())**2)
 
-
-def sumsq_within(df_long, n):
+def sumsq_within(df_long: pd.DataFrame, n: int):
     """
     calculates the sum of squared Intra-subj variance,
     the average session value subtracted from overall avg of values
@@ -105,8 +109,8 @@ def sumsq_within(df_long, n):
         n
     ).sum()
 
-
-def sumsq_btwn(df_long, c):
+## WHAT IS c?
+def sumsq_btwn(df_long: pd.DataFrame, c: int):
     """
     calculates the sum of squared between-subj variance,
     the average subject value subtracted from overall avg of values
@@ -123,7 +127,8 @@ def sumsq_btwn(df_long, c):
     ).sum()
 
 
-def calculate_icc(df_wide, sub_var, sess_vars, icc_type='icc_3'):
+def calculate_icc(df_wide: pd.DataFrame, sub_var: list, 
+                  sess_vars: list, icc_type: str = 'icc_3'):
     """
     This ICC calculation employs the ANOVA technique.
     It converts a wide data.frame into a long format, where subjects repeat for sessions
@@ -189,7 +194,8 @@ def calculate_icc(df_wide, sub_var, sess_vars, icc_type='icc_3'):
     return ICC_est
 
 
-def mri_voxel_icc(paths_sess1, paths_sess2, mask, paths_sess3=None, icc='icc_3'):
+def mri_voxel_icc(paths_sess1: list, paths_sess2: list,
+                  mask: str, paths_sess3 : list = None, icc : str = 'icc_3'):
     """
     mri_voxel_icc: calculates the ICC by voxel for specified input files.
     The path to the subject's data should be provided as a list for each session, i.e.
