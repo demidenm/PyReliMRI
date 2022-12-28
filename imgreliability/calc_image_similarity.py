@@ -31,7 +31,7 @@ def image_similarity(imgfile1: str, imgfile2: str,
     masker = NiftiMasker(mask_img=mask)
     imgdata = masker.fit_transform(img)
 
-    # threshold image, make compatible for positive & negative values
+    # threshold image, compatible for positive & negative values
     # (i.e., some may want similarity in (de)activation)
     if thresh is not None:
         if thresh > 0:
@@ -80,51 +80,52 @@ def permute_images(nii_filelist: list, mask: str,
 
     return coef_df
 
-# should pass a numpy array rather than a data frame
+# should pass a numpy array rather than a data frame.
 # since this requires the data frame to have a specific name that
 # is embedded in the function
-# also - use simpler computation
-def sumsq_total(data: NDArray):
+
+# ** MD: since the mri_voxel df is input with specific columns, is the refactored approach below appropriate?**
+
+def sumsq_total(df_long: pd.DataFrame, values: str):
     """
     calculates the sum of square total
     the difference between each value and the global mean
     :param df_long:
+    :param values: variable string for values containing scores
     :return:
     """
-    return np.sum((data - data.mean())**2)
+    return np.sum((df_long[values] - df_long[values].mean())**2)
 
-def sumsq_within(df_long: pd.DataFrame, n: int):
+def sumsq_within(df_long: pd.DataFrame, sessions: str, values: str, n_subjects: int):
     """
     calculates the sum of squared Intra-subj variance,
     the average session value subtracted from overall avg of values
-    :param df_long: long df
-    :param n: sample n
+    :param df_long: long df for scores across subjects and 1+ sesssions
+    :param sessions: session (repeated measurement) variable in df, string
+    :param values: variable for values for subjects across sessions, str
+    :param n_subjects: number of subjects
     :return: returns sumsqured within
     """
-    return np.multiply(
-        np.square(
-            np.subtract(df_long['vals'].mean(),
-                        df_long[['sess', 'vals']].groupby(by='sess')['vals'].mean()
-                        )),
-        n
-    ).sum()
 
-## WHAT IS c?
-def sumsq_btwn(df_long: pd.DataFrame, c: int):
+    return np.sum(
+        ((df_long[values].mean() - df_long[[sessions, values]].groupby(by=sessions)[values].mean())**2) * n_subjects
+    )
+
+
+def sumsq_btwn(df_long: pd.DataFrame, subj: str, values: str, n_sessions: int):
     """
     calculates the sum of squared between-subj variance,
     the average subject value subtracted from overall avg of values
-    :param df_long: long df
-    :param n: sample n
+
+    :param df_long: long df for scores across subjects and 1+ sesssions
+    :param session: subj variable in df, string
+    :param values: variable for values for subjects across sessions, str
+    :param n_sessions: number of sessions
     :return: returns sumsqured within
     """
-    return np.multiply(
-        np.square(
-            np.subtract(df_long['vals'].mean(),
-                        df_long[[sub_var, 'vals']].groupby(by=sub_var)['vals'].mean()
-                        )),
-        c
-    ).sum()
+    return np.sum(
+        ((df_long[values].mean() - df_long[[subj, values]].groupby(by=subj)[values].mean()) ** 2) * n_sessions
+    )
 
 
 def calculate_icc(df_wide: pd.DataFrame, sub_var: list, 
@@ -148,27 +149,27 @@ def calculate_icc(df_wide: pd.DataFrame, sub_var: list,
     df_long = pd.melt(df_wide,
                       id_vars=sub_var,
                       value_vars=sess_vars,
-                      var_name='sess',
-                      value_name='vals')
+                      var_name="sess",
+                      value_name="vals")
 
     # Calc degrees of freedom
-    [n, c] = df_wide.drop([sub_var], axis=1).shape
-    DF_n = n - 1
-    DF_c = c - 1
-    DF_r = (n - 1) * (c - 1)
+    [n_subj, sess] = df_wide.drop([sub_var], axis=1).shape
+    DF_n = n_subj - 1
+    DF_c = sess - 1
+    DF_r = (n_subj - 1) * (n_sess - 1)
 
     # Calculating different sum of squared values
     # sum of squared total
-    SS_T = sumsq_total(df_long)
+    SS_T = sumsq_total(df_long=df_long, values="vals")
 
-    # the sum of squared inter-subj variance (c = sessions)
-    SS_R = sumsq_btwn(df_long, c)
+    # the sum of squared inter-subj variance (n_sessions = # sessions/measurement occasions)
+    SS_R = sumsq_btwn(df_long=df_long, subj="subj", values="vals", n_sessions=sess)
 
-    # the sum of squared Intra-subj variance (n = sample of subjects)
-    SS_C = sumsq_within(df_long, n)
+    # the sum of squared Intra-subj variance (n_subj = sample of subjects)
+    SS_C = sumsq_within(df_long=df_long, sessions="sess", values="vals", n_subjects=n_subj)
 
     # Sum Square Errors
-    SSE = SS_T - SS_R - SS_C
+    SSE = SS_T - SS_B - SS_W
 
     # Sum square withins subj err
     SSW = SS_C + SSE

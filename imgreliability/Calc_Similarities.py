@@ -154,7 +154,7 @@ def sumsq_btwn(df_long, c):
     return np.multiply(
         np.square(
             np.subtract(df_long['vals'].mean(),
-                        df_long[[sub_var, 'vals']].groupby(by=sub_var)['vals'].mean()
+                        df_long[['sub_var', 'vals']].groupby(by=sub_var)['vals'].mean()
                         )),
         c
     ).sum()
