@@ -153,9 +153,9 @@ def calculate_icc(df_wide: pd.DataFrame, sub_var: list,
                       value_name="vals")
 
     # Calc degrees of freedom
-    [n_subj, sess] = df_wide.drop([sub_var], axis=1).shape
+    [n_subj, n_sess] = df_wide.drop([sub_var], axis=1).shape
     DF_n = n_subj - 1
-    DF_c = sess - 1
+    DF_c = n_sess - 1
     DF_r = (n_subj - 1) * (n_sess - 1)
 
     # Calculating different sum of squared values
@@ -163,13 +163,13 @@ def calculate_icc(df_wide: pd.DataFrame, sub_var: list,
     SS_T = sumsq_total(df_long=df_long, values="vals")
 
     # the sum of squared inter-subj variance (n_sessions = # sessions/measurement occasions)
-    SS_R = sumsq_btwn(df_long=df_long, subj="subj", values="vals", n_sessions=sess)
+    SS_R = sumsq_btwn(df_long=df_long, subj="subj", values="vals", n_sessions=n_sess)
 
     # the sum of squared Intra-subj variance (n_subj = sample of subjects)
     SS_C = sumsq_within(df_long=df_long, sessions="sess", values="vals", n_subjects=n_subj)
 
     # Sum Square Errors
-    SSE = SS_T - SS_B - SS_W
+    SSE = SS_T - SS_R - SS_C
 
     # Sum square withins subj err
     SSW = SS_C + SSE
@@ -178,7 +178,7 @@ def calculate_icc(df_wide: pd.DataFrame, sub_var: list,
     MSR = SS_R / (DF_n)
     MSC = SS_C / (DF_c)
     MSE = SSE / (DF_r)
-    MSW = SSW / (n * (DF_c))
+    MSW = SSW / (n_subj * (DF_c))
 
     if icc_type == 'icc_1':
         # ICC(1), Model 1
@@ -186,7 +186,7 @@ def calculate_icc(df_wide: pd.DataFrame, sub_var: list,
 
     elif icc_type == 'icc_2':
         # ICC(2,1)
-        ICC_est = (MSR - MSE) / (MSR + (DF_c) * MSE + (c) * (MSC - MSE) / n)
+        ICC_est = (MSR - MSE) / (MSR + (DF_c) * MSE + (n_sess) * (MSC - MSE) / n_subj)
 
     elif icc_type == 'icc_3':
         # ICC(3,1)
