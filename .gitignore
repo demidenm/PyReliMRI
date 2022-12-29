@@ -8,3 +8,5 @@
 .idea/vcs.xml
 .ipynb_checkpoints/Reliability_calcs-checkpoint.ipynb
 Reliability_calcs.ipynb
+tests/__pycache__/test_similarity_ref.cpython-38-pytest-7.2.0.pyc
+imgreliability/__pycache__/calc_image_similarity.cpython-38.pyc
