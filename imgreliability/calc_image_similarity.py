@@ -6,10 +6,13 @@ from itertools import combinations
 from nilearn.maskers import NiftiMasker
 from numpy.typing import NDArray
 
-def image_similarity(imgfile1: str, imgfile2: str, 
+
+def image_similarity(imgfile1: str, imgfile2: str,
                      mask: str = None, thresh: float = None,
                      similarity_type: str = 'Dice') -> float:
-    """
+    """ The img_similarity function takes in two images (3D), a binarized mask (3D), and simiarlity type.
+    Based on the specified threshold and similarity type, the ratio of intersecting and union of voxels is calculated.
+    The function returns a ratio of voxels that overlap between the two images
     :param imgfile1: nii path to first image
     :param imgfile2: nii path to second image
     :param mask: path to image mask for voxel selection
@@ -17,15 +20,15 @@ def image_similarity(imgfile1: str, imgfile2: str,
     :param similarity_type: specify calculation, can be Dice or Jaccards, Default = Dice
     :return: similarity coefficient
     """
-    assert similarity_type.casefold() in ['dice','jaccard'], 'similarity_type must be "Dice" or "Jaccard". ' \
-                                                             'Provided: {}"'.format(similarity_type)
+    assert similarity_type.casefold() in ['dice', 'jaccard'], 'similarity_type must be "Dice" or "Jaccard". ' \
+                                                              'Provided: {}"'.format(similarity_type)
 
     # load list of images
     imagefiles = [imgfile1, imgfile2]
     img = [image.load_img(i) for i in imagefiles]
 
     assert img[0].shape == img[1].shape, 'images of different shape, ' \
-                                         'image 1 {} and image 2 {}'.format(img[0].shape,img[1].shape)
+                                         'image 1 {} and image 2 {}'.format(img[0].shape, img[1].shape)
 
     # mask image
     masker = NiftiMasker(mask_img=mask)
@@ -47,13 +50,11 @@ def image_similarity(imgfile1: str, imgfile2: str,
     return dice_coeff if similarity_type.casefold() == 'dice' else dice_coeff / (2 - dice_coeff)
 
 
-def permute_images(nii_filelist: list, mask: str, 
-                   thresh: float = None, similarity_type: str='Dice'):
-    """
-    This permutation takes in a list of paths to Nifti images and creates a comparsion that covers all possible
+def permute_images(nii_filelist: list, mask: str,
+                   thresh: float = None, similarity_type: str = 'Dice'):
+    """This permutation takes in a list of paths to Nifti images and creates a comparsion that covers all possible
     combinations. For each combination, it calculates the specified similarity and
     returns the coefficients & string combo.
-
     :param nii_filelist: list of paths to NII files
     :param mask: path to image mask for brain mask
     :param thresh: threshold to use on NII files, default 1.5
@@ -62,7 +63,7 @@ def permute_images(nii_filelist: list, mask: str,
     """
     # test whether function type is of 'Dice' or 'Jaccard', case insensitive
     assert similarity_type.casefold() in ['dice', 'jaccard'], 'similarity_type must be "Dice" or "Jaccard", ' \
-                                                   '{} entered'.format(similarity_type)
+                                                              '{} entered'.format(similarity_type)
 
     var_permutes = list(combinations(nii_filelist, 2))
     coef_df = pd.DataFrame(columns=['similar_coef', 'image_labels'])
@@ -80,62 +81,63 @@ def permute_images(nii_filelist: list, mask: str,
 
     return coef_df
 
+
 # should pass a numpy array rather than a data frame.
 # since this requires the data frame to have a specific name that
 # is embedded in the function
 
-# ** MD: since the mri_voxel df is input with specific columns, is the refactored approach below appropriate?**
+# --> MD: since the mri_voxel df is input with specific col names, is the refactored approach below appropriate?
 
-def sumsq_total(df_long: pd.DataFrame, values: str):
-    """
-    calculates the sum of square total
+def sumsq_total(df_long: pd.DataFrame, values: str) -> NDArray:
+    """ calculates the sum of square total
     the difference between each value and the global mean
+
     :param df_long:
     :param values: variable string for values containing scores
     :return:
     """
-    return np.sum((df_long[values] - df_long[values].mean())**2)
+    return np.sum((df_long[values] - df_long[values].mean()) ** 2)
 
-def sumsq_within(df_long: pd.DataFrame, sessions: str, values: str, n_subjects: int):
-    """
-    calculates the sum of squared Intra-subj variance,
+
+def sumsq_within(df_long: pd.DataFrame, intra_var: str,
+                 values: str, n_subjects: int) -> NDArray:
+    """calculates the sum of squared Intra-subj variance,
     the average session value subtracted from overall avg of values
+
     :param df_long: long df for scores across subjects and 1+ sesssions
-    :param sessions: session (repeated measurement) variable in df, string
+    :param intra_var: intra-subject variable (repeated measurement) in df, string
     :param values: variable for values for subjects across sessions, str
     :param n_subjects: number of subjects
-    :return: returns sumsqured within
+    :return: returns sum squared within (intra) subject variance (e.g.,sessions/repeated measures)
     """
 
     return np.sum(
-        ((df_long[values].mean() - df_long[[sessions, values]].groupby(by=sessions)[values].mean())**2) * n_subjects
+        ((df_long[values].mean() - df_long[[intra_var, values]].groupby(by=intra_var)[values].mean()) ** 2) * n_subjects
     )
 
 
-def sumsq_btwn(df_long: pd.DataFrame, subj: str, values: str, n_sessions: int):
-    """
-    calculates the sum of squared between-subj variance,
+def sumsq_btwn(df_long: pd.DataFrame, inter_var: str,
+               values: str, n_sessions: int) -> NDArray:
+    """calculates the sum of squared between-subj variance,
     the average subject value subtracted from overall avg of values
 
-    :param df_long: long df for scores across subjects and 1+ sesssions
-    :param session: subj variable in df, string
+    :param df_long: long df for scores across subjects and 1+ sessions
+    :param inter_var: inter-subject variable (e.g., ID) in df, string
     :param values: variable for values for subjects across sessions, str
     :param n_sessions: number of sessions
-    :return: returns sumsqured within
+    :return: returns sum squared between (inter) subject variance
     """
     return np.sum(
-        ((df_long[values].mean() - df_long[[subj, values]].groupby(by=subj)[values].mean()) ** 2) * n_sessions
+        ((df_long[values].mean() - df_long[[inter_var, values]].groupby(by=inter_var)[values].mean()) ** 2) * n_sessions
     )
 
 
-def calculate_icc(df_wide: pd.DataFrame, sub_var: list, 
+def calculate_icc(df_wide: pd.DataFrame, sub_var: list,
                   sess_vars: list, icc_type: str = 'icc_3'):
-    """
-    This ICC calculation employs the ANOVA technique.
+    """ This ICC calculation uses the ANOVA technique.
     It converts a wide data.frame into a long format, where subjects repeat for sessions
     The total variance (SS_T) is squared difference each value and the overall mean.
     This is then decomposed into INTER (between) and INTRA (within) subject variance.
-
 
     :param df_wide: Data of subjects & sessions, wide format.
     :param sub_var: list of variables in dataframe that subject identifying variable
@@ -143,14 +145,14 @@ def calculate_icc(df_wide: pd.DataFrame, sub_var: list,
     :param icc_type: default is ICC(3,1), alternative is ICC(1,1) via icc_1 or ICC(2,1) via icc_2
     :return: ICC calculation
     """
-    assert icc_type in ['icc_1', 'icc_2','icc_3'], 'ICC type should be icc_1, icc_2,icc_3, ' \
-                                                   '{} entered'.format(icc_type)
+    assert icc_type in ['icc_1', 'icc_2', 'icc_3'], 'ICC type should be icc_1, icc_2,icc_3, ' \
+                                                    '{} entered'.format(icc_type)
 
-    df_long = pd.melt(df_wide,
-                      id_vars=sub_var,
-                      value_vars=sess_vars,
-                      var_name="sess",
-                      value_name="vals")
+    data_long = pd.melt(df_wide,
+                        id_vars=sub_var,
+                        value_vars=sess_vars,
+                        var_name="sess",
+                        value_name="vals")
 
     # Calc degrees of freedom
     [n_subj, n_sess] = df_wide.drop([sub_var], axis=1).shape
@@ -160,13 +162,13 @@ def calculate_icc(df_wide: pd.DataFrame, sub_var: list,
 
     # Calculating different sum of squared values
     # sum of squared total
-    SS_T = sumsq_total(df_long=df_long, values="vals")
+    SS_T = sumsq_total(df_long=data_long, values="vals")
 
-    # the sum of squared inter-subj variance (n_sessions = # sessions/measurement occasions)
-    SS_R = sumsq_btwn(df_long=df_long, subj="subj", values="vals", n_sessions=n_sess)
+    # the sum of squared inter-subj variance (n_sessions= # sessions/measurement occasions)
+    SS_R = sumsq_btwn(df_long=data_long, inter_var="subj", values="vals", n_sessions=n_sess)
 
-    # the sum of squared Intra-subj variance (n_subj = sample of subjects)
-    SS_C = sumsq_within(df_long=df_long, sessions="sess", values="vals", n_subjects=n_subj)
+    # the sum of squared Intra-subj variance (n_subj= sample of subjects)
+    SS_C = sumsq_within(df_long=data_long, intra_var="sess", values="vals", n_subjects=n_subj)
 
     # Sum Square Errors
     SSE = SS_T - SS_R - SS_C
@@ -196,12 +198,13 @@ def calculate_icc(df_wide: pd.DataFrame, sub_var: list,
 
 
 def mri_voxel_icc(paths_sess1: list, paths_sess2: list,
-                  mask: str, paths_sess3 : list = None, icc : str = 'icc_3'):
-    """
-    mri_voxel_icc: calculates the ICC by voxel for specified input files.
+                  mask: str, paths_sess3: list = None, icc: str = 'icc_3'):
+    """mri_voxel_icc: calculates the ICC by voxel for specified input files.
     The path to the subject's data should be provided as a list for each session, i.e.
-    dat_ses1 = ["./ses1/sub-00_Contrast-A_bold.nii.gz","./ses1/sub-01_Contrast-A_bold.nii.gz", "./ses1/sub-00_Contrast-A_bold.nii.gz"]
-    dat_ses2 = ["./ses2/sub-00_Contrast-A_bold.nii.gz","./ses2/sub-01_Contrast-A_bold.nii.gz", "./ses2/sub-03_Contrast-A_bold.nii.gz"]
+    dat_ses1 = ["./ses1/sub-00_Contrast-A_bold.nii.gz","./ses1/sub-01_Contrast-A_bold.nii.gz",
+                "./ses1/sub-00_Contrast-A_bold.nii.gz"]
+    dat_ses2 = ["./ses2/sub-00_Contrast-A_bold.nii.gz","./ses2/sub-01_Contrast-A_bold.nii.gz",
+                "./ses2/sub-03_Contrast-A_bold.nii.gz"]
     Inter-subject variance would be: between subjects in session 1 & between subjects in session 2
     Intra-subject variance would be: within subject across session 1 and session 2.
 
