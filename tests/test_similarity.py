@@ -1,7 +1,7 @@
 import pytest
 import numpy as np
 from pathlib import Path
-from imgreliability.calc_image_similarity import (
+from old_scripts.calc_image_similarity import (
     image_similarity,
     sumsq_total
 )

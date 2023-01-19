@@ -2,13 +2,12 @@ import pytest
 import numpy as np
 import pandas as pd
 from pathlib import Path
-from imgreliability.calc_image_similarity import (
+from imgreliability.icc import calculate_icc
+from imgreliability.similarity import (
     image_similarity,
-    sumsq_total,
-    sumsq_within,
-    sumsq_btwn,
-    calculate_icc
+    permute_images
 )
+from imgreliability.brain_icc import voxel_icc
 from collections import namedtuple
 from nibabel import Nifti1Image
 import nibabel as nib
@@ -86,71 +85,33 @@ def test_image_similarity(image_pair, measure):
     )
     assert imgsim is not None
 
-# test ICC calc is close for specified r
-def create_corrdat(r):
-    subj = np.arange(1, 1000 + 1, 1)
-    cov = np.array([[1., r],
-                    [r, 1.]])
-
-    np.random.seed(111)
-    repeated = multivar_norm.rvs(mean=[0, 0],
-                                 cov=cov, size=1000)
-
-    df = pd.DataFrame(data=np.column_stack((subj, repeated)),
-                      columns=["subj", "A1", "A2"])
-
-    return df
-
-@pytest.mark.parametrize("corr", [.50, .60,.45])
-def test_calculate_icc(corr):
-    df = create_corrdat(corr)
-    icc = calculate_icc(df_wide=df, sub_var="subj",
-                        sess_vars=["A1", "A2"],
-                        icc_type='icc_3')
-
-    assert np.allclose(round(icc, 2), corr)
-
-# test degenerate case where ssqt,within,between is zero
-def test_sumsq_total():
-    data = np.ones(100)
-    ssqt = sumsq_total(data)
-    assert np.allclose(ssqt, 0)
-
-def test_sumsq_total():
-    n = 100
-    subj = np.tile(np.arange(1, n + 1, 1), 2)
-    measures = np.tile(np.ones(n), 2)
-    df_lg = pd.DataFrame(data=np.column_stack((subj, measures)),
-                         columns=["subj", "values"])
-    ssqt = sumsq_total(df_long=df_lg, values="values")
-    assert np.allclose(ssqt, 0)
+#@pytest.mark.parametrize("corr", [.50, .60,.45])
+def test_calculate_icc1():
+    import seaborn as sns
+    data = sns.load_dataset('anagrams')
+    # subset to only divided attnr measure occ
+    a_wd = data[data['attnr'] != 'divided']
+    icc = calculate_icc2(df_wide=a_wd, sub_var="subidr",
+                         sess_vars=["num1", "num2", "num3"], icc_type='icc_1')
+    assert np.allclose(round(icc, 2), -0.05)
 
 
-def test_sumsq_within():
-    n_subj = 100
-    n_sess = 2
-    subj = np.tile(np.arange(1, n_subj + 1, 1), 2)
-    measures = np.tile(np.ones(n_subj), 2)
-    sessions = np.hstack((np.ones(n_subj), np.zeros(n_subj)))
-    df_lg = pd.DataFrame(data=np.column_stack((subj, sessions, measures)),
-                         columns=["subj", "sess", "values"])
-    ssq_wthn = sumsq_within(df_long=df_lg, intra_var="sess",
-                            values="values", n_subjects=n_subj)
-
-    assert np.allclose(ssq_wthn, 0)
+def test_calculate_icc2():
+    import seaborn as sns
+    data = sns.load_dataset('anagrams')
+    # subset to only divided attnr measure occ
+    a_wd = data[data['attnr'] != 'divided']
+    icc = calculate_icc2(df_wide=a_wd, sub_var="subidr",
+                         sess_vars=["num1", "num2", "num3"], icc_type='icc_2')
+    assert np.allclose(round(icc, 2), 0.11)
 
 
-def test_sumsq_btwn():
-    n_subj = 100
-    n_sess = 2
-    subj = np.tile(np.arange(1, n_subj + 1, 1), 2)
-    measures = np.tile(np.ones(n_subj), 2)
-    sessions = np.hstack((np.ones(n_subj), np.zeros(n_subj)))
-    df_lg = pd.DataFrame(data=np.column_stack((subj, sessions, measures)),
-                         columns=["subj", "sess", "values"])
-    sssq_btwn = sumsq_btwn(df_long=df_lg, inter_var="subj",
-                           values="values", n_sessions=n_sess)
-
-    assert np.allclose(sssq_btwn, 0)
-
+def test_calculate_icc3():
+    import seaborn as sns
+    data = sns.load_dataset('anagrams')
+    # subset to only divided attnr measure occ
+    a_wd = data[data['attnr'] != 'divided']
+    icc = calculate_icc2(df_wide=a_wd, sub_var="subidr",
+                         sess_vars=["num1", "num2", "num3"], icc_type='icc_3')
+    assert np.allclose(round(icc, 2), 0.20)
 
