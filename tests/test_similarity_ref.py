@@ -2,12 +2,15 @@ import pytest
 import numpy as np
 import pandas as pd
 from pathlib import Path
-from imgreliability.icc import calculate_icc
 from imgreliability.similarity import (
     image_similarity,
     permute_images
 )
-from imgreliability.brain_icc import voxel_icc
+from imgreliability.icc import (
+    sumsq_icc,
+    aov_icc,
+    peng_icc
+)
 from collections import namedtuple
 from nibabel import Nifti1Image
 import nibabel as nib
@@ -90,9 +93,17 @@ def test_calculate_icc1():
     import seaborn as sns
     data = sns.load_dataset('anagrams')
     # subset to only divided attnr measure occ
-    a_wd = data[data['attnr'] != 'divided']
-    icc = calculate_icc2(df_wide=a_wd, sub_var="subidr",
-                         sess_vars=["num1", "num2", "num3"], icc_type='icc_1')
+    a_wd = data[data['attnr'] == 'divided']
+    a_ld = pd.DataFrame(
+        pd.melt(a_wd,
+                id_vars="subidr",
+                value_vars=["num1", "num2", "num3"],
+                var_name="sess",
+                value_name="vals"))
+
+    icc = peng_icc(df_long=a_ld, sub_var="subidr",
+                   sess_var="sess", values="vals", icc_type='icc_1')
+
     assert np.allclose(round(icc, 2), -0.05)
 
 
@@ -100,9 +111,16 @@ def test_calculate_icc2():
     import seaborn as sns
     data = sns.load_dataset('anagrams')
     # subset to only divided attnr measure occ
-    a_wd = data[data['attnr'] != 'divided']
-    icc = calculate_icc2(df_wide=a_wd, sub_var="subidr",
-                         sess_vars=["num1", "num2", "num3"], icc_type='icc_2')
+    a_wd = data[data['attnr'] == 'divided']
+    a_ld = pd.DataFrame(
+        pd.melt(a_wd,
+                id_vars="subidr",
+                value_vars=["num1", "num2", "num3"],
+                var_name="sess",
+                value_name="vals"))
+
+    icc = peng_icc(df_long=a_ld, sub_var="subidr",
+                   sess_var="sess",values="vals", icc_type='icc_2')
     assert np.allclose(round(icc, 2), 0.11)
 
 
@@ -110,8 +128,32 @@ def test_calculate_icc3():
     import seaborn as sns
     data = sns.load_dataset('anagrams')
     # subset to only divided attnr measure occ
-    a_wd = data[data['attnr'] != 'divided']
-    icc = calculate_icc2(df_wide=a_wd, sub_var="subidr",
-                         sess_vars=["num1", "num2", "num3"], icc_type='icc_3')
+    a_wd = data[data['attnr'] == 'divided']
+    a_ld = pd.DataFrame(
+        pd.melt(a_wd,
+                id_vars="subidr",
+                value_vars=["num1", "num2", "num3"],
+                var_name="sess",
+                value_name="vals"))
+
+    icc = aov_icc(df_long=a_ld, sub_var="subidr",
+                   sess_var="sess", values="vals", icc_type='icc_3')
     assert np.allclose(round(icc, 2), 0.20)
+
+
+def test_calculate_icc3():
+    import seaborn as sns
+    data = sns.load_dataset('anagrams')
+    # subset to only divided attnr measure occ
+    a_wd = data[data['attnr'] == 'divided']
+    a_ld = pd.DataFrame(
+        pd.melt(a_wd,
+                id_vars="subidr",
+                value_vars=["num1", "num2", "num3"],
+                var_name="sess",
+                value_name="vals"))
+
+    icc = aov_icc(df_long=a_ld, sub_var="subidr",
+                   sess_var="sess", values="vals", icc_type='icc_1')
+    assert np.allclose(round(icc, 2), -.05)
 
