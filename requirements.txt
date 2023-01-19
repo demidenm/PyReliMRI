@@ -1,5 +1,9 @@
 os
 numpy
+pingouin
 pandas
+pytest
+pathlib
 nilearn
 itertools
+warnings
