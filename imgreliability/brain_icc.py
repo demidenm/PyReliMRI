@@ -59,6 +59,8 @@ def voxel_icc_aov(paths_sess1, paths_sess2, mask, paths_sess3=None, icc='icc_3')
 
             ICC.append(aov_icc(df_long=vox_pd, sub_var="subj",
                                       sess_var="sess", values="vals", icc_type=icc))
+        icc_array = np.array(ICC)
+        icc_brain = masker.inverse_transform(icc_array)
 
     elif paths_sess3 is not None:
         for v in range(len(imgdata[0].T)):
@@ -79,8 +81,11 @@ def voxel_icc_aov(paths_sess1, paths_sess2, mask, paths_sess3=None, icc='icc_3')
                                       sess_var="sess", values="vals", icc_type=icc))
 
         # using unmask to reshape the 1D voxels back to 3D specified mask
+            # using unmask to reshape the 1D voxels back to 3D specified mask
+        icc_array = np.array(ICC)
+        icc_brain = masker.inverse_transform(icc_array)
 
-    return masker.inverse_transform(np.array(ICC))
+    return icc_brain
 
 
 def voxel_icc_peng(paths_sess1, paths_sess2, mask, paths_sess3=None, icc='icc_3'):
@@ -134,6 +139,8 @@ def voxel_icc_peng(paths_sess1, paths_sess2, mask, paths_sess3=None, icc='icc_3'
 
             ICC.append(peng_icc(df_long=vox_pd, sub_var="subj",
                                       sess_var="sess", values="vals", icc_type=icc))
+        icc_array = np.array(ICC)
+        icc_brain = masker.inverse_transform(icc_array)
 
     elif paths_sess3 is not None:
         for v in range(len(imgdata[0].T)):
@@ -154,7 +161,10 @@ def voxel_icc_peng(paths_sess1, paths_sess2, mask, paths_sess3=None, icc='icc_3'
                                       sess_var="sess", values="vals", icc_type=icc))
 
         # using unmask to reshape the 1D voxels back to 3D specified mask
-    return masker.inverse_transform(np.array(ICC))
+        icc_array = np.array(ICC)
+        icc_brain = masker.inverse_transform(icc_array)
+
+    return icc_brain
 
 
 def voxel_icc_sumsq(paths_sess1, paths_sess2, mask, paths_sess3=None, icc='icc_3'):
@@ -208,6 +218,8 @@ def voxel_icc_sumsq(paths_sess1, paths_sess2, mask, paths_sess3=None, icc='icc_3
 
             ICC.append(sumsq_icc(df_long=vox_pd, sub_var="subj",
                                       sess_var="sess", values="vals", icc_type=icc))
+        icc_array = np.array(ICC)
+        icc_brain = masker.inverse_transform(icc_array)
 
     elif paths_sess3 is not None:
         for v in range(len(imgdata[0].T)):
@@ -228,4 +240,7 @@ def voxel_icc_sumsq(paths_sess1, paths_sess2, mask, paths_sess3=None, icc='icc_3
                                       sess_var="sess", values="vals", icc_type=icc))
 
         # using unmask to reshape the 1D voxels back to 3D specified mask
-    return masker.inverse_transform(np.array(ICC))
+        icc_array = np.array(ICC)
+        icc_brain = masker.inverse_transform(icc_array)
+
+    return icc_brain
