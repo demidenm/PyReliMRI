@@ -48,9 +48,9 @@ def voxel_icc_aov(paths_sess1, paths_sess2, mask, paths_sess3=None, icc='icc_3')
             # sub sample v voxel for all subjects for each session. Stack columns to create np array
             #  that includes voxels and sub labels (1-n, repeated) for session 1 [0] & session 2 [1]
             np_voxdata = np.column_stack((np.tile(sub_n, 2),
-                                          np.hstack((["sess1"] * len(imgdata[0][:, 1]),
-                                                     ["sess2"] * len(imgdata[1][:, 1]))),
-                                          np.hstack((imgdata[0][:, 1], imgdata[1][:, 1]))
+                                          np.hstack((["sess1"] * len(imgdata[0][:, v]),
+                                                     ["sess2"] * len(imgdata[1][:, v]))),
+                                          np.hstack((imgdata[0][:, v], imgdata[1][:, v]))
                                           ))
 
             # create dataframe that is then used with ICC function to calculate specified ICC
@@ -59,18 +59,16 @@ def voxel_icc_aov(paths_sess1, paths_sess2, mask, paths_sess3=None, icc='icc_3')
 
             ICC.append(aov_icc(df_long=vox_pd, sub_var="subj",
                                       sess_var="sess", values="vals", icc_type=icc))
-        icc_array = np.array(ICC)
-        icc_brain = masker.inverse_transform(icc_array)
 
     elif paths_sess3 is not None:
         for v in range(len(imgdata[0].T)):
             # sub sample v voxel for all subjects for each session. Stack columns to create np array
             #  that includes voxels and sub labels for session 1 [0] & session 2 [1], session [3]
             np_voxdata = np.column_stack((np.tile(sub_n, 3),
-                                          np.hstack((["sess1"] * len(imgdata[0][:, 1]),
-                                                     ["sess2"] * len(imgdata[1][:, 1]),
-                                                     ["sess3"] * len(imgdata[3][:, 1]))),
-                                          np.hstack((imgdata[0][:, 1], imgdata[1][:, 1]))
+                                          np.hstack((["sess1"] * len(imgdata[0][:, v]),
+                                                     ["sess2"] * len(imgdata[1][:, v]),
+                                                     ["sess3"] * len(imgdata[3][:, v]))),
+                                          np.hstack((imgdata[0][:, v], imgdata[1][:, v]))
                                           ))
 
             # create dataframe that is then used with ICC function to calculate specified ICC
@@ -82,10 +80,8 @@ def voxel_icc_aov(paths_sess1, paths_sess2, mask, paths_sess3=None, icc='icc_3')
 
         # using unmask to reshape the 1D voxels back to 3D specified mask
             # using unmask to reshape the 1D voxels back to 3D specified mask
-        icc_array = np.array(ICC)
-        icc_brain = masker.inverse_transform(icc_array)
 
-    return icc_brain
+    return masker.inverse_transform(np.array(ICC))
 
 
 def voxel_icc_peng(paths_sess1, paths_sess2, mask, paths_sess3=None, icc='icc_3'):
@@ -128,9 +124,9 @@ def voxel_icc_peng(paths_sess1, paths_sess2, mask, paths_sess3=None, icc='icc_3'
             # sub sample v voxel for all subjects for each session. Stack columns to create np array
             #  that includes voxels and sub labels (1-n, repeated) for session 1 [0] & session 2 [1]
             np_voxdata = np.column_stack((np.tile(sub_n, 2),
-                                          np.hstack((["sess1"] * len(imgdata[0][:, 1]),
-                                                     ["sess2"] * len(imgdata[1][:, 1]))),
-                                          np.hstack((imgdata[0][:, 1], imgdata[1][:, 1]))
+                                          np.hstack((["sess1"] * len(imgdata[0][:, v]),
+                                                     ["sess2"] * len(imgdata[1][:, v]))),
+                                          np.hstack((imgdata[0][:, v], imgdata[1][:, v]))
                                           ))
 
             # create dataframe that is then used with ICC function to calculate specified ICC
@@ -139,18 +135,16 @@ def voxel_icc_peng(paths_sess1, paths_sess2, mask, paths_sess3=None, icc='icc_3'
 
             ICC.append(peng_icc(df_long=vox_pd, sub_var="subj",
                                       sess_var="sess", values="vals", icc_type=icc))
-        icc_array = np.array(ICC)
-        icc_brain = masker.inverse_transform(icc_array)
 
     elif paths_sess3 is not None:
         for v in range(len(imgdata[0].T)):
             # sub sample v voxel for all subjects for each session. Stack columns to create np array
             #  that includes voxels and sub labels for session 1 [0] & session 2 [1], session [3]
             np_voxdata = np.column_stack((np.tile(sub_n, 3),
-                                          np.hstack((["sess1"] * len(imgdata[0][:, 1]),
-                                                     ["sess2"] * len(imgdata[1][:, 1]),
-                                                     ["sess3"] * len(imgdata[3][:, 1]))),
-                                          np.hstack((imgdata[0][:, 1], imgdata[1][:, 1]))
+                                          np.hstack((["sess1"] * len(imgdata[0][:, v]),
+                                                     ["sess2"] * len(imgdata[1][:, v]),
+                                                     ["sess3"] * len(imgdata[3][:, v]))),
+                                          np.hstack((imgdata[0][:, v], imgdata[1][:, v]))
                                           ))
 
             # create dataframe that is then used with ICC function to calculate specified ICC
@@ -161,10 +155,8 @@ def voxel_icc_peng(paths_sess1, paths_sess2, mask, paths_sess3=None, icc='icc_3'
                                       sess_var="sess", values="vals", icc_type=icc))
 
         # using unmask to reshape the 1D voxels back to 3D specified mask
-        icc_array = np.array(ICC)
-        icc_brain = masker.inverse_transform(icc_array)
 
-    return icc_brain
+    return masker.inverse_transform(np.array(ICC))
 
 
 def voxel_icc_sumsq(paths_sess1, paths_sess2, mask, paths_sess3=None, icc='icc_3'):
@@ -207,9 +199,9 @@ def voxel_icc_sumsq(paths_sess1, paths_sess2, mask, paths_sess3=None, icc='icc_3
             # sub sample v voxel for all subjects for each session. Stack columns to create np array
             #  that includes voxels and sub labels (1-n, repeated) for session 1 [0] & session 2 [1]
             np_voxdata = np.column_stack((np.tile(sub_n, 2),
-                                          np.hstack((["sess1"] * len(imgdata[0][:, 1]),
-                                                     ["sess2"] * len(imgdata[1][:, 1]))),
-                                          np.hstack((imgdata[0][:, 1], imgdata[1][:, 1]))
+                                          np.hstack((["sess1"] * len(imgdata[0][:, v]),
+                                                     ["sess2"] * len(imgdata[1][:, v]))),
+                                          np.hstack((imgdata[0][:, v], imgdata[1][:, v]))
                                           ))
 
             # create dataframe that is then used with ICC function to calculate specified ICC
@@ -218,18 +210,16 @@ def voxel_icc_sumsq(paths_sess1, paths_sess2, mask, paths_sess3=None, icc='icc_3
 
             ICC.append(sumsq_icc(df_long=vox_pd, sub_var="subj",
                                       sess_var="sess", values="vals", icc_type=icc))
-        icc_array = np.array(ICC)
-        icc_brain = masker.inverse_transform(icc_array)
 
     elif paths_sess3 is not None:
         for v in range(len(imgdata[0].T)):
             # sub sample v voxel for all subjects for each session. Stack columns to create np array
             #  that includes voxels and sub labels for session 1 [0] & session 2 [1], session [3]
             np_voxdata = np.column_stack((np.tile(sub_n, 3),
-                                          np.hstack((["sess1"] * len(imgdata[0][:, 1]),
-                                                     ["sess2"] * len(imgdata[1][:, 1]),
-                                                     ["sess3"] * len(imgdata[3][:, 1]))),
-                                          np.hstack((imgdata[0][:, 1], imgdata[1][:, 1]))
+                                          np.hstack((["sess1"] * len(imgdata[0][:, v]),
+                                                     ["sess2"] * len(imgdata[1][:, v]),
+                                                     ["sess3"] * len(imgdata[3][:, v]))),
+                                          np.hstack((imgdata[0][:, v], imgdata[1][:, v]))
                                           ))
 
             # create dataframe that is then used with ICC function to calculate specified ICC
@@ -240,7 +230,5 @@ def voxel_icc_sumsq(paths_sess1, paths_sess2, mask, paths_sess3=None, icc='icc_3
                                       sess_var="sess", values="vals", icc_type=icc))
 
         # using unmask to reshape the 1D voxels back to 3D specified mask
-        icc_array = np.array(ICC)
-        icc_brain = masker.inverse_transform(icc_array)
 
-    return icc_brain
+    return masker.inverse_transform(np.array(ICC))
