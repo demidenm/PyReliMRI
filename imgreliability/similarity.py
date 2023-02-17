@@ -67,11 +67,12 @@ def permute_images(nii_filelist: list, mask: str,
     var_permutes = list(combinations(nii_filelist, 2))
     coef_df = pd.DataFrame(columns=['similar_coef', 'image_labels'])
 
-    for r in var_permutes:
+    for img_comb in var_permutes:
         # select basename of file name(s)
-        path = [os.path.basename(i) for i in r]
+        path = [os.path.basename(i) for i in img_comb]
         # calculate simiarlity
-        val = image_similarity(imgfile1=r[0], imgfile2=r[1], mask=mask, thresh=thresh, similarity_type=similarity_type)
+        val = image_similarity(imgfile1=img_comb[0], imgfile2=img_comb[1], mask=mask,
+                               thresh=thresh, similarity_type=similarity_type)
 
         # for each permutation, save value + label to pandas df
         similarity_data = pd.DataFrame(np.column_stack((val, " ~ ".join([path[0], path[1]]))),

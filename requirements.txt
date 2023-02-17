@@ -1,9 +1,10 @@
 os
 numpy
-pingouin
 pandas
 pytest
 pathlib
 nilearn
 itertools
+scipy
+pingouin
 warnings
