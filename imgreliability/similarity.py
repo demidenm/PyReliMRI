@@ -1,9 +1,34 @@
 import os
 import numpy as np
 import pandas as pd
+import warnings
 from nilearn import image
 from itertools import combinations
 from nilearn.maskers import NiftiMasker
+
+
+def tetrachoric_corr(img1, img2):
+    """
+    Calculates the tetrachoric correlation between two binary vectors, IMG1 and IMG2.
+
+    :param img1: A 1D binary numpy array of length n representing the 1st dichotomous (1/0) variable.
+    :param img2: A 1D binary numpy array of length n representing the 2nd dichotomous (1/0) variable..
+
+    Returns: The tetrachoric correlation between the two binary variables.
+   """
+
+    assert len(img1) == len(img2), 'Input vectors must have the same length' \
+                                   'IMG1 length: {} and IMG2 length: {}'.format(len(img1), len(img2))
+
+    # frequencies of the four possible combinations of IMG1 and IMG2
+    A = sum(np.logical_and(img1 == 0, img2 == 0))  # Both img values are 0
+    B = sum(np.logical_and(img1 == 0, img2 == 1))  # IMG1 is 0, IMG2 is 1
+    C = sum(np.logical_and(img1 == 1, img2 == 0))  # IMG1 is 1, IMG2 is 0
+    D = sum(np.logical_and(img1 == 1, img2 == 1))  # Both variables are 1
+
+    AD = A*D
+
+    return np.cos(np.pi/(1+np.sqrt(AD/B/C)))
 
 
 def image_similarity(imgfile1: str, imgfile2: str,
@@ -16,11 +41,12 @@ def image_similarity(imgfile1: str, imgfile2: str,
     :param imgfile2: nii path to second image
     :param mask: path to image mask for voxel selection
     :param thresh: specify voxel threshold to use, if any, values >0. Default = 0
-    :param similarity_type: specify calculation, can be Dice or Jaccards, Default = Dice
+    :param similarity_type: specify calculation, can be Dice, Jaccards or Tetrachoric, Default = Dice
     :return: similarity coefficient
     """
-    assert similarity_type.casefold() in ['dice', 'jaccard'], 'similarity_type must be "Dice" or "Jaccard". ' \
-                                                              'Provided: {}"'.format(similarity_type)
+    assert similarity_type.casefold() in ['dice', 'jaccard', 'tetrachoric'], 'similarity_type must be ' \
+                                                                             '"Dice", "Jaccard" or "Tetrachoric". ' \
+                                                                             'Provided: {}"'.format(similarity_type)
 
     # load list of images
     imagefiles = [imgfile1, imgfile2]
@@ -42,11 +68,20 @@ def image_similarity(imgfile1: str, imgfile2: str,
         elif thresh < 0:
             imgdata = imgdata < thresh
 
-    intersect = np.logical_and(imgdata[0, :], imgdata[1, :])
-    union = np.logical_or(imgdata[0, :], imgdata[1, :])
-    dice_coeff = (intersect.sum()) / (float(union.sum()) + np.finfo(float).eps)
+    if similarity_type.casefold() in ['dice', 'jaccard']:
+        # Intersection of images
+        intersect = np.logical_and(imgdata[0, :], imgdata[1, :])
+        union = np.logical_or(imgdata[0, :], imgdata[1, :])
+        dice_coeff = (intersect.sum()) / (float(union.sum()) + np.finfo(float).eps)
+        if similarity_type.casefold() == 'dice':
+            coeff = dice_coeff
+        else:
+            coeff = dice_coeff / (2 - dice_coeff)
+    elif similarity_type.casefold() == 'tetrachoric':
+        warnings.filterwarnings('ignore')
+        coeff = tetrachoric_corr(img1=imgdata[0, :], img2=imgdata[1, :])
 
-    return dice_coeff if similarity_type.casefold() == 'dice' else dice_coeff / (2 - dice_coeff)
+    return coeff
 
 
 def permute_images(nii_filelist: list, mask: str,
@@ -61,8 +96,9 @@ def permute_images(nii_filelist: list, mask: str,
     :return: returns similarity coefficient & labels in pandas dataframe
     """
     # test whether function type is of 'Dice' or 'Jaccard', case insensitive
-    assert similarity_type.casefold() in ['dice', 'jaccard'], 'similarity_type must be "Dice" or "Jaccard", ' \
-                                                              '{} entered'.format(similarity_type)
+    assert similarity_type.casefold() in ['dice', 'jaccard', 'tetrachoric'], 'similarity_type must be ' \
+                                                                             '"Dice", "Jaccard" or "Tetrachoric". ' \
+                                                                             'Provided: {}"'.format(similarity_type)
 
     var_permutes = list(combinations(nii_filelist, 2))
     coef_df = pd.DataFrame(columns=['similar_coef', 'image_labels'])
