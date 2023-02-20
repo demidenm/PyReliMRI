@@ -1,7 +1,7 @@
 import os
-import numpy as np
-import pandas as pd
 import warnings
+from pandas import concat, DataFrame
+from numpy import logical_and, logical_or, finfo, column_stack
 from nilearn import image
 from itertools import combinations
 from nilearn.maskers import NiftiMasker
@@ -47,9 +47,9 @@ def image_similarity(imgfile1: str, imgfile2: str,
 
     if similarity_type.casefold() in ['dice', 'jaccard']:
         # Intersection of images
-        intersect = np.logical_and(imgdata[0, :], imgdata[1, :])
-        union = np.logical_or(imgdata[0, :], imgdata[1, :])
-        dice_coeff = (intersect.sum()) / (float(union.sum()) + np.finfo(float).eps)
+        intersect = logical_and(imgdata[0, :], imgdata[1, :])
+        union = logical_or(imgdata[0, :], imgdata[1, :])
+        dice_coeff = (intersect.sum()) / (float(union.sum()) + finfo(float).eps)
         if similarity_type.casefold() == 'dice':
             coeff = dice_coeff
         else:
@@ -78,7 +78,7 @@ def permute_images(nii_filelist: list, mask: str,
                                                                              'Provided: {}"'.format(similarity_type)
 
     var_permutes = list(combinations(nii_filelist, 2))
-    coef_df = pd.DataFrame(columns=['similar_coef', 'image_labels'])
+    coef_df = DataFrame(columns=['similar_coef', 'image_labels'])
 
     for img_comb in var_permutes:
         # select basename of file name(s)
@@ -88,8 +88,8 @@ def permute_images(nii_filelist: list, mask: str,
                                thresh=thresh, similarity_type=similarity_type)
 
         # for each permutation, save value + label to pandas df
-        similarity_data = pd.DataFrame(np.column_stack((val, " ~ ".join([path[0], path[1]]))),
+        similarity_data = DataFrame(column_stack((val, " ~ ".join([path[0], path[1]]))),
                                        columns=['similar_coef', 'image_labels'])
-        coef_df = pd.concat([coef_df, similarity_data], axis=0, ignore_index=True)
+        coef_df = concat([coef_df, similarity_data], axis=0, ignore_index=True)
 
     return coef_df

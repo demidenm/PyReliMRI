@@ -1,4 +1,4 @@
-import numpy as np
+from numpy import cos, pi, sqrt, logical_and
 
 
 def tetrachoric_corr(img1, img2):
@@ -15,11 +15,11 @@ def tetrachoric_corr(img1, img2):
                                    'IMG1 length: {} and IMG2 length: {}'.format(len(img1), len(img2))
 
     # frequencies of the four possible combinations of IMG1 and IMG2
-    A = sum(np.logical_and(img1 == 0, img2 == 0))  # Both img values are 0
-    B = sum(np.logical_and(img1 == 0, img2 == 1))  # IMG1 is 0, IMG2 is 1
-    C = sum(np.logical_and(img1 == 1, img2 == 0))  # IMG1 is 1, IMG2 is 0
-    D = sum(np.logical_and(img1 == 1, img2 == 1))  # Both variables are 1
+    A = sum(logical_and(img1 == 0, img2 == 0))  # Both img values are 0
+    B = sum(logical_and(img1 == 0, img2 == 1))  # IMG1 is 0, IMG2 is 1
+    C = sum(logical_and(img1 == 1, img2 == 0))  # IMG1 is 1, IMG2 is 0
+    D = sum(logical_and(img1 == 1, img2 == 1))  # Both variables are 1
 
     AD = A*D
 
-    return np.cos(np.pi/(1+np.sqrt(AD/B/C))).astype('float64')
+    return cos(pi/(1+sqrt(AD/B/C))).astype('float64')

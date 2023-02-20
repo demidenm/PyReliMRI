@@ -1,13 +1,13 @@
-import pandas as pd
 import warnings
-import numpy as np
+from pandas import DataFrame
+from numpy import sum
 from scipy.stats import f
 from pingouin import anova
 from pingouin import intraclass_corr as pg_icc
 from numpy.typing import NDArray
 
 
-def sumsq_total(df_long: pd.DataFrame, values: str) -> NDArray:
+def sumsq_total(df_long: DataFrame, values: str) -> NDArray:
     """
     calculates the sum of square total
     the difference between each value and the global mean
@@ -15,10 +15,10 @@ def sumsq_total(df_long: pd.DataFrame, values: str) -> NDArray:
     :param values: variable string for values containing scores
     :return:
     """
-    return np.sum((df_long[values] - df_long[values].mean())**2)
+    return sum((df_long[values] - df_long[values].mean())**2)
 
 
-def sumsq_within(df_long: pd.DataFrame, sessions: str, values: str, n_subjects: int) -> NDArray:
+def sumsq_within(df_long: DataFrame, sessions: str, values: str, n_subjects: int) -> NDArray:
     """
     calculates the sum of squared Intra-subj variance,
     the average session value subtracted from overall avg of values
@@ -29,12 +29,12 @@ def sumsq_within(df_long: pd.DataFrame, sessions: str, values: str, n_subjects: 
     :return: returns sumsqured within
     """
 
-    return np.sum(
+    return sum(
         ((df_long[values].mean() - df_long[[sessions, values]].groupby(by=sessions)[values].mean())**2)*n_subjects
     )
 
 
-def sumsq_btwn(df_long: pd.DataFrame, subj: str, values: str, n_sessions: int) -> NDArray:
+def sumsq_btwn(df_long: DataFrame, subj: str, values: str, n_sessions: int) -> NDArray:
     """
     calculates the sum of squared between-subj variance,
     the average subject value subtracted from overall avg of values
@@ -45,7 +45,7 @@ def sumsq_btwn(df_long: pd.DataFrame, subj: str, values: str, n_sessions: int) -
     :param n_sessions: number of sessions
     :return: returns sumsqured within
     """
-    return np.sum(
+    return sum(
         ((df_long[values].mean() - df_long[[subj, values]].groupby(by=subj)[values].mean()) ** 2) * n_sessions
     )
 
@@ -81,7 +81,7 @@ def icc_confint(msbs: float, msws: float, mserr: float, msc: float,
     df1 = n_subjs - 1
     df1kd = n_subjs * (n_sess - 1)
 
-    f_stat2 = f_stat3 = msbs / mserr
+    f_stat3 = msbs / mserr
     df2kd = (n_subjs - 1) * (n_sess - 1)
 
     # Calculate ICC Confident interval
@@ -110,7 +110,7 @@ def icc_confint(msbs: float, msws: float, mserr: float, msc: float,
     return lb_ci, ub_ci
 
 
-def sumsq_icc(df_long: pd.DataFrame, sub_var: str,
+def sumsq_icc(df_long: DataFrame, sub_var: str,
               sess_var: str, values: str, icc_type: str = 'icc_3'):
     """ This ICC calculation uses the SS calculation, which are similar to ANOVA, but fewer estimates are used.
     It takes in a long format pandas DF, where subjects repeat for sessions
@@ -168,7 +168,7 @@ def sumsq_icc(df_long: pd.DataFrame, sub_var: str,
 
 
 # alternative ICC calculations that are a bit slower
-def aov_icc(df_long: pd.DataFrame, sub_var: str,
+def aov_icc(df_long: DataFrame, sub_var: str,
             sess_var: str, values: str, icc_type: str = 'icc_3'):
     """ This ICC calculation uses the ANOVA technique.
     It converts a wide data.frame into a long format, where subjects repeat for sessions
@@ -214,7 +214,7 @@ def aov_icc(df_long: pd.DataFrame, sub_var: str,
     return ICC_est
 
 
-def peng_icc(df_long: pd.DataFrame, sub_var: str,
+def peng_icc(df_long: DataFrame, sub_var: str,
              sess_var: str, values: str, icc_type: str = 'icc_3'):
     """ This ICC calculation uses the output from penguin ICC table.
     It takes in a long dataframe that consists of the sub variables, sess labels and session values
