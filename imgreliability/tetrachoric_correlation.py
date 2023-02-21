@@ -1,7 +1,7 @@
-from numpy import cos, pi, sqrt, logical_and
+from numpy import cos, pi, sqrt, logical_and, ndarray
 
 
-def tetrachoric_corr(img1, img2):
+def tetrachoric_corr(img1: ndarray, img2: ndarray) -> float:
     """
     Calculates the tetrachoric correlation between two binary vectors, IMG1 and IMG2.
 
@@ -10,8 +10,8 @@ def tetrachoric_corr(img1, img2):
 
     Returns: The tetrachoric correlation between the two binary variables.
    """
-    assert len(img1) > 0, f"Error: img1 ({img1}) is empty"
-    assert len(img2) > 0, f"Error: img1 ({img1}) is empty"
+    assert len(img1) > 0, f"Image 1: ({img1}) is empty, length should be > 0"
+    assert len(img2) > 0, f"Image 2: ({img1}) is empty, length should be > 0"
     assert len(img1) == len(img2), 'Input vectors must have the same length' \
                                    'IMG1 length: {} and IMG2 length: {}'.format(len(img1), len(img2))
 
@@ -23,4 +23,4 @@ def tetrachoric_corr(img1, img2):
 
     AD = A*D
 
-    return cos(pi/(1+sqrt(AD/B/C))).astype('float64')
+    return cos(pi/(1+sqrt(AD/B/C)))
