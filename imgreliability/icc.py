@@ -11,7 +11,7 @@ def sumsq_total(df_long: DataFrame, values: str) -> NDArray:
     """
     calculates the sum of square total
     the difference between each value and the global mean
-    :param df_long:
+    :param df_long: A pandas DataFrame in long format.
     :param values: variable string for values containing scores
     :return:
     """
@@ -22,7 +22,7 @@ def sumsq_within(df_long: DataFrame, sessions: str, values: str, n_subjects: int
     """
     calculates the sum of squared Intra-subj variance,
     the average session value subtracted from overall avg of values
-    :param df_long: long df for scores across subjects and 1+ sesssions
+    :param df_long: A pandas DataFrame in long format (e.g scores across subjects and 1+ sessions)
     :param sessions: session (repeated measurement) variable in df, string
     :param values: variable for values for subjects across sessions, str
     :param n_subjects: number of subjects
@@ -39,7 +39,7 @@ def sumsq_btwn(df_long: DataFrame, subj: str, values: str, n_sessions: int) -> N
     calculates the sum of squared between-subj variance,
     the average subject value subtracted from overall avg of values
 
-    :param df_long: long df for scores across subjects and 1+ sesssions
+    :param df_long: A pandas DataFrame in long format (e.g scores across subjects and 1+ sessions)
     :param subj: subj variable in df, string
     :param values: variable for values for subjects across sessions, str
     :param n_sessions: number of sessions

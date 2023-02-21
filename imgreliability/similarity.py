@@ -62,7 +62,7 @@ def image_similarity(imgfile1: str, imgfile2: str,
 
 
 def permute_images(nii_filelist: list, mask: str,
-                   thresh: float = None, similarity_type: str = 'Dice'):
+                   thresh: float = None, similarity_type: str = 'Dice') -> DataFrame:
     """This permutation takes in a list of paths to Nifti images and creates a comparsion that covers all possible
     combinations. For each combination, it calculates the specified similarity and
     returns the coefficients & string combo.
@@ -89,7 +89,7 @@ def permute_images(nii_filelist: list, mask: str,
 
         # for each permutation, save value + label to pandas df
         similarity_data = DataFrame(column_stack((val, " ~ ".join([path[0], path[1]]))),
-                                       columns=['similar_coef', 'image_labels'])
+                                    columns=['similar_coef', 'image_labels'])
         coef_df = concat([coef_df, similarity_data], axis=0, ignore_index=True)
 
     return coef_df
