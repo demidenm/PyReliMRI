@@ -10,15 +10,16 @@ def tetrachoric_corr(img1, img2):
 
     Returns: The tetrachoric correlation between the two binary variables.
    """
-
+    assert len(img1) > 0, f"Error: img1 ({img1}) is empty"
+    assert len(img2) > 0, f"Error: img1 ({img1}) is empty"
     assert len(img1) == len(img2), 'Input vectors must have the same length' \
                                    'IMG1 length: {} and IMG2 length: {}'.format(len(img1), len(img2))
 
     # frequencies of the four possible combinations of IMG1 and IMG2
-    A = sum(logical_and(img1 == 0, img2 == 0))  # Both img values are 0
-    B = sum(logical_and(img1 == 0, img2 == 1))  # IMG1 is 0, IMG2 is 1
-    C = sum(logical_and(img1 == 1, img2 == 0))  # IMG1 is 1, IMG2 is 0
-    D = sum(logical_and(img1 == 1, img2 == 1))  # Both variables are 1
+    A = sum(logical_and(img1 == 0, img2 == 0))
+    B = sum(logical_and(img1 == 0, img2 == 1))
+    C = sum(logical_and(img1 == 1, img2 == 0))
+    D = sum(logical_and(img1 == 1, img2 == 1))
 
     AD = A*D
 
