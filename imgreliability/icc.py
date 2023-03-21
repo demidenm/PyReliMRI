@@ -27,7 +27,8 @@ def sumsq_within(df_long: DataFrame, sessions: str, values: str, n_subjects: int
     """
 
     return sum(
-        ((df_long[values].mean() - df_long[[sessions, values]].groupby(by=sessions)[values].mean())**2)*n_subjects
+        ((df_long[values].mean() - 
+          df_long[[sessions, values]].groupby(by=sessions)[values].mean())**2) * n_subjects
     )
 
 
@@ -45,6 +46,14 @@ def sumsq_btwn(df_long: DataFrame, subj: str, values: str, n_sessions: int) -> N
     return sum(
         ((df_long[values].mean() - df_long[[subj, values]].groupby(by=subj)[values].mean()) ** 2) * n_sessions
     )
+
+
+def check_icc_type(icc_type, allowed_types=None):
+    if allowed_types is None:
+        allowed_types = ['icc_1', 'icc_2', 'icc_3']
+    assert icc_type in allowed_types, \
+        f'ICC type should be in {",".join(allowed_types)}' \
+        f'{icc_type} entered'
 
 
 def icc_confint(msbs: float, msws: float, mserr: float, msc: float,
@@ -69,9 +78,7 @@ def icc_confint(msbs: float, msws: float, mserr: float, msc: float,
     icc1_ci, icc21_ci or icc31_ci : tuple
         The 95% confidence intervals for ICC(1), ICC(2,1), and ICC(3,1), respectively.
     """
-
-    assert icc_type in ['icc_1', 'icc_2', 'icc_3'], 'ICC type should be icc_1, icc_2,icc_3, ' \
-                                                    '{} entered'.format(icc_type)
+    check_icc_type(icc_type)
 
     # Calculate F, df, and p-values
     f_stat1 = msbs / msws
@@ -95,9 +102,9 @@ def icc_confint(msbs: float, msws: float, mserr: float, msc: float,
         f2u = f.ppf(1 - alpha / 2, n_subjs - 1, v)
         f2l = f.ppf(1 - alpha / 2, v, n_subjs - 1)
         lb_ci = n_subjs * (msbs - f2u * mserr) / (
-                    f2u * (n_sess * msc + (n_sess * n_subjs - n_sess - n_subjs) * mserr) + n_subjs * msbs)
+            f2u * (n_sess * msc + (n_sess * n_subjs - n_sess - n_subjs) * mserr) + n_subjs * msbs)
         ub_ci = n_subjs * (f2l * msbs - mserr) / (
-                    n_sess * msc + (n_sess * n_subjs - n_sess - n_subjs) * mserr + n_subjs * f2l * msbs)
+            n_sess * msc + (n_sess * n_subjs - n_sess - n_subjs) * mserr + n_subjs * f2l * msbs)
     elif icc_type == 'icc_3':
         f_lb = f_stat3 / f.ppf(1 - alpha / 2, df1, df2kd)
         f_ub = f_stat3 * f.ppf(1 - alpha / 2, df2kd, df1)
@@ -121,8 +128,8 @@ def sumsq_icc(df_long: DataFrame, sub_var: str,
     :param icc_type: default is ICC(3,1), alternative is ICC(1,1) via icc_1 or ICC(2,1) via icc_2
     :return: icc calculation, icc low bound conf, icc upper bound conf, msbs, msws
     """
-    assert icc_type in ['icc_1', 'icc_2', 'icc_3'], 'ICC type should be icc_1, icc_2,icc_3, ' \
-                                                    '{} entered'.format(icc_type)
+    
+    check_icc_type(icc_type)
 
     # n = subjs, c = sessions/ratings
     n = df_long[sub_var].nunique()
