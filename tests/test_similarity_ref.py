@@ -6,11 +6,7 @@ from imgreliability.similarity import (
     image_similarity,
     permute_images
 )
-from imgreliability.icc import (
-    sumsq_icc,
-    aov_icc,
-    peng_icc
-)
+from imgreliability.icc import sumsq_icc
 from collections import namedtuple
 from nibabel import Nifti1Image
 import nibabel as nib
@@ -101,7 +97,7 @@ def test_calculate_icc1():
                 var_name="sess",
                 value_name="vals"))
 
-    icc = peng_icc(df_long=a_ld, sub_var="subidr",
+    icc = sumsq_icc(df_long=a_ld, sub_var="subidr",
                    sess_var="sess", values="vals", icc_type='icc_1')
 
     assert np.allclose(round(icc, 2), -0.05)
@@ -119,41 +115,6 @@ def test_calculate_icc2():
                 var_name="sess",
                 value_name="vals"))
 
-    icc = peng_icc(df_long=a_ld, sub_var="subidr",
+    icc = sumsq_icc(df_long=a_ld, sub_var="subidr",
                    sess_var="sess",values="vals", icc_type='icc_2')
     assert np.allclose(round(icc, 2), 0.11)
-
-
-def test_calculate_icc3():
-    import seaborn as sns
-    data = sns.load_dataset('anagrams')
-    # subset to only divided attnr measure occ
-    a_wd = data[data['attnr'] == 'divided']
-    a_ld = pd.DataFrame(
-        pd.melt(a_wd,
-                id_vars="subidr",
-                value_vars=["num1", "num2", "num3"],
-                var_name="sess",
-                value_name="vals"))
-
-    icc = aov_icc(df_long=a_ld, sub_var="subidr",
-                   sess_var="sess", values="vals", icc_type='icc_3')
-    assert np.allclose(round(icc, 2), 0.20)
-
-
-def test_calculate_icc3():
-    import seaborn as sns
-    data = sns.load_dataset('anagrams')
-    # subset to only divided attnr measure occ
-    a_wd = data[data['attnr'] == 'divided']
-    a_ld = pd.DataFrame(
-        pd.melt(a_wd,
-                id_vars="subidr",
-                value_vars=["num1", "num2", "num3"],
-                var_name="sess",
-                value_name="vals"))
-
-    icc = aov_icc(df_long=a_ld, sub_var="subidr",
-                   sess_var="sess", values="vals", icc_type='icc_1')
-    assert np.allclose(round(icc, 2), -.05)
-
