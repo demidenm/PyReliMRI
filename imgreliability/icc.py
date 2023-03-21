@@ -2,8 +2,6 @@ import warnings
 from pandas import DataFrame
 from numpy import sum
 from scipy.stats import f
-from pingouin import anova
-from pingouin import intraclass_corr as pg_icc
 from numpy.typing import NDArray
 
 
@@ -166,82 +164,3 @@ def sumsq_icc(df_long: DataFrame, sub_var: str,
 
     return icc_est, icc_lb, icc_ub, MSBtw, MSWtn
 
-
-# alternative ICC calculations that are a bit slower
-def aov_icc(df_long: DataFrame, sub_var: str,
-            sess_var: str, values: str, icc_type: str = 'icc_3'):
-    """ This ICC calculation uses the ANOVA technique.
-    It converts a wide data.frame into a long format, where subjects repeat for sessions
-    The total variance (SS_T) is squared difference each value and the overall mean.
-    This is then decomposed into INTER (between) and INTRA (within) subject variance.
-
-    :param df_long: Data of subjects & sessions, long format (i.e., subjs repeated, for 1+ sessions).
-    :param sub_var: list of variables in dataframe w/ subject identifying variable
-    :param sess_var: list of in dataframe that are repeat session variables
-    :param values: list of values for each session
-    :param icc_type: default is ICC(3,1), alternative is ICC(1,1) via icc_1 or ICC(2,1) via icc_2
-    :return: ICC calculation
-    """
-    assert icc_type in ['icc_1', 'icc_2', 'icc_3'], 'ICC type should be icc_1, icc_2,icc_3, ' \
-                                                    '{} entered'.format(icc_type)
-
-    # n = subjs/targets, c = sessions/raters
-    n = df_long[sub_var].nunique()
-    c = df_long[sess_var].nunique()
-
-    warnings.filterwarnings('ignore')
-    aov = anova(data=df_long, dv=values, between=[sub_var, sess_var], ss_type=2)
-
-    # mean of square errors calcs
-    MSBtw = aov.at[0, "MS"]
-    MSWtn = (aov.at[1, "SS"] + aov.at[2, "SS"]) / (aov.at[1, "DF"] + aov.at[2, "DF"])
-    MSj = aov.at[1, "MS"]
-    MSErr = aov.at[2, "MS"]
-
-    # Calculate ICCs
-    if icc_type == 'icc_1':
-        # ICC(1), Model 1
-        ICC_est = (MSBtw - MSWtn) / (MSBtw + (c - 1) * MSWtn)
-
-    elif icc_type == 'icc_2':
-        # ICC(2,1)
-        ICC_est = (MSBtw - MSErr) / (MSBtw + (c - 1) * MSErr + c * (MSj - MSErr) / n)
-
-    elif icc_type == 'icc_3':
-        # ICC(2,1)
-        ICC_est = (MSBtw - MSErr) / (MSBtw + (c - 1) * MSErr)
-
-    return ICC_est
-
-
-def peng_icc(df_long: DataFrame, sub_var: str,
-             sess_var: str, values: str, icc_type: str = 'icc_3'):
-    """ This ICC calculation uses the output from penguin ICC table.
-    It takes in a long dataframe that consists of the sub variables, sess labels and session values
-
-    :param df_long: Data of subjects & sessions, long format (i.e., subjs repeated, for 1+ sessions).
-    :param sub_var: list of variables in dataframe w/ subject identifying variable
-    :param sess_var: list of in dataframe that are repeat session variables
-    :param values: list of values for each session
-    :param icc_type: default is ICC(3,1), alternative is ICC(1,1) via icc_1 or ICC(2,1) via icc_2
-    :return: ICC calculation
-    """
-    assert icc_type in ['icc_1', 'icc_2', 'icc_3'], 'ICC type should be icc_1, icc_2,icc_3, ' \
-                                                    '{} entered'.format(icc_type)
-    warnings.filterwarnings('ignore')
-    if icc_type == 'icc_1':
-        # ICC(1), Model 1
-        ICC_est = pg_icc(data=df_long, targets=sub_var,
-                         raters=sess_var, ratings=values).iloc[0, 2]  # location of ICC 1
-
-    elif icc_type == 'icc_2':
-        # ICC(2,1)
-        ICC_est = pg_icc(data=df_long, targets=sub_var,
-                         raters=sess_var, ratings=values).iloc[1, 2]  # location of ICC 2
-
-    elif icc_type == 'icc_3':
-        # ICC(2,1)
-        ICC_est = pg_icc(data=df_long, targets=sub_var,
-                         raters=sess_var, ratings=values).iloc[2, 2]  # location of ICC 3
-
-    return ICC_est
