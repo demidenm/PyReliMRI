@@ -1,4 +1,3 @@
-import warnings
 from pandas import DataFrame
 from numpy import sum
 from scipy.stats import f
