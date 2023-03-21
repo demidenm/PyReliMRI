@@ -1,6 +1,6 @@
 # Python-based Reliability in MRI (PyReliMRI)
 
-PyReliMRI is described and appled in [Associated article](https://www.doi.org)
+PyReliMRI is described and applied in the [TBD Preprint](https://www.doi.org)
 
 ## Authors
 
