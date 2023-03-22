@@ -5,7 +5,7 @@ from nilearn import image
 from nilearn.maskers import NiftiMasker
 
 
-def voxelwise_icc(paths_sess1, paths_sess2, mask, paths_sess3=None, icc='icc_3'):
+def voxelwise_icc(paths_sess1: str, paths_sess2: str, mask: str, paths_sess3=None, icc='icc_3'):
     """
     voxelwise_icc: calculates the ICC (+lower bound & upper bound CI)
     by voxel for specified input files using manual sumsq calculations.
@@ -62,11 +62,11 @@ def voxelwise_icc(paths_sess1, paths_sess2, mask, paths_sess3=None, icc='icc_3')
             vox_pd = DataFrame(data=np_voxdata, columns=["subj", "sess", "vals"])
             vox_pd = vox_pd.astype({"subj": int, "sess": "category", "vals": float})
 
-            icc_est, icc_lb, icc_ub, MSbtw, MSwtn = sumsq_icc(df_long=vox_pd, sub_var="subj", sess_var="sess",
+            iccest, icclb, iccub, MSbtw, MSwtn = sumsq_icc(df_long=vox_pd, sub_var="subj", sess_var="sess",
                                                               values="vals", icc_type=icc)
-            icc_calc.append(icc_est)
-            icc_ub.append(icc_lb)
-            icc_lb.append(icc_ub)
+            icc_calc.append(iccest)
+            icc_ub.append(icclb)
+            icc_lb.append(iccub)
             msbs.append(MSbtw)
             msws.append(MSwtn)
 
@@ -85,11 +85,11 @@ def voxelwise_icc(paths_sess1, paths_sess2, mask, paths_sess3=None, icc='icc_3')
             vox_pd = DataFrame(data=np_voxdata, columns=["subj", "sess", "vals"])
             vox_pd = vox_pd.astype({"subj": int, "sess": "category", "vals": float})
 
-            icc_est, icc_lb, icc_ub, MSbtw, MSwtn = sumsq_icc(df_long=vox_pd, sub_var="subj", sess_var="sess",
+            iccest, icclb, iccub, MSbtw, MSwtn = sumsq_icc(df_long=vox_pd, sub_var="subj", sess_var="sess",
                                                               values="vals", icc_type=icc)
-            icc_calc.append(icc_est)
-            icc_ub.append(icc_lb)
-            icc_lb.append(icc_ub)
+            icc_calc.append(iccest)
+            icc_ub.append(icclb)
+            icc_lb.append(iccub)
             msbs.append(MSbtw)
             msws.append(MSwtn)
 
