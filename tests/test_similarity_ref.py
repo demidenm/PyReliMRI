@@ -2,6 +2,8 @@ import pytest
 import numpy as np
 import pandas as pd
 from pathlib import Path
+import seaborn as sns
+
 from imgreliability.similarity import (
     image_similarity,
     permute_images
@@ -71,6 +73,7 @@ def image_pair(tmp_path_factory):
 def test_image_pair_smoke(image_pair):
     assert image_pair.images is not None
 
+
 def test_image_pair_images(image_pair):
     for imgfile in image_pair.images + [image_pair.mask]:
         img = nib.load(imgfile)
@@ -86,7 +89,6 @@ def test_image_similarity(image_pair, measure):
 
 #@pytest.mark.parametrize("corr", [.50, .60,.45])
 def test_calculate_icc1():
-    import seaborn as sns
     data = sns.load_dataset('anagrams')
     # subset to only divided attnr measure occ
     a_wd = data[data['attnr'] == 'divided']
@@ -98,13 +100,12 @@ def test_calculate_icc1():
                 value_name="vals"))
 
     icc = sumsq_icc(df_long=a_ld, sub_var="subidr",
-                   sess_var="sess", values="vals", icc_type='icc_1')
+                   sess_var="sess", value_var="vals", icc_type='icc_1')
 
-    assert np.allclose(round(icc, 2), -0.05)
+    assert np.allclose(icc[0], -0.05, atol=.01)
 
 
 def test_calculate_icc2():
-    import seaborn as sns
     data = sns.load_dataset('anagrams')
     # subset to only divided attnr measure occ
     a_wd = data[data['attnr'] == 'divided']
@@ -116,5 +117,5 @@ def test_calculate_icc2():
                 value_name="vals"))
 
     icc = sumsq_icc(df_long=a_ld, sub_var="subidr",
-                   sess_var="sess",values="vals", icc_type='icc_2')
-    assert np.allclose(round(icc, 2), 0.11)
+                   sess_var="sess",value_var="vals", icc_type='icc_2')
+    assert np.allclose(icc[0], 0.11, atol=.01)

@@ -5,12 +5,12 @@ from numpy import logical_and, logical_or, finfo, column_stack
 from nilearn import image
 from itertools import combinations
 from nilearn.maskers import NiftiMasker
-from tetrachoric_correlation import tetrachoric_corr as tet_corr
+from imgreliability.tetrachoric_correlation import tetrachoric_corr as tet_corr
 
 
 def image_similarity(imgfile1: str, imgfile2: str,
                      mask: str = None, thresh: float = None,
-                     similarity_type: str = 'Dice') -> float:
+                     similarity_type: str = 'dice') -> float:
     """ The img_similarity function takes in two images (3D), a binarized mask (3D), and simiarlity type.
     Based on the specified threshold and similarity type, the ratio of intersecting and union of voxels is calculated.
     The function returns a ratio of voxels that overlap between the two images

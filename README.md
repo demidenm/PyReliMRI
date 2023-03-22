@@ -1,3 +1,5 @@
+[![Python package](https://github.com/demidenm/PyReliMRI/actions/workflows/python-package-conda.yml/badge.svg)](https://github.com/demidenm/PyReliMRI/actions/workflows/python-package-conda.yml)
+
 # Python-based Reliability in MRI (PyReliMRI)
 
 PyReliMRI is described and applied in the [TBD Preprint](https://www.doi.org)

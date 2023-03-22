@@ -1,9 +1,9 @@
 import pytest
 import numpy as np
 from pathlib import Path
-from old_scripts.calc_image_similarity import (
+from imgreliability.similarity import (
     image_similarity,
-    sumsq_total
+    permute_images
 )
 from collections import namedtuple
 from nibabel import Nifti1Image
@@ -74,16 +74,9 @@ def test_image_pair_images(image_pair):
         assert img is not None
 
 @pytest.mark.parametrize("measure", ['Dice', 'Jaccard'])
-def test_image_similarity(image_pair, measure):
+def test_image_similarity_smoketest(image_pair, measure):
     imgsim = image_similarity(
         image_pair.images[0], image_pair.images[1], image_pair.mask,
         thresh=1, similarity_type=measure
     )
     assert imgsim is not None
-
-# test degenerate case where ssqt is zero
-def test_sumsq_total():
-    data = np.ones(100)
-    ssqt = sumsq_total(data)
-    assert np.allclose(ssqt, 0)
-

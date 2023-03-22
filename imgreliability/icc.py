@@ -27,7 +27,8 @@ def sumsq_within(df_long: DataFrame, sessions: str, values: str, n_subjects: int
     """
 
     return sum(
-        ((df_long[values].mean() - df_long[[sessions, values]].groupby(by=sessions)[values].mean())**2)*n_subjects
+        ((df_long[values].mean() - 
+          df_long[[sessions, values]].groupby(by=sessions)[values].mean())**2) * n_subjects
     )
 
 
@@ -45,6 +46,14 @@ def sumsq_btwn(df_long: DataFrame, subj: str, values: str, n_sessions: int) -> N
     return sum(
         ((df_long[values].mean() - df_long[[subj, values]].groupby(by=subj)[values].mean()) ** 2) * n_sessions
     )
+
+
+def check_icc_type(icc_type, allowed_types=None):
+    if allowed_types is None:
+        allowed_types = ['icc_1', 'icc_2', 'icc_3']
+    assert icc_type in allowed_types, \
+        f'ICC type should be in {",".join(allowed_types)}' \
+        f'{icc_type} entered'
 
 
 def icc_confint(msbs: float, msws: float, mserr: float, msc: float,
@@ -69,9 +78,7 @@ def icc_confint(msbs: float, msws: float, mserr: float, msc: float,
     icc1_ci, icc21_ci or icc31_ci : tuple
         The 95% confidence intervals for ICC(1), ICC(2,1), and ICC(3,1), respectively.
     """
-
-    assert icc_type in ['icc_1', 'icc_2', 'icc_3'], 'ICC type should be icc_1, icc_2,icc_3, ' \
-                                                    '{} entered'.format(icc_type)
+    check_icc_type(icc_type)
 
     # Calculate F, df, and p-values
     f_stat1 = msbs / msws
@@ -95,9 +102,9 @@ def icc_confint(msbs: float, msws: float, mserr: float, msc: float,
         f2u = f.ppf(1 - alpha / 2, n_subjs - 1, v)
         f2l = f.ppf(1 - alpha / 2, v, n_subjs - 1)
         lb_ci = n_subjs * (msbs - f2u * mserr) / (
-                    f2u * (n_sess * msc + (n_sess * n_subjs - n_sess - n_subjs) * mserr) + n_subjs * msbs)
+            f2u * (n_sess * msc + (n_sess * n_subjs - n_sess - n_subjs) * mserr) + n_subjs * msbs)
         ub_ci = n_subjs * (f2l * msbs - mserr) / (
-                    n_sess * msc + (n_sess * n_subjs - n_sess - n_subjs) * mserr + n_subjs * f2l * msbs)
+            n_sess * msc + (n_sess * n_subjs - n_sess - n_subjs) * mserr + n_subjs * f2l * msbs)
     elif icc_type == 'icc_3':
         f_lb = f_stat3 / f.ppf(1 - alpha / 2, df1, df2kd)
         f_ub = f_stat3 * f.ppf(1 - alpha / 2, df2kd, df1)
@@ -108,21 +115,27 @@ def icc_confint(msbs: float, msws: float, mserr: float, msc: float,
 
 
 def sumsq_icc(df_long: DataFrame, sub_var: str,
-              sess_var: str, values: str, icc_type: str = 'icc_3'):
+              sess_var: str, value_var: str, icc_type: str = 'icc_3'):
     """ This ICC calculation uses the SS calculation, which are similar to ANOVA, but fewer estimates are used.
     It takes in a long format pandas DF, where subjects repeat for sessions
     The total variance (SS_T) is squared difference each value and the overall mean.
     This is then decomposed into INTER (between) and INTRA (within) subject variance.
 
     :param df_long: Data of subjects & sessions, long format (i.e., subjs repeating, for 1+ sessions).
-    :param sub_var: str of in dataframe w/ subject identifying variable
-    :param sess_var: str in dataframe that is repeat session variables
-    :param values: str in dataframe that contains values for each session
+    :param sub_var: str of column in dataframe w/ subject identifying variable
+    :param sess_var: str of column in dataframe that is repeat session variables
+    :param value_var: str in dataframe that contains values for each session
     :param icc_type: default is ICC(3,1), alternative is ICC(1,1) via icc_1 or ICC(2,1) via icc_2
     :return: icc calculation, icc low bound conf, icc upper bound conf, msbs, msws
     """
-    assert icc_type in ['icc_1', 'icc_2', 'icc_3'], 'ICC type should be icc_1, icc_2,icc_3, ' \
-                                                    '{} entered'.format(icc_type)
+    assert sub_var in df_long.columns,\
+        f'sub_var {sub_var} must be a column in the data frame'
+    assert sess_var in df_long.columns,\
+        f'sess_var {sess_var} must be a column in the data frame'
+    assert value_var in df_long.columns,\
+        f'value_var {value_var} must be a column in the data frame'
+
+    check_icc_type(icc_type)
 
     # n = subjs, c = sessions/ratings
     n = df_long[sub_var].nunique()
@@ -130,9 +143,9 @@ def sumsq_icc(df_long: DataFrame, sub_var: str,
     DF_r = (n - 1) * (c - 1)
 
     # Sum of square errors
-    SS_Total = sumsq_total(df_long=df_long, values=values)
-    SS_Btw = sumsq_btwn(df_long=df_long, subj=sub_var, values=values, n_sessions=c)
-    SS_C = sumsq_within(df_long=df_long, sessions=sess_var, values=values, n_subjects=n)
+    SS_Total = sumsq_total(df_long=df_long, values=value_var)
+    SS_Btw = sumsq_btwn(df_long=df_long, subj=sub_var, values=value_var, n_sessions=c)
+    SS_C = sumsq_within(df_long=df_long, sessions=sess_var, values=value_var, n_subjects=n)
     SS_Err = SS_Total - SS_Btw - SS_C
     SS_Wth = SS_C + SS_Err
 
@@ -143,23 +156,26 @@ def sumsq_icc(df_long: DataFrame, sub_var: str,
     MSErr = SS_Err / DF_r
 
     # Calculate ICCs
+    icc_lb, icc_ub = None, None  # set to None in case they are skipped
     if icc_type == 'icc_1':
         # ICC(1), Model 1
         icc_est = (MSBtw - MSWtn) / (MSBtw + (c - 1) * MSWtn)
-        icc_lb, icc_ub = icc_confint(msbs=MSBtw, msws=MSWtn, mserr=MSErr, msc=MSc,
+        if MSWtn > 0 and MSErr > 0:
+            icc_lb, icc_ub = icc_confint(msbs=MSBtw, msws=MSWtn, mserr=MSErr, msc=MSc,
                                      n_subjs=n, n_sess=c, alpha=0.05, icc_type='icc_1')
 
     elif icc_type == 'icc_2':
         # ICC(2,1)
         icc_est = (MSBtw - MSErr) / (MSBtw + (c - 1) * MSErr + c * (MSc - MSErr) / n)
-        icc_lb, icc_ub = icc_confint(msbs=MSBtw, msws=MSWtn, mserr=MSErr, msc=MSc,
+        if MSWtn > 0 and MSErr > 0:
+            icc_lb, icc_ub = icc_confint(msbs=MSBtw, msws=MSWtn, mserr=MSErr, msc=MSc,
                                      n_subjs=n, n_sess=c, icc_2=icc_est, alpha=0.05, icc_type='icc_2')
 
     elif icc_type == 'icc_3':
         # ICC(2,1)
         icc_est = (MSBtw - MSErr) / (MSBtw + (c - 1) * MSErr)
-        icc_lb, icc_ub = icc_confint(msbs=MSBtw, msws=MSWtn, mserr=MSErr, msc=MSc,
+        if MSWtn > 0 and MSErr > 0:
+            icc_lb, icc_ub = icc_confint(msbs=MSBtw, msws=MSWtn, mserr=MSErr, msc=MSc,
                                      n_subjs=n, n_sess=c, alpha=0.05, icc_type='icc_3')
 
     return icc_est, icc_lb, icc_ub, MSBtw, MSWtn
-
