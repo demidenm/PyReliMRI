@@ -128,9 +128,12 @@ def sumsq_icc(df_long: DataFrame, sub_var: str,
     :param icc_type: default is ICC(3,1), alternative is ICC(1,1) via icc_1 or ICC(2,1) via icc_2
     :return: icc calculation, icc low bound conf, icc upper bound conf, msbs, msws
     """
-    assert sub_var in df_long.columns, f'sub_var {sub_var} must be a column in the data frame'
-    assert sess_var in df_long.columns, f'sess_var {sess_var} must be a column in the data frame'
-    assert value_var in df_long.columns, f'value_var {value_var} must be a column in the data frame'
+    assert sub_var in df_long.columns,\
+        f'sub_var {sub_var} must be a column in the data frame'
+    assert sess_var in df_long.columns,\
+        f'sess_var {sess_var} must be a column in the data frame'
+    assert value_var in df_long.columns,\
+        f'value_var {value_var} must be a column in the data frame'
 
     check_icc_type(icc_type)
 
@@ -153,22 +156,26 @@ def sumsq_icc(df_long: DataFrame, sub_var: str,
     MSErr = SS_Err / DF_r
 
     # Calculate ICCs
+    icc_lb, icc_ub = None, None  # set to None in case they are skipped
     if icc_type == 'icc_1':
         # ICC(1), Model 1
         icc_est = (MSBtw - MSWtn) / (MSBtw + (c - 1) * MSWtn)
-        icc_lb, icc_ub = icc_confint(msbs=MSBtw, msws=MSWtn, mserr=MSErr, msc=MSc,
+        if MSWtn > 0 and MSErr > 0:
+            icc_lb, icc_ub = icc_confint(msbs=MSBtw, msws=MSWtn, mserr=MSErr, msc=MSc,
                                      n_subjs=n, n_sess=c, alpha=0.05, icc_type='icc_1')
 
     elif icc_type == 'icc_2':
         # ICC(2,1)
         icc_est = (MSBtw - MSErr) / (MSBtw + (c - 1) * MSErr + c * (MSc - MSErr) / n)
-        icc_lb, icc_ub = icc_confint(msbs=MSBtw, msws=MSWtn, mserr=MSErr, msc=MSc,
+        if MSWtn > 0 and MSErr > 0:
+            icc_lb, icc_ub = icc_confint(msbs=MSBtw, msws=MSWtn, mserr=MSErr, msc=MSc,
                                      n_subjs=n, n_sess=c, icc_2=icc_est, alpha=0.05, icc_type='icc_2')
 
     elif icc_type == 'icc_3':
         # ICC(2,1)
         icc_est = (MSBtw - MSErr) / (MSBtw + (c - 1) * MSErr)
-        icc_lb, icc_ub = icc_confint(msbs=MSBtw, msws=MSWtn, mserr=MSErr, msc=MSc,
+        if MSWtn > 0 and MSErr > 0:
+            icc_lb, icc_ub = icc_confint(msbs=MSBtw, msws=MSWtn, mserr=MSErr, msc=MSc,
                                      n_subjs=n, n_sess=c, alpha=0.05, icc_type='icc_3')
 
     return icc_est, icc_lb, icc_ub, MSBtw, MSWtn
