@@ -3,3 +3,6 @@ pandas
 pytest
 nilearn
 scipy
+seaborn
+hypothesis
+
