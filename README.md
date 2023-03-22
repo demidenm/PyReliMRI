@@ -10,13 +10,13 @@ PyReliMRI is described and applied in the [TBD Preprint](https://www.doi.org)
 
 ## Intro of Problem
 
-Reliability questions for [task fMRI](https://https://doi.org/10.1177/0956797620916786) and [resting state fMRI](https://www.doi.org/10.1016/j.neuroimage.2019.116157) are increasing. As described in [2010](https://www.doi.org/10.1111/j.1749-6632.2010.05446.x), there are various ways that researchers calculate reliability. Few open-source packages exist to calculate multiple individual and group reliability metrics using one tool.
+Reliability questions for [task fMRI](https://https://www.doi.org/10.1177/0956797620916786) and [resting state fMRI](https://www.doi.org/10.1016/j.neuroimage.2019.116157) are increasing. As described in [2010](https://www.doi.org/10.1111/j.1749-6632.2010.05446.x), there are various ways that researchers calculate reliability. Few open-source packages exist to calculate multiple individual and group reliability metrics using one tool.
 
 ## Purpose of Script
 
 The purpose of this package is to provide an open-source python package that will provide multiple reliability metrics, at the group and individual level, that researchers may use to report in their manuscripts in cases of multi-run and/or multi-session data.
  - At the group level, [similarity.py](/imgreliability/similarity.py) calculates a similarity calculations between two fMRI images using Dice or Jaccard similarity coefficients or tetrachoric correlation. In addition to calculate the similarity between two images, a function is provided to permute across a list of 3D images and return a list of coefficients.
- - At the individual level, the [brain_icc.py](/imgreliability/brain_icc.py) calculates ICC(1), ICC(2,1) or ICC(3,1). For description of different ICCs and their calculations, see discussion in [Liljequist et al., 2019](www.doi.org/10.1371/journal.pone.0219854).
+ - At the individual level, the [brain_icc.py](/imgreliability/brain_icc.py) calculates ICC(1), ICC(2,1) or ICC(3,1). For description of different ICCs and their calculations, see discussion in [Liljequist et al., 2019](https://www.doi.org/10.1371/journal.pone.0219854).
 
 
 | **Script Name** | **Functions** | **Inputs**                                                                                                                                                                                                                                                                                               | **Purpose**                                                                                                                                                                                                                                                                                                       |
