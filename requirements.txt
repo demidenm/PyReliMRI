@@ -1,9 +1,5 @@
-os
-warnings
 numpy
 pandas
 pytest
-pathlib
 nilearn
-itertools
 scipy
