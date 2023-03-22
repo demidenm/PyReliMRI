@@ -1,6 +1,6 @@
 from imgreliability.tetrachoric_correlation import tetrachoric_corr
 import numpy as np
-from hypothesis import example, given, strategies as st
+from hypothesis import given, strategies as st
 from hypothesis.extra.numpy import arrays
 
 def test_tetrachoric_corr():
