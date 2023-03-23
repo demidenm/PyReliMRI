@@ -126,6 +126,13 @@ As noted previously, the permutations are across the image combinations and retu
 FAQ
 ---
 
-- `Can I use these function on output from FSL, AFNI or SPM?` Yes, you can use these functions on any NifTi data \
-that are of the same shape and in the same space. You just need the that paths to the locations of the .nii or .nii.gz files
+* `Can I use these function on output from FSL, AFNI or SPM?` \
+Yes, you can use these functions on any NifTi data that are of the same shape and in the same space. \
+You just need the that paths to the locations of the .nii or .nii.gz files
+
+* `Are there restrictions on which data I should or shouldn't calculate similarity between?` \
+It all depends on the question. You can calculate similarity between group level maps or individual maps. \
+There are two things to keep in mind: Ensure the data is in the form that is expect and be cautious about the \
+thresholding that is used because a threshold of 2.3 on a t-stat.nii.gz may not be as restriction on the group maps \
+as it is on the the individual maps.
 
