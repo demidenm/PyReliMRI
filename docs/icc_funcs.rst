@@ -152,15 +152,44 @@ package in R.
 **sumsq_icc**
 
 Now that the internal calculations of the ICC have been reviewed, we can use the package to get the values of interest. \
-Recall, the :doc:`usage.py <icc>` usage documentation with the associated formulas for the ICC(1), ICC(2,1) and ICC(3,1). \
-Those are not rehashed here, so considered check that page out for those details.
+The associated formulas for the ICC(1), ICC(2,1) and ICC(3,1) are described below.
 
-Nevertheless, `sumsq_icc` can be used on a dataset with multiple subjects with 1+ measures occasions. We can calculate this ICC \
-for the anagrams data used above. Note: the require inputs are a long dataframe, subject variable, \
+The formula for ICC(1) is:
+
+.. math::
+
+    ICC(1) = \frac{MSb - MSw}{MS_b + (c-1)MS_w}
+
+
+The formula for ICC(2,1) is:
+
+.. math::
+
+    ICC(2,1) = \frac{MSBtw - MSErr}{MSBtw + (c - 1) * MSErr + c * (MSc - MSErr) / n}
+
+The formula for ICC(2,1) is:
+
+.. math::
+
+    ICC(3,1) = \frac{MSBtw - MSErr}{MSBtw + (c - 1) * MSErr}
+
+
+Where:
+
+- MSb: mean square between subjects
+- MSw: mean square within subjects
+- MSErr: mean squared residual error
+- MSc: mean squared error of sessions
+- c: is the number of sessions
+- n: numbers of subjects
+
+
+Hence, `sumsq_icc` can be used on a dataset with multiple subjects with 1+ measures occasions. We can calculate this ICC \
+for the anagrams data used above. Note: the required inputs are a long dataframe, subject variable, \
 session variable and the value scores variables that are contained in the long dataframe, plus the \
 icc to return (options: icc_1, icc_2, icc_3; default: icc_3).
 
-The sumsq_icc function will return five values: the ICC etimate, lower bound 95% confidence interval, \
+The `sumsq_icc` function will return five values: the ICC etimate, lower bound 95% confidence interval, \
 upper bound 95% counfidence interval, mean square between subject variance, mean square within subject variance. \
 This information will print to a terminal or can be saved to five variables:
 
@@ -173,18 +202,18 @@ This information will print to a terminal or can be saved to five variables:
                                                     sess_var="sess",value_var="vals",icc_type="icc_3")
 
 This will store the five associated values in the five variables:
-    - icc3: ICC estimate
-    - icc3_lb: 95% lower bound CI for ICC estimate
-    - icc3_lb: 95% upper bound CI for ICC estimate
-    - icc3_msbs: Mean Squared Between Subject Variance using for ICC estimate
-    - icc3_msws: Mean Squared Within Subject Variance used for ICC estimate
+    - `icc3`: ICC estimate
+    - `icc3_lb`: 95% lower bound CI for ICC estimate
+    - `icc3_lb`: 95% upper bound CI for ICC estimate
+    - `icc3_msbs`: Mean Squared Between Subject Variance using for ICC estimate
+    - `icc3_msws`: Mean Squared Within Subject Variance used for ICC estimate
 
 brain_icc.py
 ------------
 
 The `brain_icc.py` is, for a lack for better words, a big wrapper for for the `icc.py`. \
-In short, the `voxelwise_icc` function within `brain_icc.py` voxelwise_icc calculates the ICC for 3D nifti brain images \
-across subjects and sessions on a voxel-by-voxel basis. Here are the steps it takes:
+In short, the `voxelwise_icc` function within `brain_icc.py` calculates the ICC for 3D nifti brain images \
+across subjects and sessions on a voxel-by-voxel basis. Here are the steps it uses:
 
     - The function takes in the paths to the 3D nifti brain images for each session, the path to the nifti mask object, and the ICC type to be calculated.
     - The function checks if there are the same number of files in session 1 and session 2 (e.g., paths_sess1, paths_sess2 + optional) and raises an error if they are of different length.

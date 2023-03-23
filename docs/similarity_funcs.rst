@@ -8,8 +8,19 @@ image_similarity
 ----------------
 
 As described previously, the purpose of the `similarity.py` is to calculate different types of similarity between \
-two or more NifTi 3D images. These images can be from spm, fsl, afni or nilearn *preprocessed* output and the main requirement \
-the user has to confirm two of the following are true:
+two or more NifTi 3D images. The types of similarity estimates include the Dice Coefficient, Jaccard Coefficient or the \
+Tetrachoric correlation. The formulas for each are as follows:
+
+Dice Similarity Coefficient  =  :math:`\frac{2|A \cap B|}{|A| + |B|}`
+
+Jaccard Similarity Coefficient  =  :math:`\frac{|A \cap B|}{|A \cup B|}`
+
+Tetrachoric Correlation  =  :math:`\cos\left(\frac{\pi}{1+\sqrt{\frac{AD}{BC}}}\right)`
+
+
+
+The NifTi images that are used with this function can be from SPM, FSL, AFNI or Nilearn *preprocessed* outputs. The two requirements \
+the user has to confirm are:
 
 * Image Shape: The two images being compared have to be of the same shape. If the images are of different length the the comparison of the volumes will be wrong. The package will throw an error if they are of the wrong shape.
 * Normal/Coregistration: The images should be normalize in space for proper comparison. Here, you will not see an error but so ensure images are in the same space and properly aligned.
@@ -52,6 +63,7 @@ We can look at the images to see the activation maps for each:
 
 Now that we have pulled this data, we will load the similarity package from `imgreliability` and calculate the jaccard similarity coefficient  \
 and tetrachoric correlation between the two images.
+
 
 .. code-block:: python
 

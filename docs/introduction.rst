@@ -21,10 +21,15 @@ Reliability questions for `task fMRI <https://https://www.doi.org/10.1177/095679
 Purpose of Script
 ~~~~~~~~~~~~~~~~~~
 
-The purpose of this package is to provide an open-source python package that will provide multiple reliability metrics, at the group and individual level, that researchers may use to report in their manuscripts in cases of multi-run and/or multi-session data.
-At the group level, ``similarity.py`` calculates a similarity calculations between two fMRI images using Dice or Jaccard similarity coefficients or tetrachoric correlation. In addition to calculate the similarity between two images, a function is provided to permute across a list of 3D images and return a list of coefficients.
+The purpose of this package is to provide an open-source python package that will estimate multiple reliability metrics on fMRI data -- at the group and individual level -- \
+that researchers may use to report in their manuscripts in cases of multi-run and/or multi-session data.
 
-At the individual level, the ``brain_icc.py`` calculates ICC(1), ICC(2,1) or ICC(3,1). For description of different ICCs and their calculations, see discussion in `Liljequist et al., 2019 <https://www.doi.org/10.1371/journal.pone.0219854>`_.
+At the group level, ``similarity.py`` calculates a similarity calculations between two fMRI images using Dice or Jaccard similarity coefficients or tetrachoric correlation. \
+In addition to calculating the similarity between two NifTi images, a `permute_images` is provided to permute across a list of 3D images and return a list of coefficients.
+
+At the individual level, the ``brain_icc.py`` calculates intraclass correlation. For description of different ICCs and their calculations, \
+see discussion in `Liljequist et al., 2019 <https://www.doi.org/10.1371/journal.pone.0219854>`_. In this package, you have the option to \
+select ICC(1), ICC(2,1) or ICC(3,1).
 
 .. list-table::
    :header-rows: 1
@@ -38,20 +43,20 @@ At the individual level, the ``brain_icc.py`` calculates ICC(1), ICC(2,1) or ICC
 
    * - brain_icc.py
      - voxelwise_icc
-     - **REQUIRED:** Paths to 3D Nifti session 1,paths to 3D Nifti session 2, brain mask  **OPTIONAL:** paths to 3D Nifti session 3 and ICC type (icc_type; default = 'icc_3', options include: 'icc_3', 'icc_2', 'icc_1')
-     - Calculate the intraclass correlation (e.g., ICC(1), ICC(2,1), or ICC(3,1) for 3D volumes across 1+ sessions, returning five 3D volumes reflecting the ICC estimate, the 95% lowerbound for ICC estimate, 95% upperbound for ICC estimate, mean squared error between subjects, mean squared error within subjects)
+     - **REQUIRED:** Paths to 3D NifTi session 1, paths to 3D NifTi session 2, path to 3D NifTi brain mask  **OPTIONAL:** paths to 3D NifTi session 3 and ICC type (icc_type; default = 'icc_3', options include: 'icc_3', 'icc_2', 'icc_1')
+     - Calculates and returns intraclass correlation (e.g., ICC(1), ICC(2,1), or ICC(3,1) for 3D volumes across 1+ sessions, returning five 3D volumes reflecting the ICC estimate, the 95% lowerbound for ICC estimate, 95% upperbound for ICC estimate, mean squared error between subjects, mean squared error within subjects)
 
    * - icc.py
      - sumsq_total, sumsq, sumsq_btwn, icc_confint, sumsq_icc
      - **REQUIRED:** Panda long dataframe with a subject variable (sub_var), session variable (sess_var), the scores (value_var) and the icc type (icc_type; default = 'icc_3', options include: 'icc_3', 'icc_2', 'icc_1')
-     - Calculates sum of squares total, error, within and between to return an ICC estimate (e.g., ICC(1), ICC(2,1), or ICC(3,1), 95% lowerbound and 95% upperbound for ICC, mean between subject variance and mean within-subject variance)
+     - Calculates different components used in calculating the ICC estimate (e.g., ICC([1], ICC([2,1], or ICC[3,1]), 95% lowerbound and 95% upperbound for ICC, mean between subject variance and mean within-subject variance
 
    * - similarity.py
      - image_similarity,permute_images
-     - **REQUIRED:** Path to 3D Nifti imgfile1,Path to 3D Nifti imgfile2 **OPTIONAL:** Path to a mask, threshold (thresh) on the images, Type (similarity_type) of image similarity coefficient (default = 'dice', options include: 'dice', 'jaccard', 'tetrachoric')
-     - Calculate the similarity between two images. Permute multiple images to calculate similarity coefficient between all possible image pairs.
+     - **REQUIRED:** Path to 3D NifTi imgfile1, Path to 3D NifTi imgfile2 **OPTIONAL:** Path to a NifTi mask, threshold level (thresh) on the images, Type (similarity_type) of image similarity coefficient (default = 'dice', options include: 'dice', 'jaccard', 'tetrachoric')
+     - Calculates and returns the similarity between two images. Permute multiple images calculates similarity coefficient between all possible image pairs and returns a dataframe.
 
    * - tetrachoric_correlation.py
      - tetrachoric_corr
      - **REQUIRED:** Binary vector NDarray,Binary vector NDarray
-     - Calculate the tetrachoric correlation between two binary vectors.
+     - Calculate and returns tetrachoric correlation between two binary vectors.

@@ -36,34 +36,6 @@ icc.py
 Inputs:
   * REQUIRED: Panda long dataframe with a subject variable (sub_var), session variable (sess_var), the scores (value_var) and the icc type (icc_type; default = default = 'icc_3', options include: 'icc_3', 'icc_2', 'icc_1')
 
-The formula for ICC(1) is:
-
-.. math::
-
-    ICC(1) = \frac{MSb - MSw}{MS_b + (c-1)MS_w}
-
-
-The formula for ICC(2,1) is:
-
-.. math::
-
-    ICC(2,1) = \frac{MSBtw - MSErr}{MSBtw + (c - 1) * MSErr + c * (MSc - MSErr) / n}
-
-The formula for ICC(2,1) is:
-
-.. math::
-
-    ICC(3,1) = \frac{MSBtw - MSErr}{MSBtw + (c - 1) * MSErr}
-
-
-Where:
-
-- MSb: mean square between subjects
-- MSw: mean square within subjects
-- MSErr: mean squared residual error
-- MSc: mean squared error of sessions
-- c: is the number of sessions
-- n: numbers of subjects
 
 
 similarity.py
@@ -99,8 +71,5 @@ tetrachoric_correlation.py
 Inputs:
   * REQUIRED: Binary vector1 NDarray, Binary vector2 NDarray
 
-.. math::
-
-    \cos\left(\frac{\pi}{1+\sqrt{\frac{AD}{BC}}}\right)
 
 
