@@ -1,12 +1,11 @@
 Similarity Based Functions
 ===========================
 
-In this section, the similarity functions are reviewed with some examples.
+In this section, the similarity functions are reviewed with some examples for `similarity.py`.
 
-similarity.py
--------------
 
-**image_similarity**
+image_similarity
+----------------
 
 As described previously, the purpose of the `similarity.py` is to calculate different types of similarity between \
 two or more NifTi 3D images. These images can be from spm, fsl, afni or nilearn *preprocessed* output and the main requirement \
@@ -70,7 +69,8 @@ Why? This is, in part, explained by the decreased overlapping zeros between the 
 and the increased number of overlapping voxels in the Jaccard calculation.
 
 
-**permute_images**
+permute_images
+----------------
 
 The `permute_images()` function is, for a lack of a better word, a wrapper over the `image_similarity()` function. It \
 takes in similar values, except this time instead if `imgfile1` and `imgfile2` it's a list of paths to NifTi images. \
@@ -121,3 +121,11 @@ As noted previously, the permutations are across the image combinations and retu
 +------+-----------------------+-------------------------------------------+
 | 5    | 0.41910546659304254   | image_3160.nii.gz ~ image_3162.nii.gz     |
 +------+-----------------------+-------------------------------------------+
+
+
+FAQ
+---
+
+- `Can I use these function on output from FSL, AFNI or SPM?` Yes, you can use these functions on any NifTi data \
+that are of the same shape and in the same space. You just need the that paths to the locations of the .nii or .nii.gz files
+
