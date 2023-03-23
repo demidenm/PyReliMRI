@@ -50,8 +50,6 @@ We can load the example data, filter to only use the `divided` values and conver
                var_name="sess",
                value_name="vals"))
 
-
-
 **sumsq_total**
 
 The sum of squared total is the estimate of the total variance across all subjects and measurement occasions. Expressed \

@@ -1,4 +1,6 @@
-[![Python package](https://github.com/demidenm/PyReliMRI/actions/workflows/python-package-conda.yml/badge.svg)](https://github.com/demidenm/PyReliMRI/actions/workflows/python-package-conda.yml)
+[![Python package](https://github.com/demidenm/PyReliMRI/actions/workflows/python-package-conda.yml/badge.svg)](https://github.com/demidenm/PyReliMRI/actions/workflows/python-package-conda.yml) 
+[![Documentation Status](https://readthedocs.org/projects/pyrelimri/badge/?version=latest&style=plastic)](https://pyrelimri.readthedocs.io/en/latest/?badge=latest&style=plastic)
+
 
 # Python-based Reliability in MRI (PyReliMRI)
 
