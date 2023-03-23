@@ -57,7 +57,7 @@ the formula used is:
 
 .. math::
 
-    \text{sumsq\_total(df\_long, values)} = \sum_{i=1}^{n}(x_i - \bar{x})^2
+    \text{sumsq_total(df\_long, values)} = \sum_{i=1}^{n}(x_i - \bar{x})^2
 
 where:
     * df_long = pandas DataFrame (df) in long format \

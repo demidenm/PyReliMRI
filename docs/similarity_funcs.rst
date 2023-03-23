@@ -15,7 +15,7 @@ Tetrachoric correlation. The formulas for each are as follows:
 
 .. math:: \text{Jaccard Similarity Coefficient} = \frac{|A \cap B|}{|A \cup B|}
 
-.. math:: \text{Tetrachoric Correlation} = \cos\left(\frac{\pi}{1+\sqrt{\frac{AD}{BC}}}\right)}
+.. math:: \text{Tetrachoric Correlation} = \cos\left(\frac{\pi}{1+\sqrt{\frac{AD}{BC}}}\right)
 
 The NifTi images that are used with this function can be from SPM, FSL, AFNI or Nilearn *preprocessed* outputs. The two requirements \
 the user has to confirm are:
