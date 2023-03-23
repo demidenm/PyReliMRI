@@ -56,7 +56,7 @@ def image_similarity(imgfile1: str, imgfile2: str,
             coeff = dice_coeff / (2 - dice_coeff)
     elif similarity_type.casefold() == 'tetrachoric':
         warnings.filterwarnings('ignore')
-        coeff = tet_corr(img1=imgdata[0, :], img2=imgdata[1, :])
+        coeff = tet_corr(vec1=imgdata[0, :], vec2=imgdata[1, :])
 
     return coeff
 
