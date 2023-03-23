@@ -61,7 +61,7 @@ def image_similarity(imgfile1: str, imgfile2: str,
     return coeff
 
 
-def permute_images(nii_filelist: list, mask: str,
+def permute_images(nii_filelist: list, mask: str = None,
                    thresh: float = None, similarity_type: str = 'Dice') -> DataFrame:
     """This permutation takes in a list of paths to Nifti images and creates a comparsion that covers all possible
     combinations. For each combination, it calculates the specified similarity and

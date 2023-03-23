@@ -5,10 +5,20 @@
 
 Welcome to PyReliMRI's documentation!
 =======================================================================
-Python-based Reliability in MRI (PyReliMRI) is an package that provides an open-source python \
-tool to calculate multiple reliability metrics, at the group and individual level. This is to facilitate \
-researchers to easily report reliability estimates in their manuscripts in cases of multi-run \
+Python-based Reliability in MRI (PyReliMRI) is an open-source python pack \
+tool to calculate several group- and individual-level reliability metrics. This package is released \
+for researchers using MRI data to easily report reliability estimates in their manuscripts in cases of multi-run \
 and/or multi-session data.
+
+There are a number of packages available to achieve different aspects contains in this package. \
+Specifically, multiple tools exist to calculate either simiarity metrics, intraclass corelations (e.g., 3dICC in AFNI) \
+or both (e.g., in python based `nipype <https://nipype.readthedocs.io/en/latest/>`_ or matlab `fmreli <https://github.com/nkroemer/reliability>`_). \
+However, in some cases the flexibility is limited or some features are not available. \
+For example, `ICC_rep_anova` is limited to ICC(3,1) and the `fmreli` is not accessible without \
+a matlab license and does not deploy the the tetrachoric correlation or permutation across images.
+
+Our attempt here was to integrate different multiple functions within the same package that anyone can use by simply \
+downloading python on their machine.
 
 
 PyReliMRI
@@ -35,8 +45,11 @@ Usage Examples
 
 .. toctree::
    :maxdepth: 2
-   :caption: Examples:
+   :caption: Example Usage:
 
+   examples.rst
+   similarity_funcs.rst
+   icc_funcs.rst
 
 Citing PyReliMRI
 -------------------

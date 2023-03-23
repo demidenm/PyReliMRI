@@ -29,3 +29,14 @@ Once the script is loaded, you can use the functions within the script to use it
     similarity.image_similarity(imgfile1 = path_to_img, imgfile2 = path_to_img, mask=  path_to_mash, thresh = 1.25, similarity_type = 'dice')
     # required input
     similarity.image_similarity?
+
+Required dependencies
+`````````````````````
+
+While a number of calculations are performed manual, PyReliMRI uses several packages that must be installed.
+
+-  Python>=>3.6
+-  numpy>=1.2
+-  scipy=>1.9
+-  pandas=>1.4
+-  nilearn=>0.9
