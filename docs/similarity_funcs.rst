@@ -11,13 +11,11 @@ As described previously, the purpose of the `similarity.py` is to calculate diff
 two or more NifTi 3D images. The types of similarity estimates include the Dice Coefficient, Jaccard Coefficient or the \
 Tetrachoric correlation. The formulas for each are as follows:
 
-Dice Similarity Coefficient  =  :math:`\frac{2|A \cap B|}{|A| + |B|}`
+.. math:: \text{Dice Similarity Coefficient} = \frac{2|A \cap B|}{|A| + |B|}
 
-Jaccard Similarity Coefficient  =  :math:`\frac{|A \cap B|}{|A \cup B|}`
+.. math:: \text{Jaccard Similarity Coefficient} = \frac{|A \cap B|}{|A \cup B|}
 
-Tetrachoric Correlation  =  :math:`\cos\left(\frac{\pi}{1+\sqrt{\frac{AD}{BC}}}\right)`
-
-
+.. math:: \text{Tetrachoric Correlation} = \cos\left(\frac{\pi}{1+\sqrt{\frac{AD}{BC}}}\right)}
 
 The NifTi images that are used with this function can be from SPM, FSL, AFNI or Nilearn *preprocessed* outputs. The two requirements \
 the user has to confirm are:

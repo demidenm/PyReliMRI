@@ -154,24 +154,11 @@ package in R.
 Now that the internal calculations of the ICC have been reviewed, we can use the package to get the values of interest. \
 The associated formulas for the ICC(1), ICC(2,1) and ICC(3,1) are described below.
 
-The formula for ICC(1) is:
+.. math:: \text{ICC(1)} = \frac{MSb - MSw}{MS_b + (c-1)MS_w}
 
-.. math::
+.. math:: \text{ICC(2,1)} = \frac{MSBtw - MSErr}{MSBtw + (c - 1) * MSErr + c * (MSc - MSErr) / n}
 
-    ICC(1) = \frac{MSb - MSw}{MS_b + (c-1)MS_w}
-
-
-The formula for ICC(2,1) is:
-
-.. math::
-
-    ICC(2,1) = \frac{MSBtw - MSErr}{MSBtw + (c - 1) * MSErr + c * (MSc - MSErr) / n}
-
-The formula for ICC(2,1) is:
-
-.. math::
-
-    ICC(3,1) = \frac{MSBtw - MSErr}{MSBtw + (c - 1) * MSErr}
+.. math:: \text{ICC(3,1)} = \frac{MSBtw - MSErr}{MSBtw + (c - 1) * MSErr}
 
 
 Where:
