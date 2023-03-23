@@ -1,4 +1,4 @@
-Examples for Intraclass Corr Functions
+Intraclass Correlation Functions
 =======================================
 
 
