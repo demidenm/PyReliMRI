@@ -229,7 +229,7 @@ To use the `voxelwise_icc` function you just have to provide the following infor
     - paths_sess2: A list of paths to the Nifti z-stat, t-stat or beta maps for sess2 (or run 2)
     - paths_sess3: Optional; A list of paths to the Nifti z-stat, t-stat or beta maps for sess3 (or run 3)
     - mask: The Nifti binarized masks that will be used to mask the 3D volumes.
-    - icc: The ICC estimate that will be calculated for each voxel. Options: `icc_1`, `icc_2`, `icc_3`. Default: `icc_3`
+    - icc_type: The ICC estimate that will be calculated for each voxel. Options: `icc_1`, `icc_2`, `icc_3`. Default: `icc_3`
 
 The function returns a 3D volume for:
     - ICC estimates
@@ -255,7 +255,7 @@ Next, you can call these images paths in the function and save the 3d volumes us
 
     from pyrelimri import brain_icc
 
-    icc_3d, icc_lb_3d, icc_ub_3d, icc_msbs_3d, icc_msws_3d = brain_icc.voxelwise_icc(paths_sess1 = scan1, paths_sess2 = scan2, mask = "./mask/brain_mask.nii.gz", icc = "icc_3")
+    icc_3d, icc_lb_3d, icc_ub_3d, icc_msbs_3d, icc_msws_3d = brain_icc.voxelwise_icc(paths_sess1 = scan1, paths_sess2 = scan2, mask = "./mask/brain_mask.nii.gz", icc_type = "icc_3")
 
 This will return the associated nifti 3D volumes manipulated further, plotted or \
 can be saved using nibabel:
@@ -337,7 +337,7 @@ Okay, now we should have everything we need: the path to our images and to our m
     from pyrelimri import brain_icc
     icc, icc_lb, icc_ub, icc_msbs, icc_msws = brain_icc.voxelwise_icc(paths_sess1=sess1_paths,
                                                                       paths_sess2=sess2_paths,
-                                                                      mask=mask_path, icc='icc_1')
+                                                                      mask=mask_path, icc_type='icc_1')
 
 Since the variables are saved within the environment, you should see the five variables. On my mac (i9, 16GM mem),
 it took ~4minutes to run this and get the results. Time will depend on the size of data and your machine. \

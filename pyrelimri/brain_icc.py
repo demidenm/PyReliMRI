@@ -5,7 +5,7 @@ from nilearn import image
 from nilearn.maskers import NiftiMasker
 
 
-def voxelwise_icc(paths_sess1: str, paths_sess2: str, mask: str, paths_sess3=None, icc='icc_3'):
+def voxelwise_icc(paths_sess1: str, paths_sess2: str, mask: str, paths_sess3=None, icc_type='icc_3'):
     """
     voxelwise_icc: calculates the ICC (+lower bound & upper bound CI)
     by voxel for specified input files using manual sumsq calculations.
@@ -21,7 +21,7 @@ def voxelwise_icc(paths_sess1: str, paths_sess2: str, mask: str, paths_sess3=Non
     :param paths_sess2: paths to session 2 nii MNI files
     :param paths_sess3: If there are more than 3 sessions, paths to session 3 nii MNI files
     :param mask: path to nii MNI path object
-    :param icc: provide icc type, default is icc_3, options: icc_1, icc_2, icc_3
+    :param icc_type: provide icc type, default is icc_3, options: icc_1, icc_2, icc_3
     :return: returns 3D shaped array of ICCs in shape of provided 3D  mask
     """
 
@@ -63,7 +63,7 @@ def voxelwise_icc(paths_sess1: str, paths_sess2: str, mask: str, paths_sess3=Non
             vox_pd = vox_pd.astype({"subj": int, "sess": "category", "vals": float})
 
             iccest, icclb, iccub, MSbtw, MSwtn = sumsq_icc(df_long=vox_pd, sub_var="subj", sess_var="sess",
-                                                           value_var="vals", icc_type=icc)
+                                                           value_var="vals", icc_type=icc_type)
             icc_calc.append(iccest)
             icc_lb.append(icclb)
             icc_ub.append(iccub)
@@ -86,7 +86,7 @@ def voxelwise_icc(paths_sess1: str, paths_sess2: str, mask: str, paths_sess3=Non
             vox_pd = vox_pd.astype({"subj": int, "sess": "category", "vals": float})
 
             iccest, icclb, iccub, MSbtw, MSwtn = sumsq_icc(df_long=vox_pd, sub_var="subj", sess_var="sess",
-                                                           value_var="vals", icc_type=icc)
+                                                           value_var="vals", icc_type=icc_type)
             icc_calc.append(iccest)
             icc_lb.append(icclb)
             icc_ub.append(iccub)
