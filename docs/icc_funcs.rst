@@ -43,7 +43,7 @@ We can load the example data, filter to only use the `divided` values and conver
     a_wd = data[data['attnr'] == 'divided'] # filter
     # convert to wide, so the subject/id variables are still `subidr` and values were stacking from `num1`,`num2`,num3`
     # the values will be stored in the column `vals` and the session labels (from num1-num3) into `sess`
-    a_ld = pd.DataFrame(
+    long_df = pd.DataFrame(
         pd.melt(a_wd,
                id_vars="subidr",
                value_vars=["num1", "num2", "num3"],
@@ -57,7 +57,7 @@ the formula used is:
 
 .. math::
 
-    \text{sumsq_total(df_{long}, values)} = \sum_{i=1}^{n}(x_i - \bar{x})^2
+    \text{sumsq_total}(df_{long}, values)} = \sum_{i=1}^{n}(x_i - \bar{x})^2
 
 where:
     * df_long = pandas DataFrame (df) in long format \
