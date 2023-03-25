@@ -5,7 +5,7 @@ from numpy import logical_and, logical_or, finfo, column_stack
 from nilearn import image
 from itertools import combinations
 from nilearn.maskers import NiftiMasker
-from imgreliability.tetrachoric_correlation import tetrachoric_corr as tet_corr
+from pyrelimri.tetrachoric_correlation import tetrachoric_corr as tet_corr
 
 
 def image_similarity(imgfile1: str, imgfile2: str,

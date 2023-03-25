@@ -4,11 +4,11 @@ import pandas as pd
 from pathlib import Path
 import seaborn as sns
 
-from imgreliability.similarity import (
+from pyrelimri.similarity import (
     image_similarity,
     permute_images
 )
-from imgreliability.icc import sumsq_icc
+from pyrelimri.icc import sumsq_icc
 from collections import namedtuple
 from nibabel import Nifti1Image
 import nibabel as nib

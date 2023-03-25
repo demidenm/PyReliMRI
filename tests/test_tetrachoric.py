@@ -1,4 +1,4 @@
-from imgreliability.tetrachoric_correlation import tetrachoric_corr
+from pyrelimri.tetrachoric_correlation import tetrachoric_corr
 import numpy as np
 from hypothesis import given, strategies as st
 from hypothesis.extra.numpy import arrays

@@ -1,6 +1,6 @@
 from numpy import array, arange, column_stack, tile, hstack
 from pandas import DataFrame
-from imgreliability.icc import sumsq_icc
+from pyrelimri.icc import sumsq_icc
 from nilearn import image
 from nilearn.maskers import NiftiMasker
 
@@ -63,10 +63,10 @@ def voxelwise_icc(paths_sess1: str, paths_sess2: str, mask: str, paths_sess3=Non
             vox_pd = vox_pd.astype({"subj": int, "sess": "category", "vals": float})
 
             iccest, icclb, iccub, MSbtw, MSwtn = sumsq_icc(df_long=vox_pd, sub_var="subj", sess_var="sess",
-                                                              values="vals", icc_type=icc)
+                                                           value_var="vals", icc_type=icc)
             icc_calc.append(iccest)
-            icc_ub.append(icclb)
-            icc_lb.append(iccub)
+            icc_lb.append(icclb)
+            icc_ub.append(iccub)
             msbs.append(MSbtw)
             msws.append(MSwtn)
 
@@ -86,15 +86,15 @@ def voxelwise_icc(paths_sess1: str, paths_sess2: str, mask: str, paths_sess3=Non
             vox_pd = vox_pd.astype({"subj": int, "sess": "category", "vals": float})
 
             iccest, icclb, iccub, MSbtw, MSwtn = sumsq_icc(df_long=vox_pd, sub_var="subj", sess_var="sess",
-                                                              values="vals", icc_type=icc)
+                                                           value_var="vals", icc_type=icc)
             icc_calc.append(iccest)
-            icc_ub.append(icclb)
-            icc_lb.append(iccub)
+            icc_lb.append(icclb)
+            icc_ub.append(iccub)
             msbs.append(MSbtw)
             msws.append(MSwtn)
 
         # using unmask to reshape the 1D voxels back to 3D specified mask
 
-    return masker.inverse_transform(array(icc)), masker.inverse_transform(array(icc_lb)), \
+    return masker.inverse_transform(array(icc_calc)), masker.inverse_transform(array(icc_lb)), \
            masker.inverse_transform(array(icc_ub)), masker.inverse_transform(array(msbs)), \
            masker.inverse_transform(array(msws))

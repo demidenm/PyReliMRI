@@ -59,13 +59,13 @@ We can look at the images to see the activation maps for each:
    :alt: Figure 1: HCP Left Hand (A) and Left Foot (B) Activation maps.
    :figclass: align-center
 
-Now that we have pulled this data, we will load the similarity package from `imgreliability` and calculate the jaccard similarity coefficient  \
+Now that we have pulled this data, we will load the similarity package from `pyrelimri` and calculate the jaccard similarity coefficient  \
 and tetrachoric correlation between the two images.
 
 
 .. code-block:: python
 
-    from imgreliability import similarity
+    from pyrelimri import similarity
 
     # calculate jaccard coefficient
     similarity.image_similarity(imgfile1=L_hand_map.images[0], imgfile2=L_foot_map.images[0], thresh = 1.5, similarity_type = 'jaccard')
@@ -110,7 +110,7 @@ We wont plot these images, but for reference we now have four image paths: `L_ha
 .. code-block:: python
 
     # If you hadn't, import the package
-    from imgreliability import similarity
+    from pyrelimri import similarity
     similarity.permute_images(nii_filelist=[L_foot_map.images[0],L_hand_map.images[0],
                               R_foot_map.images[0],R_hand_map.images[0]],thresh=1.5, similarity_type='jaccard')
 
@@ -137,12 +137,13 @@ FAQ
 ---
 
 * `Can I use these function on output from FSL, AFNI or SPM?` \
+
 Yes, you can use these functions on any NifTi data that are of the same shape and in the same space. \
 You just need the that paths to the locations of the .nii or .nii.gz files
 
 * `Are there restrictions on which data I should or shouldn't calculate similarity between?` \
+
 It all depends on the question. You can calculate similarity between group level maps or individual maps. \
 There are two things to keep in mind: Ensure the data is in the form that is expect and be cautious about the \
 thresholding that is used because a threshold of 2.3 on a t-stat.nii.gz may not be as restriction on the group maps \
 as it is on the the individual maps.
-

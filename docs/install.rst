@@ -8,18 +8,18 @@ You can install the PyReliMRI package directly from your terminal using *pip ins
 
 If the installation is successful, you will see something along the lines of *Successfully installed PyReliMRI-1.0.0* in your terminal.
 
-Once the package is installed, you can import the `imgreliability` module using:
+Once the package is installed, you can import the `pyrelimri` module using:
 
 .. code-block:: python
 
-   import imgreliability
+   import pyrelimri
 
 
 Alternatively, you can load specific function from the available scripts. For example, if I am only interested in calculating the image similarity, I can load
 
 .. code-block:: python
 
-   from imgreliability import similarity
+   from pyrelimri import similarity
 
 Once the script is loaded, I can use the functions within the script to use it or what information is required for my project.
 

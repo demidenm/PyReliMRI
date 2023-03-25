@@ -57,7 +57,7 @@ the formula used is:
 
 .. math::
 
-    \text{sumsq_total(df\_long, values)} = \sum_{i=1}^{n}(x_i - \bar{x})^2
+    \text{sumsq_total(df_{long}, values)} = \sum_{i=1}^{n}(x_i - \bar{x})^2
 
 where:
     * df_long = pandas DataFrame (df) in long format \
@@ -66,9 +66,10 @@ where:
     * x_bar = is the global mean specified by 'values' column in df
 
 Using the anagrams `long_df` we can calculate the sum of square total using:
+
 .. code-block:: python
 
-    from imgreliability import icc
+    from pyrelimri import icc
     icc.sumsq_total(df_long=long_df, values="vals")
 
 We will get the result of 71.8 sum of squared `total`.
@@ -95,7 +96,7 @@ We can calculate the sum of squares within using the below:
 .. code-block:: python
 
     # if you havent imported the package already
-    from imgreliability import icc
+    from pyrelimri import icc
     icc.sumsq_within(df_long=a_ld,sessions="sess", values="vals", n_subjects=10)
 
 We will get the result of 29.2 sum of squares `between` subject factor.
@@ -118,7 +119,7 @@ where:
 .. code-block:: python
 
     # if you havent imported the package already
-    from imgreliability import icc
+    from pyrelimri import icc
     icc.sumsq_btwn(df_long=a_ld,subj="subidr", values="vals", n_sessions=3) # 3 = num1-num3
 
 We will get the result of 20.0 sum of squares `between` subject factor.
@@ -183,7 +184,7 @@ This information will print to a terminal or can be saved to five variables:
 .. code-block:: python
 
     # if you havent imported the package already
-    from imgreliability import icc
+    from pyrelimri import icc
 
     icc3, icc3_lb, icc3_up, icc3_msbs, icc3_msws = icc.sumsq_icc(df_long=a_ld,sub_var="subidr",
                                                     sess_var="sess",value_var="vals",icc_type="icc_3")
@@ -252,7 +253,7 @@ Next, you can call these images paths in the function and save the 3d volumes us
 
 .. code-block:: python
 
-    from imgreliability import brain_icc
+    from pyrelimri import brain_icc
 
     icc_3d, icc_lb_3d, icc_ub_3d, icc_msbs_3d, icc_msws_3d = brain_icc.voxelwise_icc(paths_sess1 = scan1, paths_sess2 = scan2, mask = "./mask/brain_mask.nii.gz", icc = "icc_3")
 
@@ -264,3 +265,98 @@ can be saved using nibabel:
     import nibabel as nib
     nib.save(icc_3d, os.path.join('output_dir', 'file_name.nii.gz'))
 
+
+Here is a real-world example using neurovaults data collection for Precision Functional Mapping of Individual brains. The \
+collection is: `2447 <https://neurovault.org/collections/2447/>`_. The neurovault collection provides data for ten subjects, with \
+ten sessions. We will use the first two sessions. We will use the block-design motor task and focus on the [Left] Hand univariate \
+beta maps which are listed under "other".
+
+Let's use nilearn to load these data for 10 subjects and 2 sessions.
+
+.. code-block:: python
+
+    from nilearn.datasets import fetch_neurovault_ids
+    # Fetch left hand motor IDs
+    MSC01_ses1 = fetch_neurovault_ids(image_ids=[48068]) # MSC01 motor session1 1 L Hand beta
+    MSC01_ses2 = fetch_neurovault_ids(image_ids=[48073]) # MSC01 motor session2 1 L Hand beta
+    MSC02_ses1 = fetch_neurovault_ids(image_ids=[48118])
+    MSC02_ses2 = fetch_neurovault_ids(image_ids=[48123])
+    MSC03_ses1 = fetch_neurovault_ids(image_ids=[48168])
+    MSC03_ses2 = fetch_neurovault_ids(image_ids=[48173])
+    MSC04_ses1 = fetch_neurovault_ids(image_ids=[48218])
+    MSC04_ses2 = fetch_neurovault_ids(image_ids=[48223])
+    MSC05_ses1 = fetch_neurovault_ids(image_ids=[48268])
+    MSC05_ses2 = fetch_neurovault_ids(image_ids=[48273])
+    MSC06_ses1 = fetch_neurovault_ids(image_ids=[48318])
+    MSC06_ses2 = fetch_neurovault_ids(image_ids=[48323])
+    MSC07_ses1 = fetch_neurovault_ids(image_ids=[48368])
+    MSC07_ses2 = fetch_neurovault_ids(image_ids=[48368])
+    MSC08_ses1 = fetch_neurovault_ids(image_ids=[48418])
+    MSC08_ses2 = fetch_neurovault_ids(image_ids=[48423])
+    MSC09_ses1 = fetch_neurovault_ids(image_ids=[48468])
+    MSC09_ses2 = fetch_neurovault_ids(image_ids=[48473])
+    MSC10_ses1 = fetch_neurovault_ids(image_ids=[48518])
+    MSC10_ses2 = fetch_neurovault_ids(image_ids=[48523])
+
+
+Now that our data is loaded, we specify the session paths (recall, Nilearn saves the paths to the images on your computer) \
+and then we will provide this information to `voxelwise_icc` within `brain.py`
+
+
+.. code-block:: python
+
+    # session 1 list from MSC
+    sess1_paths = [MSC01_ses1.images[0], MSC02_ses1.images[0], MSC03_ses1.images[0],
+                   MSC04_ses1.images[0], MSC05_ses1.images[0], MSC06_ses1.images[0],
+                   MSC07_ses1.images[0], MSC08_ses1.images[0],MSC09_ses1.images[0],
+                   MSC10_ses1.images[0]]
+    # session 2 list form MSC
+    sess2_paths = [MSC01_ses2.images[0], MSC02_ses2.images[0], MSC03_ses2.images[0],
+                   MSC04_ses2.images[0], MSC05_ses2.images[0], MSC06_ses2.images[0],
+                   MSC07_ses2.images[0], MSC08_ses2.images[0],MSC09_ses2.images[0],
+                   MSC10_ses2.images[0]]
+
+
+You'll notice, the function asks for a mask. These data do not have a mask provided on neurovault, \
+so we will calculate our own and save it to the filepath of these data using nilearns multi-image masking option.
+
+.. code-block:: python
+
+    from nilearn.masking import compute_multi_brain_mask
+    import nibabel as nib
+    import os # so we can use only the directory location of our MSC img path
+
+    mask = compute_multi_brain_mask(target_imgs = sess1_paths)
+    mask_path = os.path.join(os.path.dirname(MSC01_ses1.images[0]), 'mask.nii.gz')
+    nib.save(mask, mask_path)
+
+Okay, now we should have everything we need: the path to our images and to our mask.
+
+.. code-block:: python
+
+    from pyrelimri import brain_icc
+    icc, icc_lb, icc_ub, icc_msbs, icc_msws = brain_icc.voxelwise_icc(paths_sess1=sess1_paths,
+                                                                      paths_sess2=sess2_paths,
+                                                                      mask=mask_path, icc='icc_1')
+
+Since the variables are saved within the environment, you should see the five variables. On my mac (i9, 16GM mem),
+it took ~4minutes to run this and get the results. Time will depend on the size of data and your machine. \
+
+You can plot them using your favorite plotting method in Python. For this example. Figure 2A shows the three \
+3D volumes for ICC, 95% upper bound and 95% lower bound. Then, Figure 2B shows the two different variance components, \
+mean squared between subject (msbs) and mean squared within subject (msws) variance. Note, depending on the map will \
+determine the thresholding you may want to use. Some voxels will have quite high variability so here the example is thresholded \
++2/-2. Alternatively, you can standardize the values within the image before plotting to avoid issues with outliers.
+
+.. figure:: img_png/example_voxelwiseicc.png
+   :align: center
+   :alt: Figure 2: Information about the ICC (A) and different variance components (B) for ten subjects.
+   :figclass: align-center
+
+As before, you can save out the images using nibabel to a directory. Here we will save it to where the images are stored:
+
+.. code-block:: python
+
+    import nibabel as nib
+    nib.save(icc, os.path.join('output_dir', 'MSC-LHandbeta_estimate-icc.nii.gz'))
+    nib.save(icc_msbs, os.path.join('output_dir', 'MSC-LHandbeta_estimate-iccmsbs.nii.gz'))

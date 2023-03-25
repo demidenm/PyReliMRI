@@ -1,5 +1,5 @@
-Example Description
-===================
+Description
+============
 
 The PyReliMRI package has several scripts that are interconnected.
 

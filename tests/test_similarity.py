@@ -1,7 +1,7 @@
 import pytest
 import numpy as np
 from pathlib import Path
-from imgreliability.similarity import (
+from pyrelimri.similarity import (
     image_similarity,
     permute_images
 )
