@@ -1,12 +1,12 @@
 pyrelimri
 =========
 
-The `pyrelimri` module contains four `.py` scripts for calculating image reliability measures.
+The `pyrelimri` package contains multiple modules for calculating image reliability measures.
 
-brain_icc.py
-------------
+brain_icc
+---------
 
-`brain_icc.py` contains the following function:
+`brain_icc` module contains the following function:
 
 * `voxelwise_icc`: As show in Figure 1, calculates the intraclass correlation (e.g., ICC(1), ICC(2,1), or ICC(3,1)) for 3D volumes across 1+ sessions, returning five 3D volumes reflecting the ICC estimate, the 95% lowerbound for ICC estimate, 95% upperbound for ICC estimate, mean squared error between subjects, mean squared error within subjects.
 
@@ -22,10 +22,10 @@ Inputs:
    Figure 1. Voxelwise intraclass correlation
 
 
-icc.py
-------
+icc
+---
 
-`icc.py` contains the following function:
+`icc` module contains the following functions:
 
 * `sumsq_total`: Calculates to total sum of squared error between subjects & sessions
 * `sumsq_within`: Calculates the sum of squared error within subjects across sessions
@@ -38,10 +38,10 @@ Inputs:
 
 
 
-similarity.py
--------------
+similarity
+----------
 
-`similarity.py` contains the following function:
+`similarity` module contains the following functions:
 
 * `image_similarity`: Calculates the similarity between two images. For example, in Figure 1a a measure 1 nifti img1 (thresholded p < 001, blue) and img2 (thresholded p <001, green). The overlapping thresholded voxels are in red. By requesting the Jaccard similarity coefficient (Fig1b), you will get a index of similarity between these two nifti images. Alternatively, you may ask what is the similarity using a binary correlation. Using tetrachoric correlation (Fig1c) we can get the similarity between voxels that are above the p < .001 threshold (==1) and those below (==0) between the two images.
 
@@ -58,10 +58,10 @@ Inputs:
 
    Figure 2. Similarity Between Images
 
-tetrachoric_correlation.py
---------------------------
+tetrachoric_correlation
+-----------------------
 
-`tetrachoric_correlation.py` contains the following function:
+`tetrachoric_correlation` module contains the following function:
 
 * `tetrachoric_corr`: Calculates the tetrachoric correlation between two binary vectors.
 

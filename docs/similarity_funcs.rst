@@ -1,13 +1,13 @@
 Similarity Based Functions
 ===========================
 
-In this section, the similarity functions are reviewed with some examples for `similarity.py`.
+In this section, the similarity functions are reviewed with some examples for `similarity` module.
 
 
 image_similarity
 ----------------
 
-As described previously, the purpose of the `similarity.py` is to calculate different types of similarity between \
+As described previously, the purpose of the `similarity` module is to calculate different types of similarity between \
 two or more NifTi 3D images. The types of similarity estimates include the Dice Coefficient, Jaccard Coefficient or the \
 Tetrachoric correlation. The formulas for each are as follows:
 
@@ -82,9 +82,10 @@ and the increased number of overlapping voxels in the Jaccard calculation.
 permute_images
 ----------------
 
-The `permute_images()` function is, for a lack of a better word, a wrapper over the `image_similarity()` function. It \
-takes in similar values, except this time instead if `imgfile1` and `imgfile2` it's a list of paths to NifTi images. \
-Otherwise, all of the same rules apply as described above. To review, the inputs to the `permute_images()` function are:
+The `permute_images()` function is, for a lack of a better word, a wrapper over the `image_similarity()` function \
+within the similarity module. It takes in similar values, except this time instead if `imgfile1` and `imgfile2` \
+it's a list of paths to NifTi images. Otherwise, all of the same rules apply as described above. To review, \
+the inputs to the `permute_images()` function are:
 
 * `nii_filelist`: Which is a list of NII files, (e.g., ["/path/dir/path_to_img1.nii.gz", "/path/dir/path_to_img2.nii.gz", "/path/dir/path_to_img3.nii.gz")
 * `mask`: The mask is optional, but it is the path to the mask (e.g., /path/dir/path_to_img_mask.nii.gz)
@@ -103,7 +104,7 @@ Using the HCP example from above, let's pull add two more images into the mix. L
     R_hand_map = fetch_neurovault_ids(image_ids=[3162])
 
 
-We wont plot these images, but for reference we now have four image paths: `L_hand_map.images[0]`, `L_foot_map.images[0]`, \
+We wont plot these images, but for reference we have four image paths: `L_hand_map.images[0]`, `L_foot_map.images[0]`, \
 `R_hand_map.images[0]`, `R_foot_map.images[0]`. Now we can try to run the `permute_images()` function:
 
 
@@ -139,7 +140,7 @@ FAQ
 * `Can I use these function on output from FSL, AFNI or SPM?` \
 
 Yes, you can use these functions on any NifTi data that are of the same shape and in the same space. \
-You just need the that paths to the locations of the .nii or .nii.gz files
+You just need the paths to the locations of the .nii or .nii.gz files for the contrast beta, t-stat or z-stat maps.
 
 * `Are there restrictions on which data I should or shouldn't calculate similarity between?` \
 

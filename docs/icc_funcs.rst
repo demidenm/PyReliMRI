@@ -1,20 +1,20 @@
 Intraclass Correlation Functions
-=======================================
+================================
 
 The intraclass correlation (ICC) estimates are a complement to the similarity functions. The variability/similarity \
 in the data can be parsed in several ways. One can estimate home similar things are about a threshold (e.g., 1/0) or \
 how similarity specific continuous estimates are across subjects. The ICC is used for the latter here.
 
-Two components are described with some examples: The `icc.py` and `brain_icc.py`. The first is the manual estimation \
+Two components are described with some examples: The  `icc` and `brain_icc` modules. The first is the manual estimation \
 of the components of the ICC, such the the sum of (1) squared total,  the sum of (2) squared within, (3) sum of squared between \
-their associated mean sums of squared (which is 1-3 divided by the degrees of freedom) in `icc.py`. Then, the next step is to \
-calculate these values on a voxel-by-voxel basis (or if you wanted to, ROI by ROI) using `brain.py`.
+their associated mean sums of squared (which is 1-3 divided by the degrees of freedom) in `icc` module. Then, the next step is to \
+calculate these values on a voxel-by-voxel basis (or if you wanted to, ROI by ROI) using `brain` module.
 
 
-icc.py
-------
+icc
+---
 
-While `icc.py` is within the package for MRI reliability, it can still be used to calculate different values on dataframes. \
+While `icc` is within the package for MRI reliability, it can still be used to calculate different values on dataframes. \
 Below will describe the different components and use `seaborns.anagrams <https://github.com/mwaskom/seaborn-data/blob/master/anagrams.csv>`_ \
 as the example for each of these.
 
@@ -196,11 +196,11 @@ This will store the five associated values in the five variables:
     - `icc3_msbs`: Mean Squared Between Subject Variance using for ICC estimate
     - `icc3_msws`: Mean Squared Within Subject Variance used for ICC estimate
 
-brain_icc.py
-------------
+brain_icc
+---------
 
-The `brain_icc.py` is, for a lack for better words, a big wrapper for for the `icc.py`. \
-In short, the `voxelwise_icc` function within `brain_icc.py` calculates the ICC for 3D nifti brain images \
+The `brain_icc` module is, for a lack for better words, a big wrapper for for the `icc` module. \
+In short, the `voxelwise_icc` function within the `brain_icc` modules calculates the ICC for 3D nifti brain images \
 across subjects and sessions on a voxel-by-voxel basis. Here are the steps it uses:
 
     - The function takes in the paths to the 3D nifti brain images for each session, the path to the nifti mask object, and the ICC type to be calculated.
@@ -300,7 +300,7 @@ Let's use nilearn to load these data for 10 subjects and 2 sessions.
 
 
 Now that our data is loaded, we specify the session paths (recall, Nilearn saves the paths to the images on your computer) \
-and then we will provide this information to `voxelwise_icc` within `brain.py`
+and then we will provide this information to `voxelwise_icc` within `brain`
 
 
 .. code-block:: python
@@ -360,3 +360,28 @@ As before, you can save out the images using nibabel to a directory. Here we wil
     import nibabel as nib
     nib.save(icc, os.path.join('output_dir', 'MSC-LHandbeta_estimate-icc.nii.gz'))
     nib.save(icc_msbs, os.path.join('output_dir', 'MSC-LHandbeta_estimate-iccmsbs.nii.gz'))
+
+
+FAQ
+---
+
+* `Why was a manual sum of squares used for ICC?` \
+
+The intraclass correlation can be calculated using the ANOVA or Hiearchical Linear Model. In practices, anova or hlm \
+packages could have been used to extract some of the parameters. However, the manually calculation was used because it was \
+found to be the most efficient and transparent. In addition, several additional parameters are calculated in the ANOVA & \
+HLM packages that can cause warnings during the analyses. The goal was to make things more efficient (3x faster on average) \
+and alleviate warnings that may occur due to calculates in other packages for metrics that are not used.
+
+* `Is brain_icc module only limited to fMRI voxelwise data inputs?` \
+
+In theory, the function voxelwise_icc in the brain_icc model can work on alternative data that is not voxelwise. For example, \
+if you have converted your voxelwise data into a parcellation (e.g., reducing it from ~100,000 voxels with a beta estimate \
+to 900 ROIs with an estimate) that is an .nii 3D volume, you can give this information to the function, too. It simply converts \
+and masks the 3D volumes, converts the 3D (x, y, z) to 1D (length = x*y*x) and iterates over each value. Furthermore, you can \
+also provide it with any other normalize 3D .nii inputs that have voxels (e.g., T1w).
+In cases where you have ROI mean-signal intensity values already extract per ROI, subject and session, you can use `sumsq_icc) \
+by looping over the ROIs treating the each ROI for the subjects and session as it's own dataset (similar to ICC() in R or pinguin ICC \
+in python.
+In future iterations of the `PyReliMRI` package the option of running ICCs for 1 of the 18 specified \
+`Nilearn Atlases <https://nilearn.github.io/dev/modules/datasets.html>`_
