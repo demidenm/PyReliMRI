@@ -11,7 +11,7 @@ def voxelwise_icc(paths_sess1: str, paths_sess2: str, mask: str, paths_sess3=Non
     by voxel for specified input files using manual sumsq calculations.
     The path to the subject's data should be provided as a list for each session, i.e.
     dat_ses1 = ["./ses1/sub-00_Contrast-A_bold.nii.gz","./ses1/sub-01_Contrast-A_bold.nii.gz",
-        "./ses1/sub-00_Contrast-A_bold.nii.gz"]
+        "./ses1/sub-03_Contrast-A_bold.nii.gz"]
     dat_ses2 = ["./ses2/sub-00_Contrast-A_bold.nii.gz","./ses2/sub-01_Contrast-A_bold.nii.gz",
         "./ses2/sub-03_Contrast-A_bold.nii.gz"]
     Inter-subject variance would be: between subjects in session 1 & between subjects in session 2

@@ -19,3 +19,5 @@ imgreliability/__pycache__/similarity.cpython-38.pyc
 imgreliability/__pycache__/__init__.cpython-38.pyc
 pyrelimri/__pycache__/brain_icc.cpython-38.pyc
 pyrelimri/__pycache__/brain_icc.cpython-38.pyc
+pyrelimri/__pycache__/similarity.cpython-38.pyc
+pyrelimri/__pycache__/tetrachoric_correlation.cpython-38.pyc
