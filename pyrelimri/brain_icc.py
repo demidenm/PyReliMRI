@@ -16,7 +16,7 @@ def voxelwise_icc(paths_sess1: str, paths_sess2: str, mask: str, paths_sess3=Non
         "./ses2/sub-03_Contrast-A_bold.nii.gz"]
     Inter-subject variance would be: between subjects in session 1 & between subjects in session 2
     Intra-subject variance would be: within subject across session 1 and session 2.
-
+    ** The order of the subjects in each list has to be the same **
     :param paths_sess1: paths to session 2 nii MNI files
     :param paths_sess2: paths to session 2 nii MNI files
     :param paths_sess3: If there are more than 3 sessions, paths to session 3 nii MNI files
@@ -39,7 +39,7 @@ def voxelwise_icc(paths_sess1: str, paths_sess2: str, mask: str, paths_sess3=Non
 
     # get subj details per session to use in pandas df
     subjs = imgdata[0].shape[:-1]
-    sub_n = np.array(np.arange(start=0, stop=subjs[0], step=1))
+    sub_n = np.arange(subjs[0])
 
     # empty list for icc, low/upper bound 95% ICC, mean square between & within subject
     icc_calc = []

@@ -173,7 +173,7 @@ def sumsq_icc(df_long: DataFrame, sub_var: str,
 
     elif icc_type == 'icc_3':
         # ICC(2,1)
-        estimate = (MSBtw - MSErr) / (MSBtw + (c - 1) * MSErr)
+        estimate = (MSBtw - MSErr) / (MSBtw + (num_sess - 1) * MSErr)
         if MSWtn > 0 and MSErr > 0:
             lowerbound, upperbound = icc_confint(msbs=MSBtw, msws=MSWtn, mserr=MSErr, msc=MSc,
                                      n_subjs=num_subjs, n_sess=num_sess, alpha=0.05, icc_type='icc_3')

@@ -224,10 +224,10 @@ between subjects across the measurement occasions. For example:
    :alt: Figure 1: HCP Left Hand (A) and Left Foot (B) Activation maps.
    :figclass: align-center
 
-To use the `voxelwise_icc` function you just have to provide the following information:
+To use the `voxelwise_icc` function you have to provide the following information:
     - paths_sess1: A list of paths to the Nifti z-stat, t-stat or beta maps for sess1 (or run 1)
-    - paths_sess2: A list of paths to the Nifti z-stat, t-stat or beta maps for sess2 (or run 2)
-    - paths_sess3: Optional; A list of paths to the Nifti z-stat, t-stat or beta maps for sess3 (or run 3)
+    - paths_sess2: A list of paths (same order as 1) to the Nifti z-stat, t-stat or beta maps for sess2 (or run 2)
+    - paths_sess3: Optional; A list of paths (same order as 1 & 2) to the Nifti z-stat, t-stat or beta maps for sess3 (or run 3)
     - mask: The Nifti binarized masks that will be used to mask the 3D volumes.
     - icc_type: The ICC estimate that will be calculated for each voxel. Options: `icc_1`, `icc_2`, `icc_3`. Default: `icc_3`
 
@@ -239,7 +239,7 @@ The function returns a 3D volume for:
     - Mean Squared Within Subject Variance
 
 
-Say we have stored paths to session 1 and session 2 in the following variables:
+Say we have stored paths to session 1 and session 2 in the following variables (Note: subjects in list have same order!):
 
 .. code-block:: python
 
@@ -385,3 +385,11 @@ by looping over the ROIs treating the each ROI for the subjects and session as i
 in python.
 In future iterations of the `PyReliMRI` package the option of running ICCs for 1 of the 18 specified \
 `Nilearn Atlases <https://nilearn.github.io/dev/modules/datasets.html>`_
+
+* `What if the list of sessions, e.g., session 1 and session 2, are in different order?` \
+
+This will cause an error in the calculations. We cannot assume for the files the naming structure. So the function is \
+flexible to inputs of 3D nifti images the function will not assume to naming rules of the files. As a result, the \
+order for subjects in session 1 = [1, 2, 3, 4, 5] but be the same in session 2 = [1, 2, 3, 4, 5]. If there are not, \
+the resulting estimates will be incorrect. They will be incorrect because across sessions you may enounter same-different \
+subjects instead of same-same across sessions.
