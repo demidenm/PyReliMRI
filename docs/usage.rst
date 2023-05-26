@@ -51,7 +51,7 @@ from `pyrelimri` the `similarity` module contains the following functions:
 
 * `similarity.image_similarity(imgfile1, imgfile2, mask = None, thresh = None, similarity_type = 'dice')`: Calculates the similarity between two images. For example, in Figure 1a a measure 1 nifti img1 (thresholded p < 001, blue) and img2 (thresholded p <001, green). The overlapping thresholded voxels are in red. By requesting the Jaccard similarity coefficient (Fig1b), you will get a index of similarity between these two nifti images. Alternatively, you may ask what is the similarity using a binary correlation. Using tetrachoric correlation (Fig1c) we can get the similarity between voxels that are above the p < .001 threshold (==1) and those below (==0) between the two images.
 
-* `similarity.permute_images(nii_filelist, mask = None, thresh = None, similarity_type = 'dice')`: Calculates the similarity between two images. Permute across 2+ images to calculate similarity coefficient between all possible image pairs.
+* `similarity.pairwise_similarity(nii_filelist, mask = None, thresh = None, similarity_type = 'dice')`: Calculates the similarity between two images. Permute across 2+ images to calculate similarity coefficient between all possible image pairs.
 
 Inputs:
   * REQUIRED: Path to 3D Nifti, imgfile1: string; Path to 3D Nifti, imgfile2: string; 3D Nifti list, nii_filelist: string

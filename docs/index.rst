@@ -15,7 +15,7 @@ Specifically, tools exist to calculate either simiarity coefficient, intraclass 
 or both (e.g., in python based `nipype <https://nipype.readthedocs.io/en/latest/>`_ or matlab `fmreli <https://github.com/nkroemer/reliability>`_). \
 However, in some cases the flexibility is limited or some features are not available. \
 For example, `ICC_rep_anova` is limited to ICC(3,1) and the `fmreli` is not accessible without \
-a matlab license and does not deploy the the tetrachoric correlation or permutation across images.
+a matlab license and does not deploy the the tetrachoric correlation or pairwise comparisons across images.
 
 Our attempt here is to integrate different functions within the same package that anyone can use by \
 downloading python and importing the package on their machine.

@@ -1,7 +1,7 @@
 import os
 import warnings
 from pandas import concat, DataFrame
-from numpy import logical_and, logical_or, finfo, column_stack
+import numpy as np
 from nilearn import image
 from itertools import combinations
 from nilearn.maskers import NiftiMasker
@@ -47,9 +47,9 @@ def image_similarity(imgfile1: str, imgfile2: str,
 
     if similarity_type.casefold() in ['dice', 'jaccard']:
         # Intersection of images
-        intersect = logical_and(imgdata[0, :], imgdata[1, :])
-        union = logical_or(imgdata[0, :], imgdata[1, :])
-        dice_coeff = (intersect.sum()) / (float(union.sum()) + finfo(float).eps)
+        intersect = np.logical_and(imgdata[0, :], imgdata[1, :])
+        union = np.logical_or(imgdata[0, :], imgdata[1, :])
+        dice_coeff = (intersect.sum()) / (float(union.sum()) + np.finfo(float).eps)
         if similarity_type.casefold() == 'dice':
             coeff = dice_coeff
         else:
@@ -61,11 +61,11 @@ def image_similarity(imgfile1: str, imgfile2: str,
     return coeff
 
 
-def permute_images(nii_filelist: list, mask: str = None,
+def pairwise_similarity(nii_filelist: list, mask: str = None,
                    thresh: float = None, similarity_type: str = 'Dice') -> DataFrame:
-    """This permutation takes in a list of paths to Nifti images and creates a comparsion that covers all possible
-    combinations. For each combination, it calculates the specified similarity and
-    returns the coefficients & string combo.
+    """This pairwise comparison takes in a list of paths to Nifti images and creates
+    a comparsion that covers all possible combinations. For each combination, it calculates
+    the specified similarity and returns the coefficients & string combo.
     :param nii_filelist: list of paths to NII files
     :param mask: path to image mask for brain mask
     :param thresh: threshold to use on NII files, default 1.5
@@ -77,18 +77,18 @@ def permute_images(nii_filelist: list, mask: str = None,
                                                                              '"Dice", "Jaccard" or "Tetrachoric". ' \
                                                                              'Provided: {}"'.format(similarity_type)
 
-    var_permutes = list(combinations(nii_filelist, 2))
+    var_pairs = list(combinations(nii_filelist, 2))
     coef_df = DataFrame(columns=['similar_coef', 'image_labels'])
 
-    for img_comb in var_permutes:
+    for img_comb in var_pairs:
         # select basename of file name(s)
         path = [os.path.basename(i) for i in img_comb]
         # calculate simiarlity
         val = image_similarity(imgfile1=img_comb[0], imgfile2=img_comb[1], mask=mask,
                                thresh=thresh, similarity_type=similarity_type)
 
-        # for each permutation, save value + label to pandas df
-        similarity_data = DataFrame(column_stack((val, " ~ ".join([path[0], path[1]]))),
+        # for each pairwise come, save value + label to pandas df
+        similarity_data = DataFrame(np.column_stack((val, " ~ ".join([path[0], path[1]]))),
                                     columns=['similar_coef', 'image_labels'])
         coef_df = concat([coef_df, similarity_data], axis=0, ignore_index=True)
 

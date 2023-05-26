@@ -3,7 +3,7 @@ import numpy as np
 from pathlib import Path
 from pyrelimri.similarity import (
     image_similarity,
-    permute_images
+    pairwise_similarity
 )
 from collections import namedtuple
 from nibabel import Nifti1Image

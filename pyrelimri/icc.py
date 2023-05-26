@@ -137,45 +137,45 @@ def sumsq_icc(df_long: DataFrame, sub_var: str,
 
     check_icc_type(icc_type)
 
-    # n = subjs, c = sessions/ratings
-    n = df_long[sub_var].nunique()
-    c = df_long[sess_var].nunique()
-    DF_r = (n - 1) * (c - 1)
+    # num_subjs = number of subjs, num_sess = number of sessions/ratings
+    num_subjs = df_long[sub_var].nunique()
+    num_sess = df_long[sess_var].nunique()
+    DF_r = (num_subjs - 1) * (num_sess - 1)
 
     # Sum of square errors
     SS_Total = sumsq_total(df_long=df_long, values=value_var)
-    SS_Btw = sumsq_btwn(df_long=df_long, subj=sub_var, values=value_var, n_sessions=c)
-    SS_C = sumsq_within(df_long=df_long, sessions=sess_var, values=value_var, n_subjects=n)
+    SS_Btw = sumsq_btwn(df_long=df_long, subj=sub_var, values=value_var, n_sessions=num_sess)
+    SS_C = sumsq_within(df_long=df_long, sessions=sess_var, values=value_var, n_subjects=num_subjs)
     SS_Err = SS_Total - SS_Btw - SS_C
     SS_Wth = SS_C + SS_Err
 
     # Mean Sum of Squares
-    MSBtw = SS_Btw / (n - 1)
-    MSWtn = SS_Wth / (DF_r + (c - 1))
-    MSc = SS_C / (c - 1)
+    MSBtw = SS_Btw / (num_subjs - 1)
+    MSWtn = SS_Wth / (DF_r + (num_sess - 1))
+    MSc = SS_C / (num_sess - 1)
     MSErr = SS_Err / DF_r
 
     # Calculate ICCs
-    icc_lb, icc_ub = None, None  # set to None in case they are skipped
+    lowerbound, upperbound = None, None  # set to None in case they are skipped
     if icc_type == 'icc_1':
         # ICC(1), Model 1
-        icc_est = (MSBtw - MSWtn) / (MSBtw + (c - 1) * MSWtn)
+        estimate = (MSBtw - MSWtn) / (MSBtw + (num_sess - 1) * MSWtn)
         if MSWtn > 0 and MSErr > 0:
-            icc_lb, icc_ub = icc_confint(msbs=MSBtw, msws=MSWtn, mserr=MSErr, msc=MSc,
-                                     n_subjs=n, n_sess=c, alpha=0.05, icc_type='icc_1')
+            lowerbound, upperbound = icc_confint(msbs=MSBtw, msws=MSWtn, mserr=MSErr, msc=MSc,
+                                     n_subjs=num_subjs, n_sess=num_sess, alpha=0.05, icc_type='icc_1')
 
     elif icc_type == 'icc_2':
         # ICC(2,1)
-        icc_est = (MSBtw - MSErr) / (MSBtw + (c - 1) * MSErr + c * (MSc - MSErr) / n)
+        estimate = (MSBtw - MSErr) / (MSBtw + (num_sess - 1) * MSErr + num_sess * (MSc - MSErr) / num_subjs)
         if MSWtn > 0 and MSErr > 0:
-            icc_lb, icc_ub = icc_confint(msbs=MSBtw, msws=MSWtn, mserr=MSErr, msc=MSc,
-                                     n_subjs=n, n_sess=c, icc_2=icc_est, alpha=0.05, icc_type='icc_2')
+            lowerbound, upperbound = icc_confint(msbs=MSBtw, msws=MSWtn, mserr=MSErr, msc=MSc,
+                                     n_subjs=num_subjs, n_sess=num_sess, icc_2=estimate, alpha=0.05, icc_type='icc_2')
 
     elif icc_type == 'icc_3':
         # ICC(2,1)
-        icc_est = (MSBtw - MSErr) / (MSBtw + (c - 1) * MSErr)
+        estimate = (MSBtw - MSErr) / (MSBtw + (c - 1) * MSErr)
         if MSWtn > 0 and MSErr > 0:
-            icc_lb, icc_ub = icc_confint(msbs=MSBtw, msws=MSWtn, mserr=MSErr, msc=MSc,
-                                     n_subjs=n, n_sess=c, alpha=0.05, icc_type='icc_3')
+            lowerbound, upperbound = icc_confint(msbs=MSBtw, msws=MSWtn, mserr=MSErr, msc=MSc,
+                                     n_subjs=num_subjs, n_sess=num_sess, alpha=0.05, icc_type='icc_3')
 
-    return icc_est, icc_lb, icc_ub, MSBtw, MSWtn
+    return estimate, lowerbound, upperbound, MSBtw, MSWtn

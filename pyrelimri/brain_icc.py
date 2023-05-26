@@ -1,4 +1,4 @@
-from numpy import array, arange, column_stack, tile, hstack
+import numpy as np
 from pandas import DataFrame
 from pyrelimri.icc import sumsq_icc
 from nilearn import image
@@ -39,7 +39,7 @@ def voxelwise_icc(paths_sess1: str, paths_sess2: str, mask: str, paths_sess3=Non
 
     # get subj details per session to use in pandas df
     subjs = imgdata[0].shape[:-1]
-    sub_n = array(arange(start=0, stop=subjs[0], step=1))
+    sub_n = np.array(np.arange(start=0, stop=subjs[0], step=1))
 
     # empty list for icc, low/upper bound 95% ICC, mean square between & within subject
     icc_calc = []
@@ -52,11 +52,11 @@ def voxelwise_icc(paths_sess1: str, paths_sess2: str, mask: str, paths_sess3=Non
         for voxel in range(len(imgdata[0].T)):
             # sub sample v voxel for all subjects for each session. Stack columns to create np array
             #  that includes voxels and sub labels (1-n, repeated) for session 1 [0] & session 2 [1]
-            np_voxdata = column_stack((tile(sub_n, 2),
-                                       hstack((["sess1"] * len(imgdata[0][:, voxel]),
-                                               ["sess2"] * len(imgdata[1][:, voxel]))),
-                                       hstack((imgdata[0][:, voxel], imgdata[1][:, voxel]))
-                                       ))
+            np_voxdata = np.column_stack((np.tile(sub_n, 2),
+                                          np.hstack((["sess1"] * len(imgdata[0][:, voxel]),
+                                                     ["sess2"] * len(imgdata[1][:, voxel]))),
+                                          np.hstack((imgdata[0][:, voxel], imgdata[1][:, voxel]))
+                                          ))
 
             # create dataframe that is then used with ICC function to calculate specified ICC
             vox_pd = DataFrame(data=np_voxdata, columns=["subj", "sess", "vals"])
@@ -74,12 +74,12 @@ def voxelwise_icc(paths_sess1: str, paths_sess2: str, mask: str, paths_sess3=Non
         for voxel in range(len(imgdata[0].T)):
             # sub sample v voxel for all subjects for each session. Stack columns to create np array
             #  that includes voxels and sub labels for session 1 [0] & session 2 [1], session [3]
-            np_voxdata = column_stack((tile(sub_n, 3),
-                                       hstack((["sess1"] * len(imgdata[0][:, voxel]),
-                                               ["sess2"] * len(imgdata[1][:, voxel]),
-                                               ["sess3"] * len(imgdata[3][:, voxel]))),
-                                       hstack((imgdata[0][:, voxel], imgdata[1][:, voxel]))
-                                       ))
+            np_voxdata = np.column_stack((np.tile(sub_n, 3),
+                                          np.hstack((["sess1"] * len(imgdata[0][:, voxel]),
+                                                     ["sess2"] * len(imgdata[1][:, voxel]),
+                                                     ["sess3"] * len(imgdata[2][:, voxel]))),
+                                          np.hstack((imgdata[0][:, voxel], imgdata[1][:, voxel]))
+                                          ))
 
             # create dataframe that is then used with ICC function to calculate specified ICC
             vox_pd = DataFrame(data=np_voxdata, columns=["subj", "sess", "vals"])
@@ -95,6 +95,6 @@ def voxelwise_icc(paths_sess1: str, paths_sess2: str, mask: str, paths_sess3=Non
 
         # using unmask to reshape the 1D voxels back to 3D specified mask
 
-    return masker.inverse_transform(array(icc_calc)), masker.inverse_transform(array(icc_lb)), \
-           masker.inverse_transform(array(icc_ub)), masker.inverse_transform(array(msbs)), \
-           masker.inverse_transform(array(msws))
+    return masker.inverse_transform(np.array(icc_calc)), masker.inverse_transform(np.array(icc_lb)), \
+           masker.inverse_transform(np.array(icc_ub)), masker.inverse_transform(np.array(msbs)), \
+           masker.inverse_transform(np.array(msws))

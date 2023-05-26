@@ -79,13 +79,13 @@ Why? This is, in part, explained by the decreased overlapping zeros between the 
 and the increased number of overlapping voxels in the Jaccard calculation.
 
 
-permute_images
+pairwise_similarity
 ----------------
 
-The `permute_images()` function is, for a lack of a better word, a wrapper over the `image_similarity()` function \
+The `pairwise_similarity()` function is, for a lack of a better word, a wrapper over the `image_similarity()` function \
 within the similarity module. It takes in similar values, except this time instead if `imgfile1` and `imgfile2` \
 it's a list of paths to NifTi images. Otherwise, all of the same rules apply as described above. To review, \
-the inputs to the `permute_images()` function are:
+the inputs to the `pairwise_similarity()` function are:
 
 * `nii_filelist`: Which is a list of NII files, (e.g., ["/path/dir/path_to_img1.nii.gz", "/path/dir/path_to_img2.nii.gz", "/path/dir/path_to_img3.nii.gz")
 * `mask`: The mask is optional, but it is the path to the mask (e.g., /path/dir/path_to_img_mask.nii.gz)
@@ -105,14 +105,14 @@ Using the HCP example from above, let's pull add two more images into the mix. L
 
 
 We wont plot these images, but for reference we have four image paths: `L_hand_map.images[0]`, `L_foot_map.images[0]`, \
-`R_hand_map.images[0]`, `R_foot_map.images[0]`. Now we can try to run the `permute_images()` function:
+`R_hand_map.images[0]`, `R_foot_map.images[0]`. Now we can try to run the `pairwise_similarity()` function:
 
 
 .. code-block:: python
 
     # If you hadn't, import the package
     from pyrelimri import similarity
-    similarity.permute_images(nii_filelist=[L_foot_map.images[0],L_hand_map.images[0],
+    similarity.pairwise_similarity(nii_filelist=[L_foot_map.images[0],L_hand_map.images[0],
                               R_foot_map.images[0],R_hand_map.images[0]],thresh=1.5, similarity_type='jaccard')
 
 As noted previously, the permutations are across the image combinations and return a pandas Dataframe. Such as.

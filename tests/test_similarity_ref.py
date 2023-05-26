@@ -6,7 +6,7 @@ import seaborn as sns
 
 from pyrelimri.similarity import (
     image_similarity,
-    permute_images
+    pairwise_similarity
 )
 from pyrelimri.icc import sumsq_icc
 from collections import namedtuple
