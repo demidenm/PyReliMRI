@@ -241,6 +241,7 @@ Say we have stored paths to session 1 and session 2 in the following variables (
 
 .. code-block:: python
 
+
     # session 1 paths
     scan1 = ["./scan1/sub-1_t-stat.nii.gz", "./scan1/sub-2_t-stat.nii.gz", "./scan1/sub-3_t-stat.nii.gz", "./scan1/sub-4_t-stat.nii.gz", "./scan1/sub-5_t-stat.nii.gz",
              "./scan1/sub-6_t-stat.nii.gz", "./scan1/sub-7_t-stat.nii.gz", "./scan1/sub-8_t-stat.nii.gz"]
@@ -253,8 +254,7 @@ Next, you can call these images paths in the function and save the 3d volumes us
 
     from pyrelimri import brain_icc
 
-    brain_icc_dict = brain_icc.voxelwise_icc(multisession_list = [scan1, scan2],
-                                             mask = "./mask/brain_mask.nii.gz", icc_type = "icc_3")
+    brain_icc_dict = brain_icc.voxelwise_icc(multisession_list = [scan1, scan2], mask = "./mask/brain_mask.nii.gz", icc_type = "icc_3")
 
 This will return the associated dictionary with nifti 3D volumes which can be manipulated further.
 
@@ -348,7 +348,6 @@ Okay, now we should have everything we need: the path to our images and to our m
     from pyrelimri import brain_icc
 
     brain_icc_msc = brain_icc.voxelwise_icc(multisession_list = [sess1_paths, sess2_paths ],
-                                            paths_sess2=sess2_paths,
                                             mask=mask_path, icc_type='icc_1')
 
 Since the dictionary is saved within the environment, you should see the dictionary with five items. On my mac (i9, 16GM mem),

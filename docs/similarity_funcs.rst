@@ -80,7 +80,7 @@ and the increased number of overlapping voxels in the Jaccard calculation.
 
 
 pairwise_similarity
-----------------
+-------------------
 
 The `pairwise_similarity()` function is, for a lack of a better word, a wrapper over the `image_similarity()` function \
 within the similarity module. It takes in similar values, except this time instead if `imgfile1` and `imgfile2` \
