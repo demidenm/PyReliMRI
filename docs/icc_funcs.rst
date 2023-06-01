@@ -155,21 +155,21 @@ package in R.
 Now that the internal calculations of the ICC have been reviewed, we can use the package to get the values of interest. \
 The associated formulas for the ICC(1), ICC(2,1) and ICC(3,1) are described below.
 
-.. math:: \text{ICC(1)} = \frac{MSb - MSw}{MS_b + (c-1)MS_w}
+.. math:: \text{ICC(1)} = \frac{MS_Btwn - MS_Wthn}{MS_Btwn + (sess - 1) MS_Wthn}
 
-.. math:: \text{ICC(2,1)} = \frac{MSBtw - MSErr}{MSBtw + (c - 1) * MSErr + c * (MSc - MSErr) / n}
+.. math:: \text{ICC(2,1)} = \frac{MS_Btwn - MS_Err}{MS_Btwn + (sess - 1) * MS_Err + sessions * (MS_sess - MS_Err) / N_subjs}
 
-.. math:: \text{ICC(3,1)} = \frac{MSBtw - MSErr}{MSBtw + (c - 1) * MSErr}
+.. math:: \text{ICC(3,1)} = \frac{MS_Btwn - MS_Err}{MS_Btwn + (sess - 1) * MS_Err}
 
 
 Where:
 
-- MSb: mean square between subjects
-- MSw: mean square within subjects
-- MSErr: mean squared residual error
-- MSc: mean squared error of sessions
-- c: is the number of sessions
-- n: numbers of subjects
+- MS_Btwn: mean square between subjects
+- MS_Wthn: mean square within subjects
+- MS_Err: mean squared residual error
+- MS_Sess: mean squared error of sessions
+- Sess: is the number of sessions
+- N_subjs: numbers of subjects
 
 
 Hence, `sumsq_icc` can be used on a dataset with multiple subjects with 1+ measures occasions. We can calculate this ICC \
