@@ -86,4 +86,6 @@ def voxelwise_icc(multisession_list: str, mask: str, icc_type='icc_3'):
     return result_dict
 
 
+    brain_icc_dict = brain_icc.voxelwise_icc(multisession_list = [scan1, scan2],
+                                             mask = "./mask/brain_mask.nii.gz", icc_type = "icc_3")
 

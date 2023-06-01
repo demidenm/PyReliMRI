@@ -253,8 +253,8 @@ Next, you can call these images paths in the function and save the 3d volumes us
 
     from pyrelimri import brain_icc
 
-    brain_icc_dict = brain_icc.voxelwise_icc(multisession_list = [scan1, scan2], mask = "./mask/brain_mask.nii.gz", icc_type = "icc_3")
-
+    brain_icc_dict = brain_icc.voxelwise_icc(multisession_list = [scan1, scan2],
+                                             mask = "./mask/brain_mask.nii.gz", icc_type = "icc_3")
 
 This will return the associated dictionary with nifti 3D volumes which can be manipulated further.
 
@@ -265,8 +265,9 @@ Here we plot the icc estimates (i.e. 'est') using nilearn's plotting
     from nilearn.plotting import view_img_on_surf
 
     view_img_on_surf(stat_map_img = brain_icc["est"],
-                 surf_mesh = 'fsaverage5', threshold = 0,
-                 title_fontsize = 16, colorbar_height = .75, colorbar_fontsize = 14).open_in_browser(
+                     surf_mesh = 'fsaverage5', threshold = 0,
+                     title_fontsize = 16, colorbar_height = .75,
+                     colorbar_fontsize = 14).open_in_browser()
 
 
 Here we save using nibabel:
