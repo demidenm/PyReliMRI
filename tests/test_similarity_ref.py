@@ -1,17 +1,16 @@
 import pytest
+import os
 import numpy as np
 import pandas as pd
+import nibabel as nib
 from pathlib import Path
 import seaborn as sns
-
-from pyrelimri.similarity import (
-    image_similarity,
-    pairwise_similarity
-)
+from pyrelimri.similarity import image_similarity
+from pyrelimri.brain_icc import voxelwise_icc
 from pyrelimri.icc import sumsq_icc
 from collections import namedtuple
-from nibabel import Nifti1Image
-import nibabel as nib
+from nilearn.masking import compute_multi_brain_mask
+
 from scipy.stats import multivariate_normal as multivar_norm
 
 
@@ -55,11 +54,11 @@ def generate_img_pair(r: float, dir: Path, use_mask: bool = False, tol: float = 
     
     for i in range(2):
         imgpair.images.append(dir / f'testimg_{i}.nii.gz')
-        tmpimg = Nifti1Image((maskvox * data[:, i]).reshape(imgdims),
+        tmpimg = nib.Nifti1Image((maskvox * data[:, i]).reshape(imgdims),
             affine=np.eye(4))
         tmpimg.to_filename(imgpair.images[-1])
     imgpair.mask = dir / 'mask.nii.gz'
-    maskimg = Nifti1Image(mask, affine=np.eye(4))
+    maskimg = nib.Nifti1Image(mask, affine=np.eye(4))
     maskimg.to_filename(imgpair.mask)
     return imgpair
     
@@ -78,6 +77,48 @@ def test_image_pair_images(image_pair):
     for imgfile in image_pair.images + [image_pair.mask]:
         img = nib.load(imgfile)
         assert img is not None
+
+def create_dummy_nifti(shape, affine, filepath):
+    data = np.random.rand(*shape)
+    img = nib.Nifti1Image(data, affine)
+    nib.save(img, str(filepath))
+
+
+def test_session_lengths_mismatch(tmp_path_factory):
+    tmpdir = tmp_path_factory.mktemp("data")
+
+    # Test case with different session lengths
+    multisession_list = [
+        [tmpdir / "sub-00_ses1_Contrast-A_bold.nii.gz",
+         tmpdir / "sub-01_ses1_Contrast-A_bold.nii.gz"],
+        [tmpdir / "sub-00_ses2_Contrast-A_bold.nii.gz",
+         tmpdir / "sub-01_ses2_Contrast-A_bold.nii.gz",
+         tmpdir / "sub-03_ses2_Contrast-A_bold.nii.gz"]
+    ]
+
+    icc_type = "icc_3"
+
+    # Create dummy NIfTI files
+    shape = (97, 115, 97)
+    affine = np.eye(4)
+    for session in multisession_list:
+        for filepath in session:
+            os.makedirs(os.path.dirname(filepath), exist_ok=True)
+            create_dummy_nifti(shape, affine, filepath)
+
+    mask = compute_multi_brain_mask(target_imgs=[
+        tmpdir / "sub-00_ses2_Contrast-A_bold.nii.gz",
+        tmpdir / "sub-01_ses2_Contrast-A_bold.nii.gz",
+        tmpdir / "sub-03_ses2_Contrast-A_bold.nii.gz"
+    ])
+
+    mask_path = tmpdir / 'test_mask.nii.gz'
+    nib.save(mask, mask_path)
+
+    # The assertion should raise an exception
+    with pytest.raises(AssertionError):
+        voxelwise_icc(multisession_list, mask, icc_type)
+
 
 @pytest.mark.parametrize("measure", ['Dice', 'Jaccard'])
 def test_image_similarity(image_pair, measure):

@@ -1,5 +1,5 @@
+import numpy as np
 from pandas import DataFrame
-from numpy import sum
 from scipy.stats import f
 from numpy.typing import NDArray
 
@@ -12,7 +12,7 @@ def sumsq_total(df_long: DataFrame, values: str) -> NDArray:
     :param values: variable string for values containing scores
     :return:
     """
-    return sum((df_long[values] - df_long[values].mean())**2)
+    return np.sum((df_long[values] - df_long[values].mean()) ** 2)
 
 
 def sumsq_within(df_long: DataFrame, sessions: str, values: str, n_subjects: int) -> NDArray:
@@ -26,9 +26,9 @@ def sumsq_within(df_long: DataFrame, sessions: str, values: str, n_subjects: int
     :return: returns sumsqured within
     """
 
-    return sum(
-        ((df_long[values].mean() - 
-          df_long[[sessions, values]].groupby(by=sessions)[values].mean())**2) * n_subjects
+    return np.sum(
+        ((df_long[values].mean() -
+          df_long[[sessions, values]].groupby(by=sessions)[values].mean()) ** 2) * n_subjects
     )
 
 
@@ -43,7 +43,7 @@ def sumsq_btwn(df_long: DataFrame, subj: str, values: str, n_sessions: int) -> N
     :param n_sessions: number of sessions
     :return: returns sumsqured within
     """
-    return sum(
+    return np.sum(
         ((df_long[values].mean() - df_long[[subj, values]].groupby(by=subj)[values].mean()) ** 2) * n_sessions
     )
 
@@ -102,9 +102,9 @@ def icc_confint(msbs: float, msws: float, mserr: float, msc: float,
         f2u = f.ppf(1 - alpha / 2, n_subjs - 1, v)
         f2l = f.ppf(1 - alpha / 2, v, n_subjs - 1)
         lb_ci = n_subjs * (msbs - f2u * mserr) / (
-            f2u * (n_sess * msc + (n_sess * n_subjs - n_sess - n_subjs) * mserr) + n_subjs * msbs)
+                f2u * (n_sess * msc + (n_sess * n_subjs - n_sess - n_subjs) * mserr) + n_subjs * msbs)
         ub_ci = n_subjs * (f2l * msbs - mserr) / (
-            n_sess * msc + (n_sess * n_subjs - n_sess - n_subjs) * mserr + n_subjs * f2l * msbs)
+                n_sess * msc + (n_sess * n_subjs - n_sess - n_subjs) * mserr + n_subjs * f2l * msbs)
     elif icc_type == 'icc_3':
         f_lb = f_stat3 / f.ppf(1 - alpha / 2, df1, df2kd)
         f_ub = f_stat3 * f.ppf(1 - alpha / 2, df2kd, df1)
@@ -128,11 +128,11 @@ def sumsq_icc(df_long: DataFrame, sub_var: str,
     :param icc_type: default is ICC(3,1), alternative is ICC(1,1) via icc_1 or ICC(2,1) via icc_2
     :return: icc calculation, icc low bound conf, icc upper bound conf, msbs, msws
     """
-    assert sub_var in df_long.columns,\
+    assert sub_var in df_long.columns, \
         f'sub_var {sub_var} must be a column in the data frame'
-    assert sess_var in df_long.columns,\
+    assert sess_var in df_long.columns, \
         f'sess_var {sess_var} must be a column in the data frame'
-    assert value_var in df_long.columns,\
+    assert value_var in df_long.columns, \
         f'value_var {value_var} must be a column in the data frame'
 
     check_icc_type(icc_type)
@@ -159,23 +159,36 @@ def sumsq_icc(df_long: DataFrame, sub_var: str,
     lowerbound, upperbound = None, None  # set to None in case they are skipped
     if icc_type == 'icc_1':
         # ICC(1), Model 1
-        estimate = (MSBtw - MSWtn) / (MSBtw + (num_sess - 1) * MSWtn)
+        try:
+            estimate = (MSBtw - MSWtn) / (MSBtw + (num_sess - 1) * MSWtn)
+        except RuntimeWarning:
+            estimate = 0
+
         if MSWtn > 0 and MSErr > 0:
             lowerbound, upperbound = icc_confint(msbs=MSBtw, msws=MSWtn, mserr=MSErr, msc=MSc,
-                                     n_subjs=num_subjs, n_sess=num_sess, alpha=0.05, icc_type='icc_1')
+                                                 n_subjs=num_subjs, n_sess=num_sess, alpha=0.05, icc_type='icc_1')
 
     elif icc_type == 'icc_2':
         # ICC(2,1)
-        estimate = (MSBtw - MSErr) / (MSBtw + (num_sess - 1) * MSErr + num_sess * (MSc - MSErr) / num_subjs)
+        try:
+            estimate = (MSBtw - MSErr) / (MSBtw + (num_sess - 1) * MSErr + num_sess * (MSc - MSErr) / num_subjs)
+        except RuntimeWarning:
+            estimate = 0
+
         if MSWtn > 0 and MSErr > 0:
             lowerbound, upperbound = icc_confint(msbs=MSBtw, msws=MSWtn, mserr=MSErr, msc=MSc,
-                                     n_subjs=num_subjs, n_sess=num_sess, icc_2=estimate, alpha=0.05, icc_type='icc_2')
+                                                 n_subjs=num_subjs, n_sess=num_sess, icc_2=estimate, alpha=0.05,
+                                                 icc_type='icc_2')
 
     elif icc_type == 'icc_3':
-        # ICC(2,1)
-        estimate = (MSBtw - MSErr) / (MSBtw + (num_sess - 1) * MSErr)
+        # ICC(3,1)
+        try:
+            estimate = (MSBtw - MSErr) / (MSBtw + (num_sess - 1) * MSErr)
+        except RuntimeWarning:
+            estimate = 0
+
         if MSWtn > 0 and MSErr > 0:
             lowerbound, upperbound = icc_confint(msbs=MSBtw, msws=MSWtn, mserr=MSErr, msc=MSc,
-                                     n_subjs=num_subjs, n_sess=num_sess, alpha=0.05, icc_type='icc_3')
+                                                 n_subjs=num_subjs, n_sess=num_sess, alpha=0.05, icc_type='icc_3')
 
     return estimate, lowerbound, upperbound, MSBtw, MSWtn

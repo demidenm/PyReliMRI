@@ -21,3 +21,9 @@ pyrelimri/__pycache__/brain_icc.cpython-38.pyc
 pyrelimri/__pycache__/brain_icc.cpython-38.pyc
 pyrelimri/__pycache__/similarity.cpython-38.pyc
 pyrelimri/__pycache__/tetrachoric_correlation.cpython-38.pyc
+tests/reliability_tests.ipynb
+tests/.ipynb_checkpoints/reliability_tests-checkpoint.ipynb
+pyrelimri/__pycache__/brain_icc.cpython-38.pyc
+pyrelimri/__pycache__/icc.cpython-38.pyc
+pyrelimri/__pycache__/similarity.cpython-38.pyc
+*.pyc
