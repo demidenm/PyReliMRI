@@ -43,8 +43,8 @@ select ICC(1), ICC(2,1) or ICC(3,1).
 
    * - brain_icc
      - voxelwise_icc
-     - **REQUIRED:** Paths to 3D NifTi session 1, paths to 3D NifTi session 2, path to 3D NifTi brain mask  **OPTIONAL:** paths to 3D NifTi session 3 and ICC type (icc_type; default = 'icc_3', options include: 'icc_3', 'icc_2', 'icc_1')
-     - Calculates and returns intraclass correlation (e.g., ICC(1), ICC(2,1), or ICC(3,1) for 3D volumes across 1+ sessions, returning five 3D volumes reflecting the ICC estimate, the 95% lowerbound for ICC estimate, 95% upperbound for ICC estimate, mean squared error between subjects, mean squared error within subjects)
+     - **REQUIRED:** list of session 1, session 2, etc, paths to 3D NifTi images, path to 3D NifTi brain mask  **OPTIONAL:** ICC type (icc_type; default = 'icc_3', options include: 'icc_3', 'icc_2', 'icc_1')
+     - Calculates and returns dictionary with intraclass correlation (e.g., ICC(1), ICC(2,1), or ICC(3,1) for 3D volumes across 1+ sessions, reflecting the ICC estimate, the 95% lowerbound for ICC estimate, 95% upperbound for ICC estimate, mean squared error between subjects, mean squared error within subjects)
 
    * - icc
      - sumsq_total, sumsq, sumsq_btwn, icc_confint, sumsq_icc
@@ -52,7 +52,7 @@ select ICC(1), ICC(2,1) or ICC(3,1).
      - Calculates different components used in calculating the ICC estimate (e.g., ICC([1], ICC([2,1], or ICC[3,1]), 95% lowerbound and 95% upperbound for ICC, mean between subject variance and mean within-subject variance
 
    * - similarity
-     - image_similarity,permute_images
+     - image_similarity,pairwise_similarity
      - **REQUIRED:** Path to 3D NifTi imgfile1, Path to 3D NifTi imgfile2 **OPTIONAL:** Path to a NifTi mask, threshold level (thresh) on the images, Type (similarity_type) of image similarity coefficient (default = 'dice', options include: 'dice', 'jaccard', 'tetrachoric')
      - Calculates and returns the similarity between two images. Permute multiple images calculates similarity coefficient between all possible image pairs and returns a dataframe.
 

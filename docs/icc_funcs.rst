@@ -203,13 +203,13 @@ The `brain_icc` module is, for a lack for better words, a big wrapper for for th
 In short, the `voxelwise_icc` function within the `brain_icc` modules calculates the ICC for 3D nifti brain images \
 across subjects and sessions on a voxel-by-voxel basis. Here are the steps it uses:
 
-    - The function takes in the paths to the 3D nifti brain images for each session, the path to the nifti mask object, and the ICC type to be calculated.
-    - The function checks if there are the same number of files in session 1 and session 2 (e.g., paths_sess1, paths_sess2 + optional) and raises an error if they are of different length.
-    - The function concatenates the 3D images into a 4D nifti image (4th dimension is subjects) using image.concat_imgs().
-    - The function uses the provided nifti mask to mask the images using NiftiMasker.
-    - It loops over the voxels in the `range(len(imgdata)` and creates a pandas DataFrame with the voxel values for each subject and session using sumsq_icc().
-    - The function calculates and retuns to a list of five variables: ICC, lower and upper bounds of the ICC 95% confidence interval, mean square between subjects, and mean square within subjects using sumsq_icc().
-    - The function then returns the five variables in the shape of the provided 3D volume using inverse_transform from NiftiMasker.
+    - Function takes a list of paths to the 3D nifti brain images for each session, the path to the nifti mask object, and the ICC type to be calculated.
+    - Function checks if there are the same number of files in each session (e.g., list[0], list[1], etc) and raises an error if they are of different length.
+    - Function concatenates the 3D images into a 4D nifti image (4th dimension is subjects) using image.concat_imgs().
+    - Function uses the provided nifti mask to mask the images using NiftiMasker.
+    - Function loops over the voxels in the `imgdata[0].shape[-1]` and creates a pandas DataFrame with the voxel values for each subject and session using sumsq_icc().
+    - The function calculates and returns a dictionary with five 3D volumes: est, lower (lower_bound) and upper (upper_bound) of the ICC 95% confidence interval, mean square between subjects (ms_btwn), and mean square within subjects (ms_wthn) using sumsq_icc().
+    - Note, the shape of the provided 3D volume is determined using inverse_transform from NiftiMasker.
 
 **voxelwise_icc**
 
@@ -225,13 +225,11 @@ between subjects across the measurement occasions. For example:
    :figclass: align-center
 
 To use the `voxelwise_icc` function you have to provide the following information:
-    - paths_sess1: A list of paths to the Nifti z-stat, t-stat or beta maps for sess1 (or run 1)
-    - paths_sess2: A list of paths (same order as 1) to the Nifti z-stat, t-stat or beta maps for sess2 (or run 2)
-    - paths_sess3: Optional; A list of paths (same order as 1 & 2) to the Nifti z-stat, t-stat or beta maps for sess3 (or run 3)
+    - multisession_list: A list of listed paths to the Nifti z-stat, t-stat or beta maps for sess1, 2, 3, etc (or run 1,2,3..)
     - mask: The Nifti binarized masks that will be used to mask the 3D volumes.
     - icc_type: The ICC estimate that will be calculated for each voxel. Options: `icc_1`, `icc_2`, `icc_3`. Default: `icc_3`
 
-The function returns a 3D volume for:
+The function returns a dictionary with 3D volumes for:
     - ICC estimates
     - ICC lowerbound 95% CI
     - ICC upperbound 95% CI
@@ -255,16 +253,28 @@ Next, you can call these images paths in the function and save the 3d volumes us
 
     from pyrelimri import brain_icc
 
-    icc_3d, icc_lb_3d, icc_ub_3d, icc_msbs_3d, icc_msws_3d = brain_icc.voxelwise_icc(paths_sess1 = scan1, paths_sess2 = scan2, mask = "./mask/brain_mask.nii.gz", icc_type = "icc_3")
+    brain_icc_dict = brain_icc.voxelwise_icc(multisession_list = [scan1, scan2], mask = "./mask/brain_mask.nii.gz", icc_type = "icc_3")
 
-This will return the associated nifti 3D volumes manipulated further, plotted or \
-can be saved using nibabel:
+
+This will return the associated dictionary with nifti 3D volumes which can be manipulated further.
+
+Here we plot the icc estimates (i.e. 'est') using nilearn's plotting
+
+.. code-block:: python
+
+    from nilearn.plotting import view_img_on_surf
+
+    view_img_on_surf(stat_map_img = brain_icc["est"],
+                 surf_mesh = 'fsaverage5', threshold = 0,
+                 title_fontsize = 16, colorbar_height = .75, colorbar_fontsize = 14).open_in_browser(
+
+
+Here we save using nibabel:
 
 .. code-block:: python
 
     import nibabel as nib
-    nib.save(icc_3d, os.path.join('output_dir', 'file_name.nii.gz'))
-
+        nib.save(icc_3d, os.path.join('output_dir', 'file_name.nii.gz'))
 
 Here is a real-world example using neurovaults data collection for Precision Functional Mapping of Individual brains. The \
 collection is: `2447 <https://neurovault.org/collections/2447/>`_. The neurovault collection provides data for ten subjects, with \
@@ -335,14 +345,15 @@ Okay, now we should have everything we need: the path to our images and to our m
 .. code-block:: python
 
     from pyrelimri import brain_icc
-    icc, icc_lb, icc_ub, icc_msbs, icc_msws = brain_icc.voxelwise_icc(paths_sess1=sess1_paths,
-                                                                      paths_sess2=sess2_paths,
-                                                                      mask=mask_path, icc_type='icc_1')
 
-Since the variables are saved within the environment, you should see the five variables. On my mac (i9, 16GM mem),
+    brain_icc_msc = brain_icc.voxelwise_icc(multisession_list = [sess1_paths, sess2_paths ],
+                                            paths_sess2=sess2_paths,
+                                            mask=mask_path, icc_type='icc_1')
+
+Since the dictionary is saved within the environment, you should see the dictionary with five items. On my mac (i9, 16GM mem),
 it took ~4minutes to run this and get the results. Time will depend on the size of data and your machine. \
 
-You can plot them using your favorite plotting method in Python. For this example. Figure 2A shows the three \
+You can plot the volumes using your favorite plotting method in Python. For this example. Figure 2A shows the three \
 3D volumes for ICC, 95% upper bound and 95% lower bound. Then, Figure 2B shows the two different variance components, \
 mean squared between subject (msbs) and mean squared within subject (msws) variance. Note, depending on the map will \
 determine the thresholding you may want to use. Some voxels will have quite high variability so here the example is thresholded \
@@ -386,10 +397,12 @@ in python.
 In future iterations of the `PyReliMRI` package the option of running ICCs for 1 of the 18 specified \
 `Nilearn Atlases <https://nilearn.github.io/dev/modules/datasets.html>`_
 
-* `What if the list of sessions, e.g., session 1 and session 2, are in different order?` \
+* `How many sessions can I use with this package?` \
 
-This will cause an error in the calculations. We cannot assume for the files the naming structure. So the function is \
-flexible to inputs of 3D nifti images the function will not assume to naming rules of the files. As a result, the \
-order for subjects in session 1 = [1, 2, 3, 4, 5] but be the same in session 2 = [1, 2, 3, 4, 5]. If there are not, \
-the resulting estimates will be incorrect. They will be incorrect because across sessions you may enounter same-different \
+In theory, you can use add into `multisession_list = [sess1, sess2, sess3, sess4, sess5]` any wide range of values.
+As the code is currently written this will restructure and label the sessions accordingly. The key aspect \
+is that subjects and runs are in the order that is required. We cannot assume for the files the naming structure. \
+The function is flexible to inputs of 3D nifti images and will not assume to naming rules of the files. As a result, the \
+order for subjects in session 1 = [1, 2, 3, 4, 5] must be the same in session 2 = [1, 2, 3, 4, 5]. If there are not, \
+the *resulting estimates will be incorrect*. They will be incorrect because across sessions you may enounter same/different \
 subjects instead of same-same across sessions.

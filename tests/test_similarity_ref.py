@@ -11,8 +11,6 @@ from pyrelimri.icc import sumsq_icc
 from collections import namedtuple
 from nilearn.masking import compute_multi_brain_mask
 
-from scipy.stats import multivariate_normal as multivar_norm
-
 
 def generate_img_pair(r: float, dir: Path, use_mask: bool = False, tol: float = .001,
                       imgdims: list = None,

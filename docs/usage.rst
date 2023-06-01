@@ -12,8 +12,8 @@ From `pyrelimri` the `brain_icc` module contains the following function:
 
 Inputs:
 
-  * REQUIRED: Paths to 3D Nifti, session 1: string; Paths to 3D Nifti, session 2: string, brain mask: string (Sessions must be in same order)
-  * OPTIONAL: Paths to 3D Nifti , session 3: string; ICC type, icc = string (default = ‘icc_3’, options include: ‘icc_3’,’icc_2’,’icc_1’)
+  * REQUIRED: list of lists to >1 sessoins/runs of 3D Nifti images: string (Sessions must be in same order); Path to 3D Nifti brain mask: string
+  * OPTIONAL: ICC type, icc = string (default = ‘icc_3’, options include: ‘icc_3’,’icc_2’,’icc_1’)
 
 .. figure:: img_png/intraclasscorr_example.png
    :align: center
