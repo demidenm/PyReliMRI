@@ -64,8 +64,8 @@ def image_similarity(imgfile1: str, imgfile2: str,
 
     else:
         if thresh is not None:
-            warnings.warn(f"It is recommended to perform Spearman rank on images that are not thresholded."
-                          f" Currently threshold is set to: {thresh}. Recommended 'None'.")
+            raise ValueError(f"It is recommended to perform Spearman rank on images that are not thresholded."
+                             f" Currently threshold is set to: {thresh}. Recommended 'None'.")
         else:
             coeff = spearmanr(a=imgdata[0, :], b=imgdata[1, :])[0]
 
