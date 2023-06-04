@@ -45,8 +45,18 @@ add_module_names = True
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = []
+extensions = ['sphinx_rtd_theme']
 
+# -- meta tags for base URL ---
+html_context = {
+    'meta_tags': [
+        ('robots', 'index, follow'),
+        ('googlebot', 'index, follow'),
+        ('bingbot', 'index, follow'),
+        ('slurp', 'index, follow'),
+    ],
+    'canonical_url': 'https://pyrelimri.readthedocs.io/',
+}
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
