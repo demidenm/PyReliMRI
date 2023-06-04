@@ -26,8 +26,7 @@ def image_similarity(imgfile1: str, imgfile2: str,
     assert similarity_type.casefold() in ['dice', 'jaccard',
                                           'tetrachoric', 'spearman'], 'similarity_type must be ' \
                                                                       '"Dice", "Jaccard", "Tetrachoric" or ' \
-                                                                      '"Spearman". Provided: {}"'.format(
-        similarity_type)
+                                                                      '"Spearman". Provided: {}"'.format(similarity_type)
 
     # load list of images
     imagefiles = [imgfile1, imgfile2]
@@ -64,8 +63,8 @@ def image_similarity(imgfile1: str, imgfile2: str,
 
     else:
         if thresh is not None:
-            raise ValueError(f"It is recommended to perform Spearman rank on images that are not thresholded."
-                             f" Currently threshold is set to: {thresh}. Recommended 'None'.")
+            raise ValueError(f"Spearman rank should be for unthresholded images."
+                             f"/n Threshold is set to: {thresh}./n Advise: 'None'.")
         else:
             coeff = spearmanr(a=imgdata[0, :], b=imgdata[1, :])[0]
 

@@ -126,6 +126,20 @@ def test_image_similarity(image_pair, measure):
     )
     assert imgsim is not None
 
+def test_spearman_similarity(image_pair):
+    spearman_sim = image_similarity(
+        image_pair.images[0], image_pair.images[1], similarity_type='spearman')
+    assert abs(spearman_sim - 0.5) < 0.1, "The similarity is not close to 0.5."
+
+def test_image_similarity_spearman_value_error(image_pair):
+    imgfile1 = image_pair.images[0]
+    imgfile2 = image_pair.images[1]
+    mask = None
+    thresh = 0.5
+    similarity_type = "spearman"
+    with pytest.raises(ValueError):
+        image_similarity(imgfile1, imgfile2, mask=mask, thresh=thresh, similarity_type=similarity_type)
+
 #@pytest.mark.parametrize("corr", [.50, .60,.45])
 def test_calculate_icc1():
     data = sns.load_dataset('anagrams')
