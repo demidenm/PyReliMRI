@@ -15,26 +15,30 @@ Once the package is installed, you can import the `pyrelimri` module using:
    import pyrelimri
 
 
-Alternatively, you can load specific function from the available scripts. For example, if I am only interested in calculating the image similarity, I can load
+Alternatively, you can load a specific function from the available modules. For example, if you're only interested in \
+calculating the similarity between 3D Nifti images, you can load
 
 .. code-block:: python
 
    from pyrelimri import similarity
 
-Once the script is loaded, I can use the functions within the script to use it or what information is required for my project.
+Once the script is loaded, the functions within the module can be used or can check with suffix '?' what input \
+is required to run the function.
 
 .. code-block:: python
 
     # how to use
-    similarity.image_similarity(imgfile1 = path_to_img, imgfile2 = path_to_img, mask=  path_to_mash, thresh = 1.25, similarity_type = 'dice')
+    similarity.image_similarity(imgfile1 = path_to_img, imgfile2 = path_to_img,
+                                mask=  path_to_mash, thresh = 1.25, similarity_type = 'dice')
     # required input
     similarity.image_similarity?
+
 
 Required dependencies
 `````````````````````
 
-While a number of calculations are performed manually, PyReliMRI uses several packages that must be installed. While the versions below are not \
-required they were sufficient to run each script during testing.
+While a number of calculations are performed manually, PyReliMRI relies on several packages that must be installed. \
+While the versions below are not required they were sufficient to run each script during testing.
 
 -  Python>=>3.6
 -  numpy>=1.2

@@ -41,7 +41,11 @@ def voxelwise_icc(multisession_list: str, mask: str, icc_type='icc_3'):
 
     # concatenate the paths to 3D images into a 4D nifti image (4th dimension are subjs) using image concat
     # iterates over list of lists
-    session_data = [image.concat_imgs(i) for i in multisession_list]
+    try:
+        session_data = [image.concat_imgs(i) for i in multisession_list]
+    except ValueError as e:
+        print(e)
+        print("Error when attempting to concatenate images. Confirm affine/size of images.")
 
     # mask images
     masker = NiftiMasker(mask_img=mask)

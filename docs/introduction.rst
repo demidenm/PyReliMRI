@@ -21,11 +21,14 @@ Reliability questions for `task fMRI <https://https://www.doi.org/10.1177/095679
 Purpose of Script
 ~~~~~~~~~~~~~~~~~~
 
-The purpose of this package is to provide an open-source python package that will estimate multiple reliability metrics on fMRI data -- at the group and individual level -- \
-that researchers may use to report in their manuscripts in cases of multi-run and/or multi-session data.
+The purpose of this PyReliMRI is to provide an open-source python package that will estimate multiple reliability \
+metrics on fMRI data -- at the group and individual level -- \
+that researchers may use to report in their manuscripts in cases of multi-run and/or multi-session MRI data.
 
-At the group level, ``similarity.py`` calculates a similarity calculations between two fMRI images using Dice or Jaccard similarity coefficients or tetrachoric correlation. \
-In addition to calculating the similarity between two NifTi images, a `permute_images` is provided to permute across a list of 3D images and return a list of coefficients.
+At the group level, ``similarity.py`` calculates the similarity between two 3D Nifti images using Dice or Jaccard \
+similarity coefficients, or tetrachoric or spearman ocorrelation. In addition to calculating the similarity between two NifTi images \
+a `pairwise_similarity` option is available to calculate pairwise similarity coefficients across a list of \
+3D Nifti images and return a list of coefficients with associated image labels.
 
 At the individual level, the ``brain_icc.py`` calculates intraclass correlation. For description of different ICCs and their calculations, \
 see discussion in `Liljequist et al., 2019 <https://www.doi.org/10.1371/journal.pone.0219854>`_. In this package, you have the option to \
@@ -53,10 +56,10 @@ select ICC(1), ICC(2,1) or ICC(3,1).
 
    * - similarity
      - image_similarity,pairwise_similarity
-     - **REQUIRED:** Path to 3D NifTi imgfile1, Path to 3D NifTi imgfile2 **OPTIONAL:** Path to a NifTi mask, threshold level (thresh) on the images, Type (similarity_type) of image similarity coefficient (default = 'dice', options include: 'dice', 'jaccard', 'tetrachoric')
-     - Calculates and returns the similarity between two images. Permute multiple images calculates similarity coefficient between all possible image pairs and returns a dataframe.
+     - **REQUIRED:** Path to 3D NifTi imgfile1, Path to 3D NifTi imgfile2 **OPTIONAL:** Path to a NifTi mask, threshold level (thresh) on the images, Type (similarity_type) of image similarity coefficient (default = 'dice', options include: 'dice', 'jaccard', 'tetrachoric', 'spearman')
+     - Calculates and returns the similarity between two images. Calculates similarity coefficient for 2+ pairwise similarity for all possible image pairs and returns a dataframe.
 
    * - tetrachoric_correlation.py
      - tetrachoric_corr
      - **REQUIRED:** Binary vector NDarray,Binary vector NDarray
-     - Calculate and returns tetrachoric correlation between two binary vectors.
+     - Calculate and return tetrachoric correlation between two binary vectors.

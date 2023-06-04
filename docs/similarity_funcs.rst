@@ -9,13 +9,15 @@ image_similarity
 
 As described previously, the purpose of the `similarity` module is to calculate different types of similarity between \
 two or more NifTi 3D images. The types of similarity estimates include the Dice Coefficient, Jaccard Coefficient or the \
-Tetrachoric correlation. The formulas for each are as follows:
+Tetrachoric or Spearman Rank correlation. The formulas for each are as follows:
 
 .. math:: \text{Dice Similarity Coefficient} = \frac{2|A \cap B|}{|A| + |B|}
 
 .. math:: \text{Jaccard Similarity Coefficient} = \frac{|A \cap B|}{|A \cup B|}
 
 .. math:: \text{Tetrachoric Correlation} = \cos\left(\frac{\pi}{1+\sqrt{\frac{AD}{BC}}}\right)
+
+.. math:: \text{Spearman Rank Correlation} =  1 - \frac{6 \sum d_i^2}{n(n^2 - 1)}
 
 The NifTi images that are used with this function can be from SPM, FSL, AFNI or Nilearn *preprocessed* outputs. The two requirements \
 the user has to confirm are:
@@ -38,8 +40,8 @@ are:
 * `imgfile1`: this is the string for the path to the first image (e.g., /path/dir/path_to_img1.nii.gz)
 * `imgfile2` this is the string for the path to the first image (e.g., /path/dir/path_to_img2.nii.gz)
 * `mask`: The mask is optional, but it is the path to the mask (e.g., /path/dir/path_to_img_mask.nii.gz)
-* `thresh`: The threshold is option but highly recommended, the similarity between unthresholded images should usually be one (unless they were thresholded before). Base the threshold on your input image type. For example a beta.nii.gz/cope.nii.gz file would be thresholded using a different interger than zstat.nii.gz
-* `similarity_type`: This the similarity calculation you want returned. The options are: 'dice', 'jaccard' or 'tetrachoric'
+* `thresh`: The threshold is optional but highly recommended for Dice/Jaccard/Tetrachoric, the similarity between unthresholded binary images will usually be one (unless they were thresholded before). Base the threshold on your input image type. For example a beta.nii.gz/cope.nii.gz file would be thresholded using a different interger than zstat.nii.gz
+* `similarity_type`: This the similarity calculation you want returned. The options are: 'dice', 'jaccard', 'tetrachoric' or 'spearman'
 
 
 Let's say we want to fetch some data off of neurovault and calculate the similarity between two images. For this example \
@@ -84,13 +86,13 @@ pairwise_similarity
 
 The `pairwise_similarity()` function is, for a lack of a better word, a wrapper over the `image_similarity()` function \
 within the similarity module. It takes in similar values, except this time instead if `imgfile1` and `imgfile2` \
-it's a list of paths to NifTi images. Otherwise, all of the same rules apply as described above. To review, \
+it takes in a list of paths to NifTi images. Otherwise, all of the same rules apply as described above. To review, \
 the inputs to the `pairwise_similarity()` function are:
 
-* `nii_filelist`: Which is a list of NII files, (e.g., ["/path/dir/path_to_img1.nii.gz", "/path/dir/path_to_img2.nii.gz", "/path/dir/path_to_img3.nii.gz")
+* `nii_filelist`: A list of Nifti files, (e.g., ["/path/dir/path_to_img1.nii.gz", "/path/dir/path_to_img2.nii.gz", "/path/dir/path_to_img3.nii.gz")
 * `mask`: The mask is optional, but it is the path to the mask (e.g., /path/dir/path_to_img_mask.nii.gz)
-* `thresh`: The threshold is option but highly recommended, the similarity between unthresholded images should usually be one (unless they were thresholded before). Base the threshold on your input image type. For example a beta.nii.gz/cope.nii.gz file would be thresholded using a different interger than zstat.nii.gz
-* `similarity_type`: This the similarity calculation you want returned. The options are: 'dice', 'jaccard' or 'tetrachoric'
+* `thresh`: The threshold is option but highly for binary estimats, the similarity between unthresholded binary images is sually one (unless they were thresholded before). Base the threshold on your input image type. For example a beta.nii.gz/cope.nii.gz file would be thresholded using a different interger than zstat.nii.gz
+* `similarity_type`: This the similarity calculation you want returned. The options are: 'dice', 'jaccard', 'tetrachoric' or 'spearman'
 
 Using the HCP example from above, let's pull add two more images into the mix. Let's be wild and add the RIGHT foot and hand images.
 
@@ -145,6 +147,7 @@ You just need the paths to the locations of the .nii or .nii.gz files for the co
 * `Are there restrictions on which data I should or shouldn't calculate similarity between?` \
 
 It all depends on the question. You can calculate similarity between group level maps or individual maps. \
-There are two things to keep in mind: Ensure the data is in the form that is expect and be cautious about the \
+There are two things to keep in mind: Ensure the data is in the form that is expected and be cautious about the \
 thresholding that is used because a threshold of 2.3 on a t-stat.nii.gz may not be as restriction on the group maps \
-as it is on the the individual maps.
+as it is on the the individual maps. Note, the spearman estimate is intended to be on raw values and not binzarized values. \
+In this case, `thresh` should remain as default 'None'.
