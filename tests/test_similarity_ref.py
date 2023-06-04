@@ -6,10 +6,13 @@ import nibabel as nib
 from pathlib import Path
 import seaborn as sns
 from pyrelimri.similarity import image_similarity
+from pyrelimri.tetrachoric_correlation import tetrachoric_corr
 from pyrelimri.brain_icc import voxelwise_icc
 from pyrelimri.icc import sumsq_icc
 from collections import namedtuple
 from nilearn.masking import compute_multi_brain_mask
+from hypothesis import given, strategies as st
+from hypothesis.extra.numpy import arrays
 
 
 def generate_img_pair(r: float, dir: Path, use_mask: bool = False, tol: float = .001,
@@ -172,3 +175,38 @@ def test_calculate_icc2():
     icc = sumsq_icc(df_long=a_ld, sub_var="subidr",
                    sess_var="sess",value_var="vals", icc_type='icc_2')
     assert np.allclose(icc[0], 0.11, atol=.01)
+
+# tetrachoric tests
+def test_tetrachoric_corr():
+    assert np.allclose(
+        tetrachoric_corr(np.array([0, 0, 1, 1]),
+                         np.array([0, 1, 0, 1])),
+        0.0)
+    assert np.allclose(
+        tetrachoric_corr(np.array([0, 0, 1, 1]),
+                         np.array([0, 0, 1, 1])),
+        1.0)
+    assert np.allclose(
+        tetrachoric_corr(np.array([0, 0, 1, 1]),
+                         np.array([1, 1, 0, 0])),
+        -1.0)
+
+def test_tetrachoric_corr_nanhandling():
+    assert np.isnan(
+        tetrachoric_corr(np.array([0, 0, 1, 1]),
+                         np.array([1, 1, 1, 1])))
+
+# property based testing with a range of arrays
+@given(vec=arrays(np.int8, (2, 24), elements=st.integers(0, 100)))
+def test_tetrachoric_corr_hypothesis(vec):
+    tc = tetrachoric_corr(vec[0, :], vec[1, :])
+    if (vec[0, :] == vec[1, :]).all():
+        assert tc == 1.0
+    else:
+        B = sum(np.logical_and(vec[0, :] == 0, vec[1, :] == 1))
+        C = sum(np.logical_and(vec[0, :] == 1, vec[1, :] == 0))
+        # should return nan in these cases
+        if B == 0 or C == 0:
+            assert np.isnan(tc)
+        else:
+            assert tc <= 1.0 and tc >= -1.0

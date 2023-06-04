@@ -172,14 +172,15 @@ Where:
 - N_subjs: numbers of subjects
 
 
-Hence, `sumsq_icc` can be used on a dataset with multiple subjects with 1+ measures occasions. We can calculate this ICC \
-for the anagrams data used above. Note: the required inputs are a long dataframe, subject variable, \
+Hence, `sumsq_icc` can be used on a dataset with multiple subjects with 1+ measurement occasions. The ICC can be calculated \
+for the anagrams data references above.
+Note: the required inputs are a long dataframe, subject variable, \
 session variable and the value scores variables that are contained in the long dataframe, plus the \
 icc to return (options: icc_1, icc_2, icc_3; default: icc_3).
 
-The `sumsq_icc` function will return five values: the ICC etimate, lower bound 95% confidence interval, \
-upper bound 95% counfidence interval, mean square between subject variance, mean square within subject variance. \
-This information will print to a terminal or can be saved to five variables:
+The `sumsq_icc` function will return five values: the ICC estimate, lower bound 95% confidence interval, \
+upper bound 95% confidence interval, mean square between subject variance, mean square within subject variance. \
+This information will print to a terminal or can be saved to five variables. Example:
 
 .. code-block:: python
 
