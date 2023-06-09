@@ -197,6 +197,10 @@ This will store the five associated values in the five variables:
     - `icc3_msbs`: Mean Squared Between Subject Variance using for ICC estimate
     - `icc3_msws`: Mean Squared Within Subject Variance used for ICC estimate
 
+Reminder: If NaN/missing values, use mean replacement of all column values. If this is not prefer, handle missing/unbalanced \
+cases before hand.
+
+
 brain_icc
 ---------
 

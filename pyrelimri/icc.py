@@ -137,6 +137,15 @@ def sumsq_icc(df_long: DataFrame, sub_var: str,
 
     check_icc_type(icc_type)
 
+    # check replace missing
+    nan_in_vals = df_long.isna().any().any()
+    if nan_in_vals:
+        # Using mean based replacement; calc mean of values column
+        # Note: pinguin in python & ICC in R converts data to wide --> listwise deletion --> convert to long
+        mean_vals = df_long[value_var].mean()
+        # Replace NaN or missing values with the column mean
+        df_long[value_var].fillna(mean_vals, inplace=True)
+
     # num_subjs = number of subjs, num_sess = number of sessions/ratings
     num_subjs = df_long[sub_var].nunique()
     num_sess = df_long[sess_var].nunique()

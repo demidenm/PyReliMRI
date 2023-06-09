@@ -48,11 +48,15 @@ select ICC(1), ICC(2,1) or ICC(3,1).
      - voxelwise_icc
      - **REQUIRED:** list of session 1, session 2, etc, paths to 3D NifTi images, path to 3D NifTi brain mask  **OPTIONAL:** ICC type (icc_type; default = 'icc_3', options include: 'icc_3', 'icc_2', 'icc_1')
      - Calculates and returns dictionary with intraclass correlation (e.g., ICC(1), ICC(2,1), or ICC(3,1) for 3D volumes across 1+ sessions, reflecting the ICC estimate, the 95% lowerbound for ICC estimate, 95% upperbound for ICC estimate, mean squared error between subjects, mean squared error within subjects)
+     - Note: Ensure that your mask contains all voxels for subjects. If voxels are NaN or zero for some subjects, NaN mean-based replacement is used and/or zeros are treated as true observed zeros.
 
    * - icc
      - sumsq_total, sumsq, sumsq_btwn, icc_confint, sumsq_icc
      - **REQUIRED:** Panda long dataframe with a subject variable (sub_var), session variable (sess_var), the scores (value_var) and the icc type (icc_type; default = 'icc_3', options include: 'icc_3', 'icc_2', 'icc_1')
      - Calculates different components used in calculating the ICC estimate (e.g., ICC([1], ICC([2,1], or ICC[3,1]), 95% lowerbound and 95% upperbound for ICC, mean between subject variance and mean within-subject variance
+     - Note: If NaN/missing values, unlike ICC in Psych package in R and intraclass_corr in Pingouin in Python which use listwise deletion, use mean replaces of all column values.
+     - If an alternate method is preferred, recommend handling missing data & re-balancing prior to use. Significant impact on estimates at high rate of missing and/or low subject N
+
 
    * - similarity
      - image_similarity,pairwise_similarity
