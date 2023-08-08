@@ -235,12 +235,14 @@ To use the `voxelwise_icc` function you have to provide the following informatio
     - icc_type: The ICC estimate that will be calculated for each voxel. Options: `icc_1`, `icc_2`, `icc_3`. Default: `icc_3`
 
 The function returns a dictionary with 3D volumes for:
-    - ICC estimates
-    - ICC lowerbound 95% CI
-    - ICC upperbound 95% CI
-    - Mean Squared Between Subject Variance
-    - Mean Squared Within Subject Variance
+    - ICC estimates ('est')
+    - ICC lowerbound 95% CI ('lower_bound')
+    - ICC upperbound 95% CI ('upper_bound')
+    - Mean Squared Between Subject Variance ('ms_btwn')
+    - Mean Squared Within Subject Variance ('ms_wthn')
 
+So the resulting stored variable will be a dictionary, e.g. "brain_output", from which you can access to view and save images such \
+as the ICC estimates (brain_output['est']) and/or mean square within subject variance (brain_output['ms_wthn']).
 
 Say we have stored paths to session 1 and session 2 in the following variables (Note: subjects in list have same order!):
 
@@ -269,7 +271,7 @@ Here we plot the icc estimates (i.e. 'est') using nilearn's plotting
 
     from nilearn.plotting import view_img_on_surf
 
-    view_img_on_surf(stat_map_img = brain_icc["est"],
+    view_img_on_surf(stat_map_img = brain_icc_dict["est"],
                      surf_mesh = 'fsaverage5', threshold = 0,
                      title_fontsize = 16, colorbar_height = .75,
                      colorbar_fontsize = 14).open_in_browser()
@@ -280,7 +282,7 @@ Here we save using nibabel:
 .. code-block:: python
 
     import nibabel as nib
-        nib.save(icc_3d, os.path.join('output_dir', 'file_name.nii.gz'))
+        nib.save(brain_icc_dict["est"], os.path.join('output_dir', 'file_name.nii.gz'))
 
 Here is a real-world example using neurovaults data collection for Precision Functional Mapping of Individual brains. The \
 collection is: `2447 <https://neurovault.org/collections/2447/>`_. The neurovault collection provides data for ten subjects, with \
@@ -374,8 +376,8 @@ As before, you can save out the images using nibabel to a directory. Here we wil
 .. code-block:: python
 
     import nibabel as nib
-    nib.save(icc, os.path.join('output_dir', 'MSC-LHandbeta_estimate-icc.nii.gz'))
-    nib.save(icc_msbs, os.path.join('output_dir', 'MSC-LHandbeta_estimate-iccmsbs.nii.gz'))
+    nib.save(brain_icc_msc["est"], os.path.join('output_dir', 'MSC-LHandbeta_estimate-icc.nii.gz'))
+    nib.save(brain_icc_msc["ms_btwn"], os.path.join('output_dir', 'MSC-LHandbeta_estimate-iccmsbs.nii.gz'))
 
 
 FAQ

@@ -1,2 +1,9 @@
 sphinx
 sphinx_rtd_theme
+numpy
+pandas
+pytest
+nilearn
+scipy
+seaborn
+hypothesis

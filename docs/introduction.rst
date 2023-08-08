@@ -22,16 +22,18 @@ Purpose of Package
 ~~~~~~~~~~~~~~~~~~
 
 The purpose of this PyReliMRI is to provide an open-source python package that will estimate multiple reliability \
-metrics on fMRI data -- at the group and individual level -- \
+metrics on fMRI data in standard space -- at the group and individual level -- \
 that researchers may use to report in their manuscripts in cases of multi-run and/or multi-session MRI data.
 
-PyReliMRI is composed of a series of modules, each of which correspond to different use cases.
+
+PyReliMRI is composed of a series of modules, each of which correspond to different use cases. \
+The package is intended to be used with 3D brain images that are in standard space. For example, Nifti fMRI brain maps in MNI space. \
 At the group level, the functions in the  ``similarity`` module calculate the similarity between two 3D Nifti images using Dice or Jaccard \
 similarity coefficients, or tetrachoric or spearman correlation. In addition to calculating the similarity between two NifTi images \
 a `pairwise_similarity` option is available to calculate pairwise similarity coefficients across a list of \
 3D Nifti images and return a list of coefficients with associated image labels.
 
-At the individual level, the functions in the ``brain_icc`` module calculate intraclass correlation. For description of different ICCs and their calculations, \
+At the individual level, the functions in the ``brain_icc`` module calculate intraclass correlations. For description of different ICCs and their calculations, \
 see discussion in `Liljequist et al., 2019 <https://www.doi.org/10.1371/journal.pone.0219854>`_. In this package, you have the option to \
 select ICC(1), ICC(2,1) or ICC(3,1).
 
