@@ -4,6 +4,18 @@ from pandas import DataFrame
 from pyrelimri.icc import sumsq_icc
 from nilearn import image
 from nilearn.maskers import (NiftiMasker,NiftiMapsMasker, NiftiLabelsMasker)
+from nilearn.datasets import (
+    fetch_atlas_aal,
+    fetch_atlas_allen_2011,
+    fetch_atlas_basc_multiscale_2015,
+    fetch_atlas_destrieux_2009,
+    fetch_atlas_difumo,
+    fetch_atlas_harvard_oxford,
+    fetch_atlas_msdl,
+    fetch_atlas_pauli_2017,
+    fetch_atlas_schaefer_2018,
+    fetch_atlas_smith_2009,
+)
 
 
 def voxelwise_icc(multisession_list: str, mask: str, icc_type='icc_3'):
