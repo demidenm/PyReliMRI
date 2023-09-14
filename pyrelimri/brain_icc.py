@@ -106,7 +106,7 @@ def voxelwise_icc(multisession_list: str, mask: str, icc_type='icc_3'):
 
 def setup_atlas(name_atlas: str, **kwargs):
     default_params = {
-        'data_dir': None,
+        'data_dir': '/tmp/',
         'verbose': 0
     }
 
@@ -189,12 +189,12 @@ def roi_icc(multisession_list: str, type_atlas: str,
     https://nilearn.github.io/dev/modules/datasets.html#atlases
 
     :param multisession_list: list of a list, a variable containing path to subjects 3D volumes for each session
-    :param atlas_name: name of atlas type provided within nilearn atlases
+    :param type_atlas: name of atlas type provided within nilearn atlases
     :param atlas_dir: location to download/store downloaded atlas. Recommended: '/tmp/'
     :param icc_type: provide icc type, default is icc_3, options: icc_1, icc_2, icc_3
-    :param **kwargs: each nilearn atlas has addition options, only defaults:
-        data_dir = atlas_dir, resume = True, and verbose = 0. These defaults can be updated as kwargs
-    :return: returns 3D shaped array of ICCs in shape of provided 3D  mask
+    :param **kwargs: each nilearn atlas has additional options, only defaults:
+        data_dir = '/tmp', verbose = 0. These defaults will be updated with provided kwargs
+    :return: returns 3D shaped array of ICCs in shape of provided 3D volumes
     """
 
     session_lengths = [len(session) for session in multisession_list]
