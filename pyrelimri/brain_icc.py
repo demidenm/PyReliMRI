@@ -123,16 +123,19 @@ def setup_atlas(name_atlas: str, **kwargs):
         'smith_2009': fetch_atlas_smith_2009,
         'talairach': fetch_atlas_talairach
     }
-    atlas_grabbed = grab_atlas.get(name_atlas)
+    try:
+        atlas_grabbed = grab_atlas.get(name_atlas)
+    except TypeError as e:
+        print("Addition parameters required for atlas: {name_atlas}. Review: Nilearn Atlases for Details")
+        print(e)
 
-    if atlas_grabbed:
+    if atlas_grabbed is None:
+        raise ValueError(f"INCORRECT atlas name. PROVIDED: {name_atlas}\n"
+                         f"OPTIONS: {', '.join(grab_atlas.keys())}")
+    else:
         default_params.update(kwargs)
         return atlas_grabbed(**default_params)
-    else:
-        print(f"INCORRECT atlas name.\n"
-              f"PROVIDED:\n\t {name_atlas}\n"
-              f"OPTIONS:\n\t{', '.join(grab_atlas.keys())}")
-        return None
+
 
 def prob_atlas_scale(nifti_map, estimate_array):
     """
@@ -196,7 +199,19 @@ def roi_icc(multisession_list: str, type_atlas: str,
         data_dir = '/tmp', verbose = 0. These defaults will be updated with provided kwargs
     :return: returns 3D shaped array of ICCs in shape of provided 3D volumes
     """
+    # grab atlas data
+    try:
+        atlas = setup_atlas(name_atlas=type_atlas, data_dir=atlas_dir, **kwargs)
+    except TypeError as e:
+        raise TypeError(f"Addition parameters required for atlas: {type_atlas}."
+                        f"Review: Nilearn Atlases for Details. \nError: {e}")
 
+    try:
+        atlas_dim = len(atlas.maps.shape)
+    except AttributeError:
+        atlas_dim = len(nib.load(atlas.maps).shape)
+
+    # combine brain data
     session_lengths = [len(session) for session in multisession_list]
     session_all_same = all(length == session_lengths[0] for length in session_lengths)
 
@@ -204,22 +219,14 @@ def roi_icc(multisession_list: str, type_atlas: str,
                              f"Mismatched lengths: {', '.join(str(length) for length in session_lengths)}"
 
     # concatenate the paths to 3D images into a 4D nifti image (4th dimension are subjs) using image concat
-    # iterates over list of lists
     try:
         session_data = [image.concat_imgs(i) for i in multisession_list]
     except ValueError as e:
         print(e)
         print("Error when attempting to concatenate images. Confirm affine/size of images.")
 
-    # Grab atlas and mask images
     # Atlases are either deterministic (3D) or probabilistic (4D). Try except to circumvent error
-    # grab/download atlas
-    atlas = setup_atlas(name_atlas=type_atlas, data_dir=atlas_dir, **kwargs)
-    try:
-        atlas_dim = len(atlas.maps.shape)
-    except AttributeError:
-        atlas_dim = len(nib.load(atlas.maps).shape)
-
+    # Get dimensions and then mask
     if atlas_dim == 3:
         masker = NiftiLabelsMasker(
             labels_img=atlas.maps,
