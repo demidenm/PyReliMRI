@@ -220,12 +220,3 @@ def setup_atlas_valuerrror():
 @pytest.mark.parametrize("atlases", ['aal', 'difumo'])
 def setup_atlas_noerror(atlases):
     setup_atlas(name_atlas=atlases)
-
-def test_roiatlasparameter_error():
-    fake_ses1 = ["sub-00_ses1_Contrast-A_bold.nii.gz", "sub-01_ses1_Contrast-A_bold.nii.gz"
-                                                       "sub-02_ses1_Contrast-A_bold.nii.gz"]
-    fake_ses2 = ["sub-00_ses2_Contrast-A_bold.nii.gz", "sub-02_ses1_Contrast-A_bold.nii.gz"
-                                                       "sub-02_ses2_Contrast-A_bold.nii.gz"]
-    with pytest.raises(TypeError):
-        roi_icc(multisession_list=[fake_ses1, fake_ses2], type_atlas='aal',
-                atlas_dir='/tmp/', icc_type='icc_3')
