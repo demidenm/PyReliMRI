@@ -8,8 +8,13 @@ setuptools.setup(
     install_requires=[
         "numpy",
         "pandas",
+        "pytest",
         "nilearn",
-        "scipy"
+        "nibabel",
+        "scipy",
+        "seaborn",
+        "scikit-learn",
+        "hypothesis"
     ],
     classifiers=[
         "Programming Language :: Python :: 3",

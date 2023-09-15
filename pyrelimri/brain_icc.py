@@ -19,6 +19,8 @@ from nilearn.datasets import (
 )
 
 
+SKLEARN_ALLOW_DEPRECATED_SKLEARN_PACKAGE_INSTALL=True
+
 def voxelwise_icc(multisession_list: str, mask: str, icc_type='icc_3'):
     """
     voxelwise_icc: calculates the ICC (+lower bound & upper bound CI)

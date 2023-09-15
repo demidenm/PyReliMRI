@@ -5,6 +5,6 @@ nilearn
 nibabel
 scipy
 seaborn
-sklearn
+scikit-learn
 hypothesis
 
