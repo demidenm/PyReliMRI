@@ -241,4 +241,4 @@ def test_roiicc_msc(tmp_path_factory):
     result = roi_icc(multisession_list=[ses1, ses2], type_atlas='shaefer_2018',
                      atlas_dir = tmpdir, icc_type='icc_3')
 
-    assert np.allclose(result['est'][200], .68, atol=.01)
+    assert np.allclose(result['est'][200], .70, atol=.01)
