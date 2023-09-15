@@ -2,7 +2,9 @@ numpy
 pandas
 pytest
 nilearn
+nibabel
 scipy
 seaborn
+sklearn
 hypothesis
 

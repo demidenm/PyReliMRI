@@ -4,7 +4,7 @@ from pandas import DataFrame
 from sklearn.preprocessing import minmax_scale
 from pyrelimri.icc import sumsq_icc
 from nilearn import image
-from nilearn.maskers import (NiftiMasker,NiftiMapsMasker, NiftiLabelsMasker)
+from nilearn.maskers import (NiftiMasker, NiftiMapsMasker, NiftiLabelsMasker)
 from nilearn.datasets import (
     fetch_atlas_aal,
     fetch_atlas_destrieux_2009,
@@ -88,9 +88,8 @@ def voxelwise_icc(multisession_list: str, mask: str, icc_type='icc_3'):
         vox_pd = vox_pd.astype({"subj": int, "sess": "category", "vals": float})
 
         est[voxel], lowbound[voxel], upbound[voxel], \
-        msbs[voxel], msws[voxel] = sumsq_icc(df_long=vox_pd,
-                                             sub_var="subj", sess_var="sess",
-                                             value_var="vals", icc_type=icc_type)
+            msbs[voxel], msws[voxel] = sumsq_icc(df_long=vox_pd, sub_var="subj", sess_var="sess",
+                                                 value_var="vals", icc_type=icc_type)
 
     # using unmask to reshape the 1D voxels back to 3D specified mask and saving to dictionary
     result_dict = {
@@ -162,7 +161,7 @@ def prob_atlas_scale(nifti_map, estimate_array):
     rescaled[non_zero_mask] = scaled_values
     new_img_shape = np.reshape(rescaled, nifti_map.shape)
 
-    return (image.new_img_like(nifti_map, new_img_shape))
+    return image.new_img_like(nifti_map, new_img_shape)
 
 
 def roi_icc(multisession_list: str, type_atlas: str,
@@ -195,21 +194,10 @@ def roi_icc(multisession_list: str, type_atlas: str,
     :param type_atlas: name of atlas type provided within nilearn atlases
     :param atlas_dir: location to download/store downloaded atlas. Recommended: '/tmp/'
     :param icc_type: provide icc type, default is icc_3, options: icc_1, icc_2, icc_3
-    :param **kwargs: each nilearn atlas has additional options, only defaults:
+    :param kwargs: each nilearn atlas has additional options, only defaults:
         data_dir = '/tmp', verbose = 0. These defaults will be updated with provided kwargs
     :return: returns 3D shaped array of ICCs in shape of provided 3D volumes
     """
-    # grab atlas data
-    try:
-        atlas = setup_atlas(name_atlas=type_atlas, data_dir=atlas_dir, **kwargs)
-    except TypeError as e:
-        raise TypeError(f"Addition parameters required for atlas: {type_atlas}."
-                        f"Review: Nilearn Atlases for Details. \nError: {e}")
-
-    try:
-        atlas_dim = len(atlas.maps.shape)
-    except AttributeError:
-        atlas_dim = len(nib.load(atlas.maps).shape)
 
     # combine brain data
     session_lengths = [len(session) for session in multisession_list]
@@ -225,8 +213,23 @@ def roi_icc(multisession_list: str, type_atlas: str,
         print(e)
         print("Error when attempting to concatenate images. Confirm affine/size of images.")
 
+    # grab atlas data
+    atlas = None
+    try:
+        atlas = setup_atlas(name_atlas=type_atlas, data_dir=atlas_dir, **kwargs)
+    except TypeError as e:
+        raise TypeError(f"Addition parameters required for atlas: {type_atlas}."
+                        f"Review: Nilearn Atlases for Details. \nError: {e}")
+
     # Atlases are either deterministic (3D) or probabilistic (4D). Try except to circumvent error
     # Get dimensions and then mask
+    atlas_dim = None
+
+    try:
+        atlas_dim = len(atlas.maps.shape)
+    except AttributeError:
+        atlas_dim = len(nib.load(atlas.maps).shape)
+
     if atlas_dim == 3:
         masker = NiftiLabelsMasker(
             labels_img=atlas.maps,
@@ -270,9 +273,8 @@ def roi_icc(multisession_list: str, type_atlas: str,
         roi_pd = roi_pd.astype({"subj": int, "sess": "category", "vals": float})
 
         est[roi], lowbound[roi], upbound[roi], \
-        msbs[roi], msws[roi] = sumsq_icc(df_long=roi_pd,
-                                         sub_var="subj", sess_var="sess",
-                                         value_var="vals", icc_type=icc_type)
+            msbs[roi], msws[roi] = sumsq_icc(df_long=roi_pd, sub_var="subj", sess_var="sess",
+                                             value_var="vals", icc_type=icc_type)
 
     # using unmask to reshape the 1D ROI data back to 3D specified mask and saving to dictionary
     result_dict = {
@@ -305,5 +307,3 @@ def roi_icc(multisession_list: str, type_atlas: str,
         result_dict.update(update_values)
 
     return result_dict
-
-
