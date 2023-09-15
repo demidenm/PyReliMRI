@@ -236,10 +236,10 @@ To use the `voxelwise_icc` function you have to provide the following informatio
 
 The function returns a dictionary with 3D volumes for:
     - ICC estimates ('est')
-    - ICC lowerbound 95% CI ('lower_bound')
-    - ICC upperbound 95% CI ('upper_bound')
-    - Mean Squared Between Subject Variance ('ms_btwn')
-    - Mean Squared Within Subject Variance ('ms_wthn')
+    - ICC lowerbound 95% CI ('lowbound')
+    - ICC upperbound 95% CI ('upbound')
+    - Mean Squared Between Subject Variance ('msbtwn')
+    - Mean Squared Within Subject Variance ('mswthn')
 
 So the resulting stored variable will be a dictionary, e.g. "brain_output", from which you can access to view and save images such \
 as the ICC estimates (brain_output['est']) and/or mean square within subject variance (brain_output['ms_wthn']).
@@ -277,7 +277,7 @@ Here we plot the icc estimates (i.e. 'est') using nilearn's plotting
                      colorbar_fontsize = 14).open_in_browser()
 
 
-Here we save using nibabel:
+Here we save the image using nibabel:
 
 .. code-block:: python
 
@@ -377,7 +377,113 @@ As before, you can save out the images using nibabel to a directory. Here we wil
 
     import nibabel as nib
     nib.save(brain_icc_msc["est"], os.path.join('output_dir', 'MSC-LHandbeta_estimate-icc.nii.gz'))
-    nib.save(brain_icc_msc["ms_btwn"], os.path.join('output_dir', 'MSC-LHandbeta_estimate-iccmsbs.nii.gz'))
+    nib.save(brain_icc_msc["msbtwn"], os.path.join('output_dir', 'MSC-LHandbeta_estimate-iccmsbs.nii.gz'))
+
+
+**roi_icc**
+
+Similar to the steps described for `voxelwise_icc` above, the ``brain_icc`` module includes the option to calculate \
+ICC values based on a pre-specified probablistic or determistic Nilearn Atlas. As mentioned elsewhere, the atlases \
+are described on `Nilearn datasets webpage <https://nilearn.github.io/dev/modules/datasets.html>`_.
+
+The Determistic atlas options (visual ex. Figure 3):
+
+    - AAL, Destrieux 2009, Harvard-Oxford, Juelich, Pauli 2017, Shaefer 2018, Talairach
+
+.. figure:: img_png/atlases_ex-deterministic.jpg
+   :align: center
+   :alt: Figure 3: MNI Display of Nilearn's Determinist Atlases (Example).
+   :figclass: align-center
+
+The Probabilistic atlas options (visual ex. Figure 4):
+
+    - Difumo, Harvard-Oxford, Juelich, Pauli 2017 and Smith 2009
+
+.. figure:: img_png/atlases_ex-probabilistic.jpg
+   :align: center
+   :alt: Figure 4: MNI Display of Nilearn's Probabilistic Atlases (Example).
+   :figclass: align-center
+
+Using the same MSC Neurovault data from above, the method to calculate ROI based ICCs is nearly identical to voxelwise_icc() \
+with a few exceptions. First, since we are masking the data by ROIs (e.g., atlas), a mask is not necessary. Second, since \
+the atlas and data may be in different affine space, to preserve the boundaries of ROIs the deterministic atlases as resampled \
+to the atlas (e.g., NiftiLabelsMasker(... resampling_target = 'labels')). However, as the boundaries are less clear for probabilistic atlases and \
+the compute time is decreased, the atlas is resampled to the data (e.g. in NiftiMapssMasker(... \
+resampling_target = 'data'). Third, the resulting dictionary will contain 11 variables:
+
+    - Atlas ROI Labels ('roi_labels'): This contains the order of labels (e.g., pulled from atlas.labels)
+    - ICC estimates ('est'): 1D array that contain ICCs estimated for N ROIs in atlas.
+    - ICC lower bound (lb) 95% CI ('lowbound'): 1D array that contain lb ICCs estimated for N ROIs in atlas.
+    - ICC upper bound (up) 95% CI ('upbound'): 1D array that contain ub ICCs estimated for N ROIs in atlas.
+    - Mean Squared Between Subject Variance ('msbtwn'): 1D array that contain MSBS ICCs estimated for N ROIs in atlas.
+    - Mean Squared Within Subject Variance ('mswthn'): 1D array that contain MSWS ICCs estimated for N ROIs in atlas.
+    - ICC estimates transformed back to space of ROI mask ('est_3d'): Nifti 3D volume of ICC estimates
+    - ICC lower bound 95% CI transformed back to space of ROI mask ('lowbound_3d'): Nifti 3D volume of lb ICC estimates
+    - ICC upper bound 95% CI transformed back to space of ROI mask ('upbound_3d'): Nifti 3D volume of up ICC estimates
+    - Mean Squared Between Subject Variance transformed back to space of ROI mask ('msbtwn_3d'): Nifti 3D volume of MSBS estimates
+    - Mean Squared Within Subject Variance transformed back to space of ROI mask ('mswthn_ed'): Nifti 3D volume of MSWS estimates
+
+An important caveat: Probabilistic atlases are 4D volumes for N ROIs. This is because each voxel has an associated probability \
+that it belongs to ROI A and ROI B. Thus, ROIs may overlap and so the estimates (as in example below) will be more smooth.
+
+Here is an example to run `roi_icc` using the MSC data loaded above for the deterministic Shaefer 400 ROIs atlas. We call the \
+`roi_icc` function within the `brain_icc` module, specify the multisession list of data, the atlas, defaults and/or requirements \
+the atlas requires (e.g., here, I specify n_rois = 400 which is the default), the directory where we want to save the atlas \
+(I chose '/tmp/' on Mac) and the icc type (similar as above, ICC[1])
+
+.. code-block:: python
+
+    from pyrelimri import brain_icc
+
+    shaefer_icc_msc = brain_icc.roi_icc(multisession_list=[sess1_paths,sess2_paths],
+                                    type_atlas='shaefer_2018', n_rois = 400,
+                                    atlas_dir='/tmp/', icc_type='icc_1')
+
+
+This will run alot faster than the `voxelwise_icc` method as it it creating a mask (slower for probabilistic) and looping over \
+the length of ROIs in the atlas.
+
+You can accesss the array of estimates and plot the Nifti image using:
+.. code-block:: python
+
+    from nilearn import plotting
+
+    # access estimates for ICC values
+    shaefer_icc_msc['est']
+
+    # plot estimate nifti volume
+    plotting.plot_stat_map(stat_map_img=shaefer_icc_msc['est_3d'], title='ICC(1) Estimate')
+
+Figure 5 is a visual example of `est_3d`, `lower_bound_3d`, `upper_bound_3d`, `ms_wthn_3d`, `ms_btwn_3d` for the 400 \
+ROI Shaefer atlas.
+
+.. figure:: img_png/roiicc_ex-shaefer400.jpg
+   :align: center
+   :alt: Figure 5: Estimates from roi_icc for Shaefer 400 Atlas on MSC data.
+   :figclass: align-center
+
+
+We can do the same for a probabilistic atlas, say the 256 ROI Difumo atlas.
+
+.. code-block:: python
+
+    from pyrelimri import brain_icc
+
+    difumo_icc_msc = brain_icc.roi_icc(multisession_list=[sess1_paths,sess2_paths],
+                                    type_atlas='difumo', dimension = 256, # notice, 'dimension' is unqiue to this atlas
+                                    atlas_dir='/tmp/', icc_type='icc_1')
+
+
+
+
+Figure 6 contains the estimates from the Difumo 256 atlas. Again, since this is a probabilistic atlas each voxel has an \
+association probability belonging to each ROI and so there are not clear boundaries. The data will have slightly different \
+distributions and appear more smooth so interpreting the maps should be approached with this in mind.
+
+.. figure:: img_png/est_difumo.png
+   :align: center
+   :alt: Figure 6: Estimates from roi_icc for Difumo Atlas on MSC data.
+   :figclass: align-center
 
 
 FAQ

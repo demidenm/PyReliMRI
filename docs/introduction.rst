@@ -35,7 +35,11 @@ a `pairwise_similarity` option is available to calculate pairwise similarity coe
 
 At the individual level, the functions in the ``brain_icc`` module calculate intraclass correlations. For description of different ICCs and their calculations, \
 see discussion in `Liljequist et al., 2019 <https://www.doi.org/10.1371/journal.pone.0219854>`_. In this package, you have the option to \
-select ICC(1), ICC(2,1) or ICC(3,1).
+select ICC(1), ICC(2,1) or ICC(3,1). The ``brain_icc`` module contains an option to calculate voxelwise ICC and ROI based ICCs. \
+The ROI based ICC is integrated with the `Nilearn datasets <https://nilearn.github.io/dev/modules/datasets.html>`_. As a result, \
+the atlas options include deterministic: AAL, Destrieux 2009, Harvard-Oxford, Juelich, Pauli 2017, Shaefer 2018, Talairach, and probablistic options: \
+Difumo, Harvard-Oxford, Juelich, Pauli 2017 and Smith 2009. Take note of the quality of each atlas as it is uploaded to Nilearn Datasets \
+and confirm it aligns with your project goals. Some coverage across MNI brain maps may vary (e.g., Juelich and Talairach).
 
 .. list-table::
    :header-rows: 1
@@ -51,6 +55,11 @@ select ICC(1), ICC(2,1) or ICC(3,1).
      - **REQUIRED:** list of session 1, session 2, etc, paths to 3D NifTi images, path to 3D NifTi brain mask
        **OPTIONAL:** ICC type (icc_type; default = 'icc_3', options include: 'icc_3', 'icc_2', 'icc_1')
      - Calculates and returns a dictionary with intraclass correlation (e.g., ICC(1), ICC(2,1), or ICC(3,1) for 3D volumes across 1+ sessions, reflecting the ICC estimate, the 95% lowerbound for ICC estimate, 95% upperbound for ICC estimate, mean squared error between subjects, mean squared error within subjects). Ensure that your mask contains all voxels for subjects. If voxels are NaN or zero for some subjects, NaN mean-based replacement is used and/or zeros are treated as true observed zeros.
+     - roi_icc
+     - **REQUIRED:** list of session 1, session 2, etc, paths to 3D NifTi images, path to 3D NifTi brain mask. Type of atlas (type_atlas) and directory to save atlas to (atlas_dir). Atlas specific requirements (see Nilearn's datasets) accepted via kwargs which are option variable names and values.
+       **OPTIONAL:** ICC type (icc_type; default = 'icc_3', options include: 'icc_3', 'icc_2', 'icc_1')
+     - Calculates and returns a dictionary with intraclass correlation (e.g., ICC(1), ICC(2,1), or ICC(3,1) for 3D volumes across 1+ sessions, reflecting the ICC estimate, the 95% lowerbound for ICC estimate, 95% upperbound for ICC estimate, mean squared error between subjects, mean squared error within subjects). Ensure that your mask contains all voxels for subjects. If voxels are NaN or zero for some subjects, NaN mean-based replacement is used and/or zeros are treated as true observed zeros.
+
 
    * - icc
      - sumsq_total, sumsq, sumsq_btwn, icc_confint, sumsq_icc

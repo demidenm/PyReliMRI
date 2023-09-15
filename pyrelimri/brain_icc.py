@@ -94,10 +94,10 @@ def voxelwise_icc(multisession_list: str, mask: str, icc_type='icc_3'):
     # using unmask to reshape the 1D voxels back to 3D specified mask and saving to dictionary
     result_dict = {
         'est': masker.inverse_transform(np.array(est)),
-        'lower_bound': masker.inverse_transform(np.array(lowbound)),
-        'upper_bound': masker.inverse_transform(np.array(upbound)),
-        'ms_btwn': masker.inverse_transform(np.array(msbs)),
-        'ms_wthn': masker.inverse_transform(np.array(msws))
+        'lowbound': masker.inverse_transform(np.array(lowbound)),
+        'upbound': masker.inverse_transform(np.array(upbound)),
+        'msbtwn': masker.inverse_transform(np.array(msbs)),
+        'mswthn': masker.inverse_transform(np.array(msws))
     }
 
     return result_dict
@@ -234,7 +234,7 @@ def roi_icc(multisession_list: str, type_atlas: str,
         masker = NiftiLabelsMasker(
             labels_img=atlas.maps,
             standardize=False,
-            resampling_target='data',
+            resampling_target='labels',
             verbose=0
         ).fit()
     elif atlas_dim == 4:
@@ -280,15 +280,15 @@ def roi_icc(multisession_list: str, type_atlas: str,
     result_dict = {
         'roi_labels': atlas.labels,
         'est': np.array(est),
-        'lower_bound': np.array(lowbound),
-        'upper_bound': np.array(upbound),
-        'ms_btwn': np.array(msbs),
-        'ms_wthn': np.array(msws)
+        'lowbound': np.array(lowbound),
+        'upbound': np.array(upbound),
+        'msbtwn': np.array(msbs),
+        'mswthn': np.array(msws)
     }
 
     est_string = {"est_3d": est,
                   "lowbound_3d": lowbound, "upbound_3d": upbound,
-                  "msbs_3d": msbs, "msws_3d": msws
+                  "msbtwn": msbs, "mswthn_3d": msws
                   }
 
     if atlas_dim == 4:
@@ -299,10 +299,10 @@ def roi_icc(multisession_list: str, type_atlas: str,
     else:
         update_values = {
             'est_3d': masker.inverse_transform(np.array(est)),
-            'lower_bound_3d': masker.inverse_transform(np.array(lowbound)),
-            'upper_bound_3d': masker.inverse_transform(np.array(upbound)),
-            'ms_btwn_3d': masker.inverse_transform(np.array(msbs)),
-            'ms_wthn_3d': masker.inverse_transform(np.array(msws))
+            'lowbound_3d': masker.inverse_transform(np.array(lowbound)),
+            'upbound_3d': masker.inverse_transform(np.array(upbound)),
+            'msbtwn_3d': masker.inverse_transform(np.array(msbs)),
+            'mswthn_3d': masker.inverse_transform(np.array(msws))
         }
         result_dict.update(update_values)
 
