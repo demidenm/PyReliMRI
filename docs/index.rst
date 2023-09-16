@@ -10,15 +10,21 @@ tool to calculate multiple group- and individual-level reliability metrics. This
 for researchers using MRI data to easily report reliability estimates in their manuscripts in cases of multi-run \
 and/or multi-session data are acquired.
 
+.. figure:: img_png/pyrelimri_fig.png
+   :align: center
+   :alt: Figure 1: Available Features within PyReliMRI.
+   :figclass: align-center
+
 There are a number of packages available to achieve different aspects contained in this package. \
 Specifically, tools exist to calculate either simiarity coefficient, intraclass corelations (e.g., 3dICC in AFNI) \
 or both (e.g., in python based `nipype <https://nipype.readthedocs.io/en/latest/>`_ or matlab `fmreli <https://github.com/nkroemer/reliability>`_). \
 However, in some cases the flexibility is limited or some features are not available. \
 For example, `ICC_rep_anova` is limited to ICC(3,1) and the `fmreli` is not accessible without \
-a matlab license and does not deploy the the tetrachoric correlation or pairwise comparisons across images.
+a matlab license and does not deploy the the tetrachoric correlation, pairwise comparisons across images or atlas \
+based reliability estimates.
 
-Our attempt here is to integrate different functions within the same package that anyone can use by \
-downloading python and importing the package on their machine.
+Our attempt here is to integrate different functions (see Figure 1) within the same package that anyone can use by \
+downloading python and importing the package onto their machine.
 
 
 PyReliMRI

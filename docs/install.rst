@@ -45,3 +45,5 @@ While the versions below are not required they were sufficient to run each scrip
 -  scipy=>1.9
 -  pandas=>1.4
 -  nilearn=>0.9
+-  nibabel=>4.0.2
+-  sklearn=>1.0.2

@@ -6,22 +6,31 @@ The `pyrelimri` package contains multiple modules for calculating image reliabil
 brain_icc
 ---------
 
-From `pyrelimri` the `brain_icc` module contains the following function:
+From `pyrelimri` the `brain_icc` module contains the following function to calculate voxelwise and \
+atlas based (region of interest) intraclass correlation estimates on provided 3D volumes.
 
-* `brain_icc.voxelwise_icc(paths_sess1, paths_sess2, mask, paths_sess3 = None, icc_type = 'icc_3')`: As show in Figure 1, calculates the intraclass correlation (e.g., ICC(1), ICC(2,1), or ICC(3,1)) for 3D volumes across 1+ sessions, returning five 3D volumes reflecting the ICC estimate, the 95% lowerbound for ICC estimate, 95% upperbound for ICC estimate, mean squared error between subjects, mean squared error within subjects.
+* `brain_icc.voxelwise_icc(mutlisession_list, mask, icc_type = 'icc_3')`: As show in Figure 1, calculates the intraclass correlation (e.g., ICC(1), ICC(2,1), or ICC(3,1)) for 3D volumes across 1+ sessions, returning five 3D volumes reflecting the ICC estimate, the 95% lowerbound for ICC estimate, 95% upperbound for ICC estimate, mean squared error between subjects, mean squared error within subjects.
 
 Inputs:
 
-  * REQUIRED: list of lists to >1 sessoins/runs of 3D Nifti images: string (Sessions must be in same order); Path to 3D Nifti brain mask: string
+  * REQUIRED: list of lists to >1 sessions/runs of 3D Nifti images: string (Sessions must be in same order); Path to 3D Nifti brain mask: string
   * OPTIONAL: ICC type, icc = string (default = ‘icc_3’, options include: ‘icc_3’,’icc_2’,’icc_1’)
 
-.. figure:: img_png/intraclasscorr_example.png
+.. figure:: img_png/brainicc_fig.png
    :align: center
    :alt: Example ABCD
    :figclass: align-center
 
-   Figure 1. Voxelwise intraclass correlation
+   Figure 1. Voxelwise Intraclass Correlation
 
+* `brain_icc.roi_icc(multisession_list, type_atlas, atlas_dir, icc_type = 'icc_3')`: As show in Figure 2, calculates the intraclass correlation (e.g., ICC(1), ICC(2,1), or ICC(3,1)) based on pre-specified atlas for 3D volumes across 1+ sessions, returning five arrays and five 3D volumes reflecting the ICC estimate, the 95% lowerbound for ICC estimate, 95% upperbound for ICC estimate, mean squared error between subjects, mean squared error within subjects.
+
+.. figure:: img_png/roiicc_fig.png
+   :align: center
+   :alt: Example ABCD
+   :figclass: align-center
+
+   Figure 2. Atlas Based Intraclass Correlation
 
 icc
 ---
@@ -49,7 +58,7 @@ similarity
 
 from `pyrelimri` the `similarity` module contains the following functions:
 
-* `similarity.image_similarity(imgfile1, imgfile2, mask = None, thresh = None, similarity_type = 'dice')`: Calculates the similarity between two images. For example, in Figure 1a a measure 1 nifti img1 (thresholded p < 001, blue) and img2 (thresholded p <001, green). The overlapping thresholded voxels are in red. By requesting the Jaccard similarity coefficient (Fig1b), you will get a index of similarity between these two nifti images. Alternatively, you may ask what is the similarity using a binary correlation. Using tetrachoric correlation (Fig1c) we can get the similarity between voxels that are above the p < .001 threshold (==1) and those below (==0) between the two images.
+* `similarity.image_similarity(imgfile1, imgfile2, mask = None, thresh = None, similarity_type = 'dice')`: Calculates the similarity between two images. For example, in Figure 3a a measure 1 nifti img1 (thresholded p < 001, blue) and img2 (thresholded p <001, green). The overlapping thresholded voxels are in red. By requesting the Jaccard similarity coefficient (Fig3b), you will get a index of similarity between these two nifti images. Alternatively, you may ask what is the similarity using a binary correlation. Using tetrachoric correlation (Fig3c) we can get the similarity between voxels that are above the p < .001 threshold (==1) and those below (==0) between the two images.
 
 * `similarity.pairwise_similarity(nii_filelist, mask = None, thresh = None, similarity_type = 'dice')`: Calculates the similarity between two images. Permute across 2+ images to calculate similarity coefficient between all possible image pairs.
 
@@ -62,7 +71,7 @@ Inputs:
    :alt: Example ABCD
    :figclass: align-center
 
-   Figure 2. Similarity Between Images
+   Figure 3. Similarity Between Images
 
 tetrachoric_correlation
 -----------------------

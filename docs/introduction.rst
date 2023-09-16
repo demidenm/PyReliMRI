@@ -21,17 +21,23 @@ Reliability questions for `task fMRI <https://https://www.doi.org/10.1177/095679
 Purpose of Package
 ~~~~~~~~~~~~~~~~~~
 
-The purpose of this PyReliMRI is to provide an open-source python package that will estimate multiple reliability \
-metrics on fMRI data in standard space -- at the group and individual level -- \
-that researchers may use to report in their manuscripts in cases of multi-run and/or multi-session MRI data.
+The purpose of the PyReliMRI is to provide an open-source python package that will estimate multiple reliability \
+metrics on fMRI (or MRI) data in standard space -- at the group and individual level -- \
+that researchers may use to report in their manuscripts in cases of multi-run and/or multi-session MRI data. If you don't have \
+multi-session or multi-run data, some of the features of this packages can still be useful!
+
+    - Example 1: you may have single session and single run task-fMRI data and you can split the run and model them separately. In this session, you can calculate reliability or similarity metrics on these files.
+    - Example 2: you may have group level maps (e.g., within or across studies for specific contrasts) or have access to neurovault data. You can use these to calculate various similarity metrics.
 
 
-PyReliMRI is composed of a series of modules, each of which correspond to different use cases. \
-The package is intended to be used with 3D brain images that are in standard space. For example, Nifti fMRI brain maps in MNI space. \
-At the group level, the functions in the  ``similarity`` module calculate the similarity between two 3D Nifti images using Dice or Jaccard \
+PyReliMRI is composed of a series of modules, each of which correspond to different use cases. So there are numerous questions that can be answered on the same data. \
+The package is intended to be used with 3D brain images that are in *standard space*.\
+For example, Nifti fMRI brain maps in MNI or Talairach space. However, in other fields it may be defined differently.\
+At the group level (this doesnt *have* to be solely used for group level maps, but the common option), the functions in the  ``similarity`` module calculate the similarity between two 3D Nifti images using Dice or Jaccard \
 similarity coefficients, or tetrachoric or spearman correlation. In addition to calculating the similarity between two NifTi images \
 a `pairwise_similarity` option is available to calculate pairwise similarity coefficients across a list of \
-3D Nifti images and return a list of coefficients with associated image labels.
+3D Nifti images and return a list of coefficients with associated image labels. The latter option is in efficient way to extract \
+similarity metrics across your list of images in a single shot.
 
 At the individual level, the functions in the ``brain_icc`` module calculate intraclass correlations. For description of different ICCs and their calculations, \
 see discussion in `Liljequist et al., 2019 <https://www.doi.org/10.1371/journal.pone.0219854>`_. In this package, you have the option to \
@@ -39,7 +45,8 @@ select ICC(1), ICC(2,1) or ICC(3,1). The ``brain_icc`` module contains an option
 The ROI based ICC is integrated with the `Nilearn datasets <https://nilearn.github.io/dev/modules/datasets.html>`_. As a result, \
 the atlas options include deterministic: AAL, Destrieux 2009, Harvard-Oxford, Juelich, Pauli 2017, Shaefer 2018, Talairach, and probablistic options: \
 Difumo, Harvard-Oxford, Juelich, Pauli 2017 and Smith 2009. Take note of the quality of each atlas as it is uploaded to Nilearn Datasets \
-and confirm it aligns with your project goals. Some coverage across MNI brain maps may vary (e.g., Juelich and Talairach).
+and confirm it aligns with your project goals. Some coverage across MNI brain maps may vary (e.g., Juelich and Talairach) and \
+probabilistic atlases will have a certain level of smoothing as a result of masking the data by the atlas.
 
 .. list-table::
    :header-rows: 1

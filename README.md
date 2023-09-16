@@ -6,7 +6,7 @@
 # Python-based Reliability in MRI (PyReliMRI)
 
 PyReliMRI is described and applied in the [TBD Preprint](https://www.doi.org)
-
+![PyReliMRI Features](/docs/img_png/pyrelimri_fig.png)
 ## Authors
 
 [Michael I. Demidenko](https://orcid.org/0000-0001-9270-0124) & [Russell A. Poldrack](https://orcid.org/0000-0001-6755-0259)

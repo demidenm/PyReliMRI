@@ -2,3 +2,4 @@
 .idea/
 Reliability_calcs.ipynb
 tests/reliability_tests.ipynb
+pyrelimri/mktestdata.py
