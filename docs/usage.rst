@@ -9,11 +9,11 @@ brain_icc
 From `pyrelimri` the `brain_icc` module contains the following function to calculate voxelwise and \
 atlas based (region of interest) intraclass correlation estimates on provided 3D volumes.
 
-* `brain_icc.voxelwise_icc(mutlisession_list, mask, icc_type = 'icc_3')`: As show in Figure 1, calculates the intraclass correlation (e.g., ICC(1), ICC(2,1), or ICC(3,1)) for 3D volumes across 1+ sessions, returning five 3D volumes reflecting the ICC estimate, the 95% lowerbound for ICC estimate, 95% upperbound for ICC estimate, mean squared error between subjects, mean squared error within subjects.
+* `brain_icc.voxelwise_icc(mutlisession_list, mask, icc_type = 'icc_3')`: As shown in Figure 1, calculates the intraclass correlation (e.g., ICC(1), ICC(2,1), or ICC(3,1)) for 3D volumes across 1+ sessions. Returns: five 3D volumes reflecting the estimated ICC, the 95% lowerbound for ICC, 95% upperbound for ICC, mean squared error between subjects & mean squared error within subjects values.
 
 Inputs:
 
-  * REQUIRED: list of lists to >1 sessions/runs of 3D Nifti images: string (Sessions must be in same order); Path to 3D Nifti brain mask: string
+  * REQUIRED: list of lists to >1 sessions/runs of 3D Nifti images: string (Subjs across Sessions must be in SAME order); Path to 3D Nifti brain mask: string
   * OPTIONAL: ICC type, icc = string (default = ‘icc_3’, options include: ‘icc_3’,’icc_2’,’icc_1’). Default set to `icc_3`
 
 .. figure:: img_png/brainicc_fig.png
@@ -28,7 +28,7 @@ Inputs:
 
 Inputs:
 
-  * REQUIRED: list of lists to >1 sessions/runs of 3D Nifti images: string (Sessions must be in same order); atlas type 'aal', 'destrieux_2009', 'difumo', 'harvard_oxford', 'juelich', 'msdl', 'pauli_2017', 'shaefer_2018', 'smith_2009', 'talairach', atlas directory where atlas already exists or should be saved (recommend: '/tmp/'), and additional options as required for each atlas at `Nilearn datasets <https://nilearn.github.io/dev/modules/datasets.html>`_. Variable and value, e.g., *dimension=64* can be added as instructed in the atlases documentation
+  * REQUIRED: list of lists to >1 sessions/runs of 3D Nifti images: string (Subjects across Sessions must be in SAME order); atlas type 'aal', 'destrieux_2009', 'difumo', 'harvard_oxford', 'juelich', 'msdl', 'pauli_2017', 'shaefer_2018', 'smith_2009', 'talairach', atlas directory where atlas already exists or should be saved (recommend: '/tmp/'), and additional options as required for each atlas at `Nilearn datasets <https://nilearn.github.io/dev/modules/datasets.html>`_. Variable and value, e.g., *dimension=64* can be added as instructed in the atlases documentation
   * OPTIONAL: ICC type, icc = string (default = ‘icc_3’, options include: ‘icc_3’,’icc_2’,’icc_1’). Default set to `icc_3`.
 
 .. figure:: img_png/roiicc_fig.png

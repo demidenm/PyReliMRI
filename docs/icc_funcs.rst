@@ -2,21 +2,22 @@ Intraclass Correlation Functions
 ================================
 
 The intraclass correlation (ICC) estimates are a complement to the similarity functions. The variability/similarity \
-in the data can be parsed in several ways. One can estimate home similar things are about a threshold (e.g., 1/0) or \
-how similarity specific continuous estimates are across subjects. The ICC is used for the latter here.
+in the data can be parsed in several ways. One can estimate how similar things are above a threshold (e.g., 1/0) or \
+how similar specific continuous estimates are across subjects. The ICC is used for the latter.
 
-Two components are described with some examples: The  `icc` and `brain_icc` modules. The first is the manual estimation \
-of the components of the ICC, such the the sum of (1) squared total,  the sum of (2) squared within, (3) sum of squared between \
-their associated mean sums of squared (which is 1-3 divided by the degrees of freedom) in `icc` module. Then, the next step is to \
-calculate these values on a voxel-by-voxel basis (or if you wanted to, ROI by ROI) using `brain` module.
+Two modules with examples are reviewed here: The  `icc` and `brain_icc` modules. The first is the manual estimation \
+of the ICC estimates, such the the (1) sum of squared total,  the (2) sum of squared within, (3) sum of squared between \
+their associated mean sums of squared (which is 1-3 divided by the degrees of freedom) in the `icc` module. \
+Then, these ICC estimates are calculated on a voxel-by-voxel basis (or if you wanted to, ROI by ROI) using `brain` module. \
+and roi-by-roi basis using 'roi_icc'
 
 
 icc
 ---
 
-While `icc` is within the package for MRI reliability, it can still be used to calculate different values on dataframes. \
-Below will describe the different components and use `seaborns.anagrams <https://github.com/mwaskom/seaborn-data/blob/master/anagrams.csv>`_ \
-as the example for each of these.
+While `icc` is within the package for MRI reliability estimates, it can still be used to calculate different values on dataframes. \
+Below I describe the different components and use `seaborns.anagrams <https://github.com/mwaskom/seaborn-data/blob/master/anagrams.csv>`_ \
+as the example for each of these components.
 
 The first 5-rows of the anagrams data are:
 
@@ -53,7 +54,7 @@ We can load the example data, filter to only use the `divided` values and conver
 **sumsq_total**
 
 The sum of squared total is the estimate of the total variance across all subjects and measurement occasions. Expressed \
-the formula used is:
+by formula:
 
 .. math::
 
@@ -65,7 +66,7 @@ where:
     * x_i = is each value in the column specified by values column in df \
     * x_bar = is the global mean specified by 'values' column in df
 
-Using the anagrams `long_df` we can calculate the sum of square total using:
+Using the anagrams `long_df` I'll calculate the sum of square total using:
 
 .. code-block:: python
 
@@ -126,7 +127,7 @@ We will get the result of 20.0 sum of squares `between` subject factor.
 
 Note: If you recall that ICC is the decomposition of `total` variance, you'll notice that 29.2 + 20.0 \
 do not sum to the total variance, 71.8. This is because there is the subj*sess variance component \
-and the residual variance, too. You can review this in an anova table:
+and the residual variance, too. You can review this in an ANOVA table:
 
 +---------------+-----------+----+-----------+-----+
 |     Source    |     SS    | DF |     MS    | np2 |
@@ -143,8 +144,8 @@ and the residual variance, too. You can review this in an anova table:
 
 **icc_confint**
 
-For each ICC estimate that can be requested, ICC(1), ICC(2,1) and ICC(3,1) and confidence interval \
-is returned with each ICC estimate. The implementation for the confident interval is the same as in \
+For each ICC estimate that can be requested, ICC(1), ICC(2,1) and ICC(3,1), a confidence interval \
+is returned for each associated ICC estimate. The implementation for the confidence interval is the same as in \
 the the `pingouin <https://github.com/raphaelvallat/pingouin/blob/master/pingouin/reliability.py>`_ \
 package in Python and the `ICC() from psych <https://search.r-project.org/CRAN/refmans/psych/html/ICC.html>`_ \
 package in R.
@@ -152,7 +153,7 @@ package in R.
 
 **sumsq_icc**
 
-Now that the internal calculations of the ICC have been reviewed, we can use the package to get the values of interest. \
+Now that the internal calculations of the ICC have been reviewed, I will use the package to get the values of interest. \
 The associated formulas for the ICC(1), ICC(2,1) and ICC(3,1) are described below.
 
 .. math:: \text{ICC(1)} = \frac{MS_Btwn - MS_Wthn}{MS_Btwn + (sess - 1) MS_Wthn}
@@ -197,16 +198,18 @@ This will store the five associated values in the five variables:
     - `icc3_msbs`: Mean Squared Between Subject Variance using for ICC estimate
     - `icc3_msws`: Mean Squared Within Subject Variance used for ICC estimate
 
-Reminder: If NaN/missing values, use mean replacement of all column values. If this is not prefer, handle missing/unbalanced \
+Reminder: If NaN/missing values, this implements uses a mean replacement of all column values. If this is not preference, handle missing/unbalanced \
 cases before hand.
 
 
 brain_icc
 ---------
 
-The `brain_icc` module is, for a lack for better words, a big wrapper for for the `icc` module. \
+The `brain_icc` module is a big wrapper for for the `icc` module. \
 In short, the `voxelwise_icc` function within the `brain_icc` modules calculates the ICC for 3D nifti brain images \
-across subjects and sessions on a voxel-by-voxel basis. Here are the steps it uses:
+across subjects and sessions on a voxel-by-voxel basis.
+
+Here are the steps it uses:
 
     - Function takes a list of paths to the 3D nifti brain images for each session, the path to the nifti mask object, and the ICC type to be calculated.
     - Function checks if there are the same number of files in each session (e.g., list[0], list[1], etc) and raises an error if they are of different length.
@@ -218,8 +221,8 @@ across subjects and sessions on a voxel-by-voxel basis. Here are the steps it us
 
 **voxelwise_icc**
 
-As mentioned above, the `voxelwise_icc` calculates the ICC values for value in the 3D volumes. \
-If we thing of an image as having the dimensions of [45, 45, 90], we can unravel it into a single vector \
+As mentioned above, the `voxelwise_icc` calculates the ICC values for each voxel in the 3D volumes. \
+Think of an image as having the dimensions of [45, 45, 90], that can be unraveled to fit into a single vector \
 for each subject that is 182,250 values long (the length in the voxelwise case is the number of voxels). \
 The `voxelwise_icc` returns an equal size in length array that contains the ICC estimate for each voxels, \
 between subjects across the measurement occasions. For example:
@@ -229,7 +232,7 @@ between subjects across the measurement occasions. For example:
    :alt: Figure 1: HCP Left Hand (A) and Left Foot (B) Activation maps.
    :figclass: align-center
 
-To use the `voxelwise_icc` function you have to provide the following information:
+To use the `voxelwise_icc` function, you have to provide the following information:
     - multisession_list: A list of listed paths to the Nifti z-stat, t-stat or beta maps for sess1, 2, 3, etc (or run 1,2,3..)
     - mask: The Nifti binarized masks that will be used to mask the 3D volumes.
     - icc_type: The ICC estimate that will be calculated for each voxel. Options: `icc_1`, `icc_2`, `icc_3`. Default: `icc_3`
@@ -244,7 +247,7 @@ The function returns a dictionary with 3D volumes for:
 So the resulting stored variable will be a dictionary, e.g. "brain_output", from which you can access to view and save images such \
 as the ICC estimates (brain_output['est']) and/or mean square within subject variance (brain_output['ms_wthn']).
 
-Say we have stored paths to session 1 and session 2 in the following variables (Note: subjects in list have same order!):
+Say I have stored paths to session 1 and session 2 in the following variables (Note: subjects in list have same order!):
 
 .. code-block:: python
 
@@ -255,7 +258,7 @@ Say we have stored paths to session 1 and session 2 in the following variables (
     scan2 = ["./scan2/sub-1_t-stat.nii.gz", "./scan2/sub-2_t-stat.nii.gz", "./scan2/sub-3_t-stat.nii.gz", "./scan2/sub-4_t-stat.nii.gz", "./scan2/sub-5_t-stat.nii.gz",
              "./scan2/sub-6_t-stat.nii.gz", "./scan2/sub-7_t-stat.nii.gz", "./scan2/sub-8_t-stat.nii.gz"]
 
-Next, you can call these images paths in the function and save the 3d volumes using:
+Next, I can call these images paths in the function and save the 3d volumes using:
 
 .. code-block:: python
 
@@ -265,7 +268,7 @@ Next, you can call these images paths in the function and save the 3d volumes us
 
 This will return the associated dictionary with nifti 3D volumes which can be manipulated further.
 
-Here we plot the icc estimates (i.e. 'est') using nilearn's plotting
+Here I plot the icc estimates (i.e. 'est') using nilearn's plotting
 
 .. code-block:: python
 
@@ -277,7 +280,7 @@ Here we plot the icc estimates (i.e. 'est') using nilearn's plotting
                      colorbar_fontsize = 14).open_in_browser()
 
 
-Here we save the image using nibabel:
+Here I save the image using nibabel:
 
 .. code-block:: python
 
@@ -286,7 +289,7 @@ Here we save the image using nibabel:
 
 Here is a real-world example using neurovaults data collection for Precision Functional Mapping of Individual brains. The \
 collection is: `2447 <https://neurovault.org/collections/2447/>`_. The neurovault collection provides data for ten subjects, with \
-ten sessions. We will use the first two sessions. We will use the block-design motor task and focus on the [Left] Hand univariate \
+ten sessions. I will use the first two sessions. I will use the block-design motor task and focus on the [Left] Hand univariate \
 beta maps which are listed under "other".
 
 Let's use nilearn to load these data for 10 subjects and 2 sessions.
@@ -317,8 +320,8 @@ Let's use nilearn to load these data for 10 subjects and 2 sessions.
     MSC10_ses2 = fetch_neurovault_ids(image_ids=[48523])
 
 
-Now that our data is loaded, we specify the session paths (recall, Nilearn saves the paths to the images on your computer) \
-and then we will provide this information to `voxelwise_icc` within `brain`
+Now that the data are loaded, I specify the session paths (recall, Nilearn saves the paths to the images on your computer) \
+and then I will provide this information to `voxelwise_icc` function within `brain_icc` module
 
 
 .. code-block:: python
@@ -335,20 +338,20 @@ and then we will provide this information to `voxelwise_icc` within `brain`
                    MSC10_ses2.images[0]]
 
 
-You'll notice, the function asks for a mask. These data do not have a mask provided on neurovault, \
-so we will calculate our own and save it to the filepath of these data using nilearns multi-image masking option.
+Notice, the function asks for a mask. These data do not have a mask provided on neurovault, \
+so I will calculate one on my own and save it to the filepath of these data using nilearns multi-image masking option.
 
 .. code-block:: python
 
     from nilearn.masking import compute_multi_brain_mask
     import nibabel as nib
-    import os # so we can use only the directory location of our MSC img path
+    import os # so Ican use only the directory location of the MSC img path
 
     mask = compute_multi_brain_mask(target_imgs = sess1_paths)
     mask_path = os.path.join(os.path.dirname(MSC01_ses1.images[0]), 'mask.nii.gz')
     nib.save(mask, mask_path)
 
-Okay, now we should have everything we need: the path to our images and to our mask.
+Okay, now I have everything I need: the paths to the images and to the mask.
 
 .. code-block:: python
 
@@ -371,7 +374,7 @@ determine the thresholding you may want to use. Some voxels will have quite high
    :alt: Figure 2: Information about the ICC (A) and different variance components (B) for ten subjects.
    :figclass: align-center
 
-As before, you can save out the images using nibabel to a directory. Here we will save it to where the images are stored:
+As before, you can save out the images using nibabel to a directory. Here I will save it to where the images are stored:
 
 .. code-block:: python
 
@@ -405,7 +408,7 @@ The Probabilistic atlas options (visual ex. Figure 4):
    :figclass: align-center
 
 Using the same MSC Neurovault data from above, the method to calculate ROI based ICCs is nearly identical to voxelwise_icc() \
-with a few exceptions. First, since we are masking the data by ROIs (e.g., atlas), a mask is not necessary. Second, since \
+with a few exceptions. First, since I am masking the data by ROIs (e.g., atlas), a mask is not necessary. Second, since \
 the atlas and data may be in different affine space, to preserve the boundaries of ROIs the deterministic atlases as resampled \
 to the atlas (e.g., NiftiLabelsMasker(... resampling_target = 'labels')). However, as the boundaries are less clear for probabilistic atlases and \
 the compute time is decreased, the atlas is resampled to the data (e.g. in NiftiMapssMasker(... \
@@ -428,7 +431,7 @@ that it belongs to ROI A and ROI B. Thus, ROIs may overlap and so the estimates 
 
 Here is an example to run `roi_icc` using the MSC data loaded above for the deterministic Shaefer 400 ROIs atlas. We call the \
 `roi_icc` function within the `brain_icc` module, specify the multisession list of data, the atlas, defaults and/or requirements \
-the atlas requires (e.g., here, I specify n_rois = 400 which is the default), the directory where we want to save the atlas \
+the atlas requires (e.g., here, I specify n_rois = 400 which is the default), the directory where I want to save the atlas \
 (I chose '/tmp/' on Mac) and the icc type (similar as above, ICC[1])
 
 .. code-block:: python
@@ -440,10 +443,10 @@ the atlas requires (e.g., here, I specify n_rois = 400 which is the default), th
                                     atlas_dir='/tmp/', icc_type='icc_1')
 
 
-This will run alot faster than the `voxelwise_icc` method as it it creating a mask (slower for probabilistic) and looping over \
-the length of ROIs in the atlas.
+This will run A LOT faster than the `voxelwise_icc` method as 'roi_icc' is reducing the voxel dimensions to ROI dimension (slower for probabilistic) and looping over \
+the length of ROIs in the atlas. So in many cases it is reducing 200,000 voxel calculations to 400 ROI calculations.
 
-You can accesss the array of estimates and plot the Nifti image using:
+You can access the array of estimates and plot the Nifti image using:
 .. code-block:: python
 
     from nilearn import plotting
@@ -463,7 +466,7 @@ ROI Shaefer atlas.
    :figclass: align-center
 
 
-We can do the same for a probabilistic atlas, say the 256 ROI Difumo atlas.
+I can do the same for a probabilistic atlas -- say the 256 ROI Difumo atlas.
 
 .. code-block:: python
 

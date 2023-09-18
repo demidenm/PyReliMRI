@@ -22,7 +22,7 @@ calculating the similarity between 3D Nifti images, you can load
 
    from pyrelimri import similarity
 
-Once the script is loaded, the functions within the module can be used or can check with suffix '?' what input \
+Once the module is loaded, the functions within the module can be used. You can check with suffix '?' what input \
 is required to run the function.
 
 .. code-block:: python
@@ -37,8 +37,9 @@ is required to run the function.
 Required dependencies
 `````````````````````
 
-While a number of calculations are performed manually, PyReliMRI relies on several packages that must be installed. \
-While the versions below are not required they were sufficient to run each script during testing.
+While a number of calculations are performed manually, PyReliMRI depends on several packages that must be installed. \
+The effort here isn't to reinvent the wheel but integrate as many tools. While the versions below are not required \
+they were sufficient to run each script during testing.
 
 -  Python>=>3.6
 -  numpy>=1.2

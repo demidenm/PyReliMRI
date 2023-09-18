@@ -1,15 +1,12 @@
 Similarity Based Functions
 ===========================
 
-In this section, the similarity functions are reviewed with some examples for `similarity` module.
+In this section, the similarity functions are reviewed with some examples for `similarity` module. The purpose of the \
+`similarity` module is to calculate different types of similarity between \
+two or more 3D NifTi images. The types of similarity estimates include the Dice Coefficient, Jaccard Coefficient, the \
+Tetrachoric or Spearman Rank correlation coefficients.
 
-
-image_similarity
-----------------
-
-As described previously, the purpose of the `similarity` module is to calculate different types of similarity between \
-two or more NifTi 3D images. The types of similarity estimates include the Dice Coefficient, Jaccard Coefficient or the \
-Tetrachoric or Spearman Rank correlation. The formulas for each are as follows:
+The formulas for each are as follows:
 
 .. math:: \text{Dice Similarity Coefficient} = \frac{2|A \cap B|}{|A| + |B|}
 
@@ -19,14 +16,17 @@ Tetrachoric or Spearman Rank correlation. The formulas for each are as follows:
 
 .. math:: \text{Spearman Rank Correlation} =  1 - \frac{6 \sum d_i^2}{n(n^2 - 1)}
 
+
+image_similarity
+----------------
+
 The NifTi images that are used with this function can be from SPM, FSL, AFNI or Nilearn *preprocessed* outputs. The two requirements \
 the user has to confirm are:
 
-* Image Shape: The two images being compared have to be of the same shape. If the images are of different length the the comparison of the volumes will be wrong. The package will throw an error if they are of the wrong shape.
-* Normal/Coregistration: The images should be normalize in space for proper comparison. Here, you will not see an error but so ensure images are in the same space and properly aligned.
+* Image Shape: The two images being compared have to be of the same shape. If the images are of different length the the comparison of the volumes will be wrong. The package will throw an error if the images are of the wrong shape.
+* Normal/Coregistration: The images should be in standard space for appropriate comparison. While the above error should arise, it will not check whether the images are in standard space.
 
-If you are unsure you can always load the images to compare or test it out and the function will give you an error.
-
+You can check the shape of the data using the following. However, standard space has to be confirmed via your preprocessing pipeline.
 .. code-block:: python
 
     from nilearn import image
@@ -44,8 +44,9 @@ are:
 * `similarity_type`: This the similarity calculation you want returned. The options are: 'dice', 'jaccard', 'tetrachoric' or 'spearman'
 
 
-Let's say we want to fetch some data off of neurovault and calculate the similarity between two images. For this example \
-we will use the `HCP task group activation maps <https://neurovault.org/collections/457/>`_. We will use nilearn to fetch these maps.
+Let's say I want to fetch some data off of neurovault and calculate the similarity between two images. For this example \
+I will use the `HCP task group activation maps <https://neurovault.org/collections/457/>`_. Instead of manually downloading and adding paths, \
+you can use nilearn to fetch these maps.
 
 .. code-block:: python
 
@@ -54,14 +55,14 @@ we will use the `HCP task group activation maps <https://neurovault.org/collecti
     L_foot_map = fetch_neurovault_ids(image_ids=[3156])
     L_hand_map = fetch_neurovault_ids(image_ids=[3158])
 
-We can look at the images to see the activation maps for each:
+You can look at the images to see the activation maps for each image:
 
 .. figure:: img_png/hcp_handfoot.png
    :align: center
    :alt: Figure 1: HCP Left Hand (A) and Left Foot (B) Activation maps.
    :figclass: align-center
 
-Now that we have pulled this data, we will load the similarity package from `pyrelimri` and calculate the jaccard similarity coefficient  \
+Now that the data are have in the environment, load the similarity package from `pyrelimri` and calculate the jaccard similarity coefficient  \
 and tetrachoric correlation between the two images.
 
 
@@ -76,25 +77,24 @@ and tetrachoric correlation between the two images.
 
 The Jaccard coefficient is 0.18 and the Tetrachoric similarity is .776.
 
-If we reduce the threshold to 1.0, in this instance the correlation will decrease and the Jaccard Coefficient will increase. \
-Why? This is, in part, explained by the decreased overlapping zeros between the bianry images \
+Try changing the threshold to 1.0. What would happen? In this instance the correlation will decrease and the Jaccard Coefficient will increase. \
+Why? This is, in part, explained by the decreased overlapping zeros between the binary images \
 and the increased number of overlapping voxels in the Jaccard calculation.
 
 
 pairwise_similarity
 -------------------
 
-The `pairwise_similarity()` function is, for a lack of a better word, a wrapper over the `image_similarity()` function \
-within the similarity module. It takes in similar values, except this time instead if `imgfile1` and `imgfile2` \
-it takes in a list of paths to NifTi images. Otherwise, all of the same rules apply as described above. To review, \
-the inputs to the `pairwise_similarity()` function are:
+The `pairwise_similarity()` function is a wrapper for the `image_similarity()` function \
+within the similarity module. It accepts similar values, except this time instead of `imgfile1` and `imgfile2` \
+the function takes in a list of paths to NifTi images. The inputs to the `pairwise_similarity()` function are:
 
 * `nii_filelist`: A list of Nifti files, (e.g., ["/path/dir/path_to_img1.nii.gz", "/path/dir/path_to_img2.nii.gz", "/path/dir/path_to_img3.nii.gz")
-* `mask`: The mask is optional, but it is the path to the mask (e.g., /path/dir/path_to_img_mask.nii.gz)
-* `thresh`: The threshold is option but highly for binary estimats, the similarity between unthresholded binary images is sually one (unless they were thresholded before). Base the threshold on your input image type. For example a beta.nii.gz/cope.nii.gz file would be thresholded using a different interger than zstat.nii.gz
-* `similarity_type`: This the similarity calculation you want returned. The options are: 'dice', 'jaccard', 'tetrachoric' or 'spearman'
+* `mask`: The mask is optional but it is the path to a Nifti brain mask (e.g., /path/dir/path_to_img_mask.nii.gz)
+* `thresh`: The threshold is optional but highly recommended for binary estimates. The similarity between unthresholded binary images is usually one (unless they were thresholded before). Base the threshold on your input image type. For example a beta.nii.gz/cope.nii.gz file would be thresholded using a different interger than zstat.nii.gz
+* `similarity_type`: This the similarity estimate between images that you want returned. The options are: 'dice', 'jaccard', 'tetrachoric' or 'spearman'
 
-Using the HCP example from above, let's pull add two more images into the mix. Let's be wild and add the RIGHT foot and hand images.
+Using the HCP example from above, add two more images into the mix.
 
 .. code-block:: python
 
@@ -106,8 +106,8 @@ Using the HCP example from above, let's pull add two more images into the mix. L
     R_hand_map = fetch_neurovault_ids(image_ids=[3162])
 
 
-We wont plot these images, but for reference we have four image paths: `L_hand_map.images[0]`, `L_foot_map.images[0]`, \
-`R_hand_map.images[0]`, `R_foot_map.images[0]`. Now we can try to run the `pairwise_similarity()` function:
+I wont plot these images, but for reference there are now four image paths: `L_hand_map.images[0]`, `L_foot_map.images[0]`, \
+`R_hand_map.images[0]`, `R_foot_map.images[0]`. Now I can try to run the `pairwise_similarity()` function:
 
 
 .. code-block:: python
@@ -117,7 +117,7 @@ We wont plot these images, but for reference we have four image paths: `L_hand_m
     similarity.pairwise_similarity(nii_filelist=[L_foot_map.images[0],L_hand_map.images[0],
                               R_foot_map.images[0],R_hand_map.images[0]],thresh=1.5, similarity_type='jaccard')
 
-As noted previously, the permutations are across the image combinations and return a pandas Dataframe. Such as.
+As noted previously, the permutations are across the image combinations. This will return a pandas Dataframe. Such as:
 
 +------+-----------------------+-------------------------------------------+
 |      | similar_coef          | image_labels                              |
@@ -148,6 +148,6 @@ You just need the paths to the locations of the .nii or .nii.gz files for the co
 
 It all depends on the question. You can calculate similarity between group level maps or individual maps. \
 There are two things to keep in mind: Ensure the data is in the form that is expected and be cautious about the \
-thresholding that is used because a threshold of 2.3 on a t-stat.nii.gz may not be as restriction on the group maps \
-as it is on the the individual maps. Note, the spearman estimate is intended to be on raw values and not binzarized values. \
+thresholding that is used because a threshold of 2.3 on a t-stat.nii.gz may not be as restrictive on the group maps \
+as it is on the the individual maps. Note, the spearman estimate is intended to be on raw values and not thresholded values. \
 In this case, `thresh` should remain as default 'None'.
