@@ -2,7 +2,7 @@ import setuptools
 
 setuptools.setup(
     name="PyReliMRI",
-    version="1.1.0",
+    version="2.0.0",
     description="A package for computing reliability of fMRI images",
     packages=setuptools.find_packages(),
     install_requires=[

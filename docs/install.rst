@@ -1,12 +1,17 @@
 PyReliMRI Installation
 -----------------------
-You can install the PyReliMRI package directly from your terminal using *pip install*
+You can install the PyReliMRI package directly from your terminal using *pip install* for a (A) specific tagged release \
+or (B) latest release that is on PyPI
 
 .. code-block:: bash
-
+   # [A] specific tagged release
    pip install git+https://github.com/demidenm/PyReliMRI.git
 
-If the installation is successful, you will see something along the lines of *Successfully installed PyReliMRI-1.0.0* in your terminal.
+   # [B] latest release on PyPI
+   pip install git+https://github.com/demidenm/PyReliMRI.git@v2.0.0
+
+
+If the installation is successful, you will see something along the lines of *Successfully installed PyReliMRI-2.0.0* into your terminal.
 
 Once the package is installed, you can import the `pyrelimri` module using:
 

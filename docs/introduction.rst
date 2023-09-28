@@ -16,7 +16,10 @@ Authors
 Intro of Problem
 ~~~~~~~~~~~~~~~~~
 
-Reliability questions for `task fMRI <https://https://www.doi.org/10.1177/0956797620916786>`_ and `resting state fMRI <https://www.doi.org/10.1016/j.neuroimage.2019.116157>`_ are increasing. As described in `2010 <https://www.doi.org/10.1111/j.1749-6632.2010.05446.x>`_, there are various ways that researchers calculate reliability. Few open-source packages exist to calculate multiple individual and group reliability metrics using one tool.
+Reliability questions for `task fMRI <https://https://www.doi.org/10.1177/0956797620916786>`_ \
+and `resting state fMRI <https://www.doi.org/10.1016/j.neuroimage.2019.116157>`_ are increasing. \
+As described in `2010 <https://www.doi.org/10.1111/j.1749-6632.2010.05446.x>`_, there are various ways that \
+researchers calculate reliability. Few open-source packages exist to calculate multiple individual and group reliability metrics within one place one.
 
 Purpose of Package
 ~~~~~~~~~~~~~~~~~~
@@ -40,7 +43,8 @@ a `pairwise_similarity` option is available to calculate pairwise similarity coe
 similarity metrics across your list of images in a single shot.
 
 At the individual level, the functions in the ``brain_icc`` module calculate intraclass correlations. For description of different ICCs and their calculations, \
-see discussion in `Liljequist et al., 2019 <https://www.doi.org/10.1371/journal.pone.0219854>`_. In this package, you have the option to \
+see discussion in `Liljequist et al., 2019 <https://www.doi.org/10.1371/journal.pone.0219854>`_ (for conceptual issues in fMRI, \
+see `Noble et al., 2021 <https://www.doi.org/10.1016/j.cobeha.2020.12.012>`_ . In this package, you have the option to \
 select ICC(1), ICC(2,1) or ICC(3,1). The ``brain_icc`` module contains an option to calculate voxelwise ICC and ROI based ICCs. \
 The ROI based ICC is integrated with the `Nilearn datasets <https://nilearn.github.io/dev/modules/datasets.html>`_. As a result, \
 the atlas options include deterministic: AAL, Destrieux 2009, Harvard-Oxford, Juelich, Pauli 2017, Shaefer 2018, Talairach, and probablistic options: \
@@ -83,3 +87,11 @@ probabilistic atlases will have a certain level of smoothing as a result of mask
      - tetrachoric_corr
      - **REQUIRED:** Binary vector NDarray, Binary vector NDarray
      - Calculate and return the tetrachoric correlation between two binary vectors.
+
+
+Citation
+~~~~~~~~
+If you use PyReliMRI in your research, please cite the following Zenodo DOI:
+
+    Demidenko, M., & Poldrack, R. (2023). PyReliMRI: An Open-source Python tool for Estimates of Reliability in MRI Data. Zenodo. https://doi.org/10.5281/zenodo.8387971
+

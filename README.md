@@ -2,14 +2,21 @@
 
 [![Documentation Status](https://readthedocs.org/projects/pyrelimri/badge/?version=latest&style=plastic)](https://pyrelimri.readthedocs.io/en/latest/?badge=latest&style=plastic)
 [![Funded By](https://img.shields.io/badge/NIDA-F32%20DA055334--01A1-yellowgreen?style=plastic)](https://reporter.nih.gov/project-details/10525501)
+[![DOI](https://zenodo.org/badge/576430868.svg)](https://zenodo.org/badge/latestdoi/576430868)
 
 # Python-based Reliability in MRI (PyReliMRI)
 
-PyReliMRI is described and applied in the [TBD Preprint](https://www.doi.org)
+PyReliMRI is described and used in the [TBD Preprint](https://www.doi.org)
+
 ![PyReliMRI Features](/docs/img_png/pyrelimri_fig.png)
 ## Authors
 
 [Michael I. Demidenko](https://orcid.org/0000-0001-9270-0124) & [Russell A. Poldrack](https://orcid.org/0000-0001-6755-0259)
+
+### Citation
+
+If you use PyReliMRI in your research, please cite the following Zenodo DOI:
+Demidenko, M., & Poldrack, R. (2023). PyReliMRI: An Open-source Python tool for Estimates of Reliability in MRI Data. Zenodo. https://doi.org/10.5281/zenodo.8387971
 
 ## Intro of Problem
 

@@ -13,7 +13,8 @@ and/or multi-session data are acquired.
 There are a number of packages available to achieve different aspects contained in this package. \
 Specifically, tools exist to calculate either simiarity coefficient, intraclass corelations (e.g., 3dICC in AFNI) \
 or both (e.g., in python based `nipype <https://nipype.readthedocs.io/en/latest/>`_ or matlab `fmreli <https://github.com/nkroemer/reliability>`_). \
-However, in some cases the flexibility is limited or some features are not available. \
+Alternatively, if you have data in .csv format, Ting Xu has a `Shiny App <https://tingsterx.shinyapps.io/ReliabilityExplorer/>`_ that calculates univariate and multivariate ICCs. \
+However, in some cases the flexibility is limited or some features are not available when working with preprocessed MRI data. \
 For example, `ICC_rep_anova` is limited to ICC(3,1) and the `fmreli` is not accessible without \
 a matlab license and does not deploy the the tetrachoric correlation, pairwise comparisons across images or atlas \
 based reliability estimates.
