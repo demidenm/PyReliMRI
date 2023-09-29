@@ -9,7 +9,7 @@ or (B) latest release that is on PyPI
    pip install git+https://github.com/demidenm/PyReliMRI.git
 
    # [B] latest release on PyPI
-   pip install git+https://github.com/demidenm/PyReliMRI.git@v2.0.0
+   pip install PyReliMRI
 
 
 If the installation is successful, you will see something along the lines of *Successfully installed PyReliMRI-2.0.0* into your terminal.
