@@ -6,10 +6,10 @@ or (B) latest release that is on PyPI
 .. code-block:: bash
 
    # [A] specific tagged release
-   pip install git+https://github.com/demidenm/PyReliMRI.git
+   pip install git+https://github.com/demidenm/PyReliMRI.git@v2.0.0
 
    # [B] latest release on PyPI
-   pip install PyReliMRI
+   pip install pyrelimri
 
 
 If the installation is successful, you will see something along the lines of *Successfully installed PyReliMRI-2.0.0* into your terminal.
