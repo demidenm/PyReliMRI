@@ -28,7 +28,7 @@ Inputs:
 
 Inputs:
 
-  * REQUIRED: list of lists to >1 sessions/runs of 3D Nifti images: string (Subjects across Sessions must be in SAME order); atlas type 'aal', 'destrieux_2009', 'difumo', 'harvard_oxford', 'juelich', 'msdl', 'pauli_2017', 'shaefer_2018', 'smith_2009', 'talairach', atlas directory where atlas already exists or should be saved (recommend: '/tmp/'), and additional options as required for each atlas at `Nilearn datasets <https://nilearn.github.io/dev/modules/datasets.html>`_. Variable and value, e.g., *dimension=64* can be added as instructed in the atlases documentation
+  * REQUIRED: list of lists to >1 sessions/runs of 3D Nifti images: string (Subjects across Sessions must be in SAME order); atlas type 'aal', 'destrieux_2009', 'difumo', 'harvard_oxford', 'juelich', 'msdl', 'pauli_2017', 'shaefer_2018', 'talairach', atlas directory where atlas already exists or should be saved (recommend: '/tmp/'), and additional options as required for each atlas at `Nilearn datasets <https://nilearn.github.io/dev/modules/datasets.html>`_. Variable and value, e.g., *dimension=64* can be added as instructed in the atlases documentation
   * OPTIONAL: ICC type, icc = string (default = ‘icc_3’, options include: ‘icc_3’,’icc_2’,’icc_1’). Default set to `icc_3`.
 
 .. figure:: img_png/roiicc_fig.png

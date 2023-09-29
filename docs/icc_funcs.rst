@@ -400,7 +400,7 @@ The Determistic atlas options (visual ex. Figure 3):
 
 The Probabilistic atlas options (visual ex. Figure 4):
 
-    - Difumo, Harvard-Oxford, Juelich, Pauli 2017 and Smith 2009
+    - Difumo, Harvard-Oxford, Juelich and Pauli 2017
 
 .. figure:: img_png/atlases_ex-probabilistic.jpg
    :align: center

@@ -121,7 +121,6 @@ def setup_atlas(name_atlas: str, **kwargs):
         'msdl': fetch_atlas_msdl,
         'pauli_2017': fetch_atlas_pauli_2017,
         'shaefer_2018': fetch_atlas_schaefer_2018,
-        'smith_2009': fetch_atlas_smith_2009,
         'talairach': fetch_atlas_talairach
     }
     try:
