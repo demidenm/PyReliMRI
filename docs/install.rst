@@ -4,6 +4,7 @@ You can install the PyReliMRI package directly from your terminal using *pip ins
 or (B) latest release that is on PyPI
 
 .. code-block:: bash
+
    # [A] specific tagged release
    pip install git+https://github.com/demidenm/PyReliMRI.git
 
