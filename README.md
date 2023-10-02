@@ -20,7 +20,7 @@ Demidenko, M., & Poldrack, R. (2023). PyReliMRI: An Open-source Python tool for 
 
 ## Intro of Problem
 
-Reliability questions for [task fMRI](https://https://www.doi.org/10.1177/0956797620916786) and [resting state fMRI](https://www.doi.org/10.1016/j.neuroimage.2019.116157) are increasing. As described in [2010](https://www.doi.org/10.1111/j.1749-6632.2010.05446.x), there are various ways that researchers calculate reliability. Few open-source packages exist to calculate multiple individual and group reliability metrics using one tool.
+Reliability questions for [task fMRI](https://www.doi.org/10.1177/0956797620916786) and [resting state fMRI](https://www.doi.org/10.1016/j.neuroimage.2019.116157) are increasing. As described in [2010](https://www.doi.org/10.1111/j.1749-6632.2010.05446.x), there are various ways that researchers calculate reliability. Few open-source packages exist to calculate multiple individual and group reliability metrics using one tool.
 
 ## Purpose of Script
 
