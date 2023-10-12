@@ -93,5 +93,5 @@ Citation
 ~~~~~~~~
 If you use PyReliMRI in your research, please cite the following Zenodo DOI:
 
-    Demidenko, M., & Poldrack, R. (2023). PyReliMRI: An Open-source Python tool for Estimates of Reliability in MRI Data. Zenodo. https://doi.org/10.5281/zenodo.8387971
+    Demidenko, M. I., & Poldrack, R. A. (2023). PyReliMRI: An Open-source Python tool for Estimates of Reliability in MRI Data [Computer software]. https://zenodo.org/record/8387971
 
