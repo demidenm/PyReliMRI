@@ -40,7 +40,8 @@ def trlocked_events(events_path: str, onsets_column: str, trial_name: str,
 
     beh_df = beh_df[[onsets_column, trial_name]]
     beh_df["TimePoint"] = round_cust(
-        beh_df[onsets_column] / bold_tr)  # Per Elizabeth, avoids bakers roundings in .round()
+        beh_df[onsets_column] / bold_tr).astype(int)  # Per Elizabeth, avoids bakers roundings in .round()
+    beh_df["TimePoint"]
 
     time_index = pd.RangeIndex(start=0, stop=bold_vols, step=1)
     time_index_df = pd.DataFrame(index=time_index)
@@ -74,7 +75,7 @@ def extract_time_series_values(behave_df: pd.DataFrame, time_series_array: np.nd
         end = start + delay
         extracted_series = time_series_array[start:end]
         extracted_series_list.append(extracted_series)
-    return np.array(extracted_series_list)
+    return np.array(extracted_series_list, dtype=object)
 
 
 def extract_time_series(bold_paths: list, roi_type: str, high_pass_sec: int = None, roi_mask: str = None,
@@ -103,8 +104,6 @@ def extract_time_series(bold_paths: list, roi_type: str, high_pass_sec: int = No
 
     if roi_type not in roi_options:
         raise ValueError("Invalid ROI type. Choose 'mask' or 'coords'.")
-
-    cache_tmp = os.path.join('/tmp', 'masker_cache')
 
     if roi_type == 'mask':
         roi_series_list = []
@@ -187,7 +186,7 @@ def extract_postcue_trs_for_conditions(events_data: list, onset: str, trial_name
             out = extract_time_series_values(behave_df=trial_type, time_series_array=time_series[index], delay=tr_delay)
             out_trs.append(out)
 
-        out_trs_array = np.array(out_trs)
+        out_trs_array = np.array(out_trs, dtype=object)
         num_subs = out_trs_array.shape[0]
         num_trials = out_trs_array.shape[1]
         num_delay = out_trs_array.shape[2]
