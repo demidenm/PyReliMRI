@@ -74,6 +74,8 @@ def extract_time_series_values(behave_df: pd.DataFrame, time_series_array: np.nd
         start = int(row)
         end = start + delay
         extracted_series = time_series_array[start:end]
+        if len(extracted_series) < delay:  # Check if extracted series is shorter than delay
+            extracted_series = np.pad(extracted_series, ((0, delay - len(extracted_series)), (0, 0)), mode='constant')
         extracted_series_list.append(extracted_series)
     return np.array(extracted_series_list, dtype=object)
 
@@ -177,32 +179,33 @@ def extract_postcue_trs_for_conditions(events_data: list, onset: str, trial_name
     """
     dfs = []
     for cue in conditions:
-        out_trs = []
+        cue_dfs = [] # creating separate cue dfs to accomodate different number of trials for cue types
+        sub_n = 0
         for index, beh_path in enumerate(events_data):
             subset_df = trlocked_events(events_path=beh_path, onsets_column=onset,
                                         trial_name=trial_name, bold_tr=bold_tr, bold_vols=bold_vols, separator='\t')
             trial_type = subset_df[subset_df[trial_name] == cue]
+            out_trs_array = extract_time_series_values(behave_df=trial_type, time_series_array=time_series[index],
+                                                       delay=tr_delay)
+            sub_n = sub_n + 1  # subject is equated to every event file N, subj n = 1 to len(events_data)
 
-            out = extract_time_series_values(behave_df=trial_type, time_series_array=time_series[index], delay=tr_delay)
-            out_trs.append(out)
+            # nth trial, list of TRs
+            for n_trial, trs in enumerate(out_trs_array):
+                num_delay = len(trs)  # Number of TRs for the current trial
+                if num_delay != tr_delay:
+                    raise ValueError(f"Mismatch between tr_delay ({tr_delay}) and number of delay TRs ({num_delay})")
 
-        out_trs_array = np.array(out_trs, dtype=object)
-        num_subs = out_trs_array.shape[0]
-        num_trials = out_trs_array.shape[1]
-        num_delay = out_trs_array.shape[2]
-        reshaped_array = out_trs_array.reshape(-1, 1)
+                reshaped_array = np.array(trs).reshape(-1, 1)
+                df = pd.DataFrame(reshaped_array, columns=['Mean_Signal'])
+                df['Subject'] = sub_n
+                df['Trial'] = n_trial + 1
+                tr_values = np.arange(1, tr_delay + 1)
+                df['TR'] = tr_values
+                cue_values = [cue] * num_delay
+                df['Cue'] = cue_values
+                cue_dfs.append(df)
 
-        df = pd.DataFrame(reshaped_array, columns=['Mean_Signal'])
-        df['Subject'] = np.repeat(np.arange(1, num_subs + 1), num_trials * num_delay)
-        df['Trial'] = np.tile(np.arange(1, num_trials + 1), num_subs * num_delay)
-
-        tr_values = np.tile(np.arange(1, num_delay + 1), num_subs * num_trials)
-        df['TR'] = np.tile(tr_values, 1)
-
-        cue_values = np.repeat([cue], num_subs * num_trials * num_delay)
-        df['Cue'] = np.tile(cue_values, 1)
-
-        dfs.append(df)
+        dfs.append(pd.concat(cue_dfs, ignore_index=True))
 
     return pd.concat(dfs, ignore_index=True)
 
