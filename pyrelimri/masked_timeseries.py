@@ -39,9 +39,13 @@ def trlocked_events(events_path: str, onsets_column: str, trial_name: str,
         raise KeyError(f"Missing columns: {', '.join(missing_cols)}")
 
     beh_df = beh_df[[onsets_column, trial_name]]
-    beh_df["TimePoint"] = round_cust(
-        beh_df[onsets_column] / bold_tr).astype(int)  # Per Elizabeth, avoids bakers roundings in .round()
-    beh_df["TimePoint"]
+    try:
+        beh_df["TimePoint"] = round_cust(
+            beh_df[onsets_column] / bold_tr).astype(int)  # Per Elizabeth, avoids bakers roundings in .round()
+    except Exception as e:
+        print("An error occurred:", e, "Following file included NaN, dropped.", events_path)
+        beh_df.dropna(inplace=True)  # cannot perform operations on missing information
+        beh_df["TimePoint"] = round_cust(beh_df[onsets_column] / bold_tr).astype(int)
 
     time_index = pd.RangeIndex(start=0, stop=bold_vols, step=1)
     time_index_df = pd.DataFrame(index=time_index)
