@@ -9,6 +9,8 @@ from pyrelimri.similarity import image_similarity
 from pyrelimri.tetrachoric_correlation import tetrachoric_corr
 from pyrelimri.brain_icc import (voxelwise_icc, setup_atlas, roi_icc)
 from pyrelimri.icc import sumsq_icc
+from pyrelimri.masked_timeseries import (trlocked_events, extract_time_series_values,
+                                         extract_time_series, extract_postcue_trs_for_conditions)
 from collections import namedtuple
 from nilearn.datasets import fetch_neurovault_ids
 from nilearn.masking import compute_multi_brain_mask
@@ -242,3 +244,124 @@ def test_roiicc_msc(tmp_path_factory):
                      atlas_dir = tmpdir, icc_type='icc_3')
 
     assert np.allclose(result['est'][200], .70, atol=.01)
+
+
+# tests for masked timeseries
+def test_miss_sub_boldpath():
+    bold_paths = ['/tmp/NDA_run-01_bold.nii.gz']
+    roi_type = 'mask'
+    roi_mask = '/tmp/roi_mask.nii.gz'
+
+    with pytest.raises(AssertionError):
+        extract_time_series(bold_paths, roi_type, roi_mask=roi_mask)
+
+def test_miss_sub_boldpath():
+    bold_paths = ['/tmp/sub-NDA_01_bold.nii.gz']
+    roi_type = 'mask'
+    roi_mask = '/tmp/roi_mask.nii.gz'
+
+    with pytest.raises(AssertionError):
+        extract_time_series(bold_paths, roi_type, roi_mask=roi_mask)
+
+
+def test_mismatched_shapes_boldroi(tmp_path):
+    # testing that error is thrown when mask and BOLD images are not similar shape
+    bold_path = tmp_path / "sub-01_run-01_bold.nii.gz"
+    roi_mask_path = tmp_path / "roi_mask.nii.gz"
+
+    # Create dummy BOLD and ROI NIfTI files with mismatched shapes
+    create_dummy_nifti((64, 64, 36, 2), np.eye(4), bold_path)
+    create_dummy_nifti((64, 64, 34), np.eye(4), roi_mask_path)
+
+    bold_paths = [bold_path]
+    roi_type = 'mask'
+
+    # Ensure that AssertionError is raised when shapes are mismatched
+    with pytest.raises(AssertionError):
+        extract_time_series(bold_paths, roi_type, roi_mask=str(roi_mask_path))
+
+def test_wrongorder_behbold_ids():
+    # testing that order of sub & run paths for BOLD paths != Behavioral paths
+    bold_path_list = [f"sub-0{i:02d}_run-01.nii.gz" for i in range(20)] + \
+                     [f"sub-0{i:02d}_run-02.nii.gz" for i in range(20)]
+    beh_path_list = [f"sub-0{i:02d}_run-01.nii.gz" for i in range(15)] + \
+                     [f"sub-0{i:02d}_run-02.nii.gz" for i in range(20)]
+
+    with pytest.raises(AssertionError):
+        extract_postcue_trs_for_conditions(events_data=beh_path_list, onset='Test',
+                                           trial_name='test', bold_tr=.800, bold_vols=200,
+                                           time_series=[0,1,2,3], conditions=['test'], tr_delay=15,
+                                           list_trpaths= bold_path_list)
+
+def test_wrongroi_type():
+    # Define invalid ROI type
+    wrong_roi_lab = 'fookwrng'
+
+    # Define other function arguments
+    bold_paths = ["sub-01_run-01_bold.nii.gz"]
+    high_pass_sec = 100
+    roi_mask = "roi_mask.nii.gz"
+
+    # Test if ValueError is raised for invalid ROI type
+    with pytest.raises(ValueError):
+        extract_time_series(bold_paths, wrong_roi_lab, high_pass_sec=high_pass_sec, roi_mask=roi_mask)
+
+def test_missing_file():
+    # test when events file is not found
+    events_path = "missing_file_name.csv"
+    onsets_column = "onsets"
+    trial_name = "trial"
+    bold_tr = 2.0
+    bold_vols = 10
+
+    # Test if FileNotFoundError is raised when the file does not exist
+    with pytest.raises(FileNotFoundError):
+        trlocked_events(events_path, onsets_column, trial_name, bold_tr, bold_vols)
+
+
+def test_missing_eventscol(tmp_path):
+    # testing missing column "trial" in events file
+    events_path = tmp_path / "test_events.csv"
+    with open(events_path, "w") as f:
+        f.write("onsets\n0.0\n1.0\n2.0\n")
+
+    # Define function arguments
+    onsets_column = "onsets"
+    trial_name = "trial"
+    bold_tr = 2.0
+    bold_vols = 10
+
+    # Test if KeyError is raised when columns are missing
+    with pytest.raises(KeyError):
+        trlocked_events(events_path, onsets_column, trial_name, bold_tr, bold_vols)
+
+
+def test_lenbold_mismatchtrlen(tmp_path):
+    # The length of the resulting TR locked values (length) should be similar N to BOLD.
+    # assume to always be true but confirm
+    events_path = tmp_path / "test_events.csv"
+    onset_name = 'onsets'
+    trial_name = 'trial'
+    bold_tr = 2.0
+    bold_vols = 5  # Mismatched bold_vols compared to the expected length of merged_df
+
+    with open(events_path, "w") as f:
+        f.write(f"{onset_name},{trial_name}\n0.0,Test1\n1.0,Test2\n2.0,Test1\n")
+
+    with pytest.raises(ValueError):
+        trlocked_events(events_path=events_path, onsets_column=onset_name, trial_name=trial_name,
+                        bold_tr=bold_tr, bold_vols=bold_vols, separator=',')
+
+def test_runtrlocked_events(tmp_path):
+    # The length of the resulting TR locked values (length) should be similar N to BOLD.
+    # assume to always be true but confirm
+    events_path = tmp_path / "test_events.csv"
+    onset_name = 'onsets'
+    trial_name = 'trial'
+    bold_tr = 2.0
+    bold_vols = 3
+    with open(events_path, "w") as f:
+        f.write(f"{onset_name},{trial_name}\n0.0,Test1\n2.0,Test2\n4.0,Test1\n")
+
+    trlocked_events(events_path=events_path, onsets_column=onset_name, trial_name=trial_name,
+                    bold_tr=bold_tr, bold_vols=bold_vols, separator=',')

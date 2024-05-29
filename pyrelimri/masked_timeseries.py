@@ -85,8 +85,7 @@ def extract_time_series_values(behave_df: pd.DataFrame, time_series_array: np.nd
 
 
 def extract_time_series(bold_paths: list, roi_type: str, high_pass_sec: int = None, roi_mask: str = None,
-                        roi_coords: tuple = None, radius_mm: int = None, bold_tr: float = None, detrend=True,
-                        fwhm_smooth: float = None):
+                        roi_coords: tuple = None, radius_mm: int = None, detrend=True, fwhm_smooth: float = None):
     """
     For each BOLD path, extract timeseries for either a specified mask or ROI coordinate. Mask and coordinate should be
     in same space/affine as BOLD data. Function leverages NiftiLabelsMasker (mask path) NiftiSpheresMasker (coordinates)
@@ -99,7 +98,6 @@ def extract_time_series(bold_paths: list, roi_type: str, high_pass_sec: int = No
         roi_mask (str or None): Path to the ROI mask image (required if roi_type is 'mask').
         roi_coords (tuple or None): Coordinates (x,y,z) for the sphere center (required if roi_type is 'coords').
         radius_mm (int or None): Radius of the sphere in mm (required if roi_type is 'coords').
-        bold_tr (float or None): TR value for acquisition of BOLD data.
         detrend: True/False, whether to use Nilearn's detrend function.
         fwhm_smooth (float or None): FWHM for spatial smoothing of data.
 
@@ -111,14 +109,33 @@ def extract_time_series(bold_paths: list, roi_type: str, high_pass_sec: int = No
     if roi_type not in roi_options:
         raise ValueError("Invalid ROI type. Choose 'mask' or 'coords'.")
 
+    bold_id_list = []
+    for bold_path in bold_paths:
+        bold_name = os.path.basename(bold_path)
+        path_parts = bold_name.split('_')
+
+        assert any('sub-' in part for part in path_parts), "The path must contain 'sub-' separated by '-'"
+        assert any('run-' in part for part in path_parts), "The path must contain 'run-' separated by '-'"
+
+        sub_id, run_id = None, None
+        for val in path_parts:
+            if 'sub-' in val:
+                sub_id = val.split('-')[1]
+            elif 'run-' in val:
+                run_id = val.split('-')[1]
+        sub_info = 'sub-' + sub_id + '_' + 'run-' + run_id
+        bold_id_list.append(sub_info)
+
     if roi_type == 'mask':
         roi_series_list = []
 
         # Iterate over each path in bold_paths
         for bold_path in bold_paths:
             img = [load_img(i) for i in [bold_path, roi_mask]]
-            assert img[0].shape[0:3] == img[1].shape, 'images of different shape, BOLD {} and ROI {}'.format(
+            assert img[0].shape[0:3] == img[1].shape, 'Position [0:3] of images differ in shape, BOLD {} and ROI {}'.format(
                 img[0].shape, img[1].shape)
+
+
             # Mask data by ROI and smooth and then clean data
             masked_data = apply_mask(bold_path, roi_mask, smoothing_fwhm=fwhm_smooth)
             clean_timeseries = clean(masked_data, standardize='psc', detrend=detrend,
@@ -128,7 +145,7 @@ def extract_time_series(bold_paths: list, roi_type: str, high_pass_sec: int = No
             time_series_avg = np.mean(clean_timeseries, axis=1)[:, None]
             roi_series_list.append(time_series_avg)
 
-        return roi_series_list
+        return roi_series_list, bold_id_list
 
     elif roi_type == 'coords':
         coord_series_list = []
@@ -144,6 +161,7 @@ def extract_time_series(bold_paths: list, roi_type: str, high_pass_sec: int = No
             img = [load_img(i) for i in [bold_path, coord_mask]]
             assert img[0].shape[0:3] == img[1].shape, 'images of different shape, BOLD {} and ROI {}'.format(
                 img[0].shape[0:3], img[1].shape)
+
             # Mask data by ROI and smooth and then clean data
             masked_data = apply_mask(bold_path, coord_mask, smoothing_fwhm=fwhm_smooth)
             clean_timeseries = clean(masked_data, standardize='psc', detrend=detrend,
@@ -152,7 +170,7 @@ def extract_time_series(bold_paths: list, roi_type: str, high_pass_sec: int = No
             # get avg at volumes across voxels, return a (volumnes,1) array
             time_series_avg = np.mean(clean_timeseries, axis=1)[:, None]
             coord_series_list.append(time_series_avg)
-        return coord_series_list, coord_mask
+        return coord_series_list, coord_mask, bold_id_list
 
     else:
         print(f'roi_type: {roi_type}, is not in [{roi_options}]')
@@ -160,7 +178,7 @@ def extract_time_series(bold_paths: list, roi_type: str, high_pass_sec: int = No
 
 def extract_postcue_trs_for_conditions(events_data: list, onset: str, trial_name: str,
                                        bold_tr: float, bold_vols: int, time_series: np.ndarray,
-                                       conditions: list, tr_delay: int):
+                                       conditions: list, tr_delay: int, list_trpaths: list):
     """
     Extract TR coinciding with condition onset, plus TRs for specified delay for each file. Save this to a pandas
     dataframe (long) with associated Mean Signal value, for each subject, trial of condition and cue across the range
@@ -175,13 +193,34 @@ def extract_postcue_trs_for_conditions(events_data: list, onset: str, trial_name
         bold_vols (int): Number of volumes for BOLD.
         time_series (numpy.ndarray): numpy array of time series data.
         conditions (list): List of cue conditions to iterate over, min 1.
-        tr_delay (int): Number of TRs to serve as delay (post onset)
+        list_trpaths (list): List or sub-##_run-## exported with timeseries extraction to match beh order
 
     Returns:
         pd.DataFrame: DataFrame containing mean signal intensity values, subject labels,
             trial labels, TR values, and cue labels for all specified conditions.
     """
     dfs = []
+
+    # check array names first
+    beh_id_list = []
+    for beh_path in events_data:
+        # create sub ID array to text again bold array
+        beh_name = os.path.basename(beh_path)
+        path_parts = beh_name.split('_')
+        sub_id, run_id = None, None
+        for val in path_parts:
+            if 'sub-' in val:
+                sub_id = val.split('-')[1]
+            elif 'run-' in val:
+                run_id = val.split('-')[1]
+        sub_info = 'sub-' + sub_id + '_' + 'run-' + run_id
+        beh_id_list.append(sub_info)
+
+    assert len(beh_id_list) == len(list_trpaths), f"Length of behavioral files {len(beh_id_list)} " \
+                                              f"does not match TR list {len(list_trpaths)}"
+    assert (np.array(beh_id_list) == np.array(list_trpaths)).all(), "Provided list_trpaths does not match" \
+                                                                f"Beh path order {beh_id_list}"
+
     for cue in conditions:
         cue_dfs = [] # creating separate cue dfs to accomodate different number of trials for cue types
         sub_n = 0
