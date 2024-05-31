@@ -293,12 +293,12 @@ def test_wrongorder_behbold_ids():
     with pytest.raises(AssertionError):
         extract_postcue_trs_for_conditions(events_data=beh_path_list, onset='Test',
                                            trial_name='test', bold_tr=.800, bold_vols=200,
-                                           time_series=[0,1,2,3], conditions=['test'], tr_delay=15,
-                                           list_trpaths= bold_path_list)
+                                           time_series=[0, 1, 2, 3], conditions=['test'], tr_delay=15,
+                                           list_trpaths=bold_path_list)
 
 def test_wrongroi_type():
     # Define invalid ROI type
-    wrong_roi_lab = 'fookwrng'
+    wrong_roi_lab = 'Testin-it'
 
     # Define other function arguments
     bold_paths = ["sub-01_run-01_bold.nii.gz"]
@@ -311,7 +311,7 @@ def test_wrongroi_type():
 
 def test_missing_file():
     # test when events file is not found
-    events_path = "missing_file_name.csv"
+    events_path = "missing_file_testin-it.csv"
     onsets_column = "onsets"
     trial_name = "trial"
     bold_tr = 2.0
@@ -324,7 +324,7 @@ def test_missing_file():
 
 def test_missing_eventscol(tmp_path):
     # testing missing column "trial" in events file
-    events_path = tmp_path / "test_events.csv"
+    events_path = tmp_path / "testin-it_events.csv"
     with open(events_path, "w") as f:
         f.write("onsets\n0.0\n1.0\n2.0\n")
 
@@ -342,7 +342,7 @@ def test_missing_eventscol(tmp_path):
 def test_lenbold_mismatchtrlen(tmp_path):
     # The length of the resulting TR locked values (length) should be similar N to BOLD.
     # assume to always be true but confirm
-    events_path = tmp_path / "test_events.csv"
+    events_path = tmp_path / "testin-it_events.csv"
     onset_name = 'onsets'
     trial_name = 'trial'
     bold_tr = 2.0
@@ -358,7 +358,7 @@ def test_lenbold_mismatchtrlen(tmp_path):
 def test_runtrlocked_events(tmp_path):
     # The length of the resulting TR locked values (length) should be similar N to BOLD.
     # assume to always be true but confirm
-    events_path = tmp_path / "test_events.csv"
+    events_path = tmp_path / "testin-it_events.csv"
     onset_name = 'onsets'
     trial_name = 'trial'
     bold_tr = 2.0
@@ -394,21 +394,21 @@ def test_testsimtrpeak(tmp_path, TR, interval):
     events_df = pd.DataFrame({
         "onset": onsets,
         "duration": durations,
-        "trial_type": "Phacking101"
+        "trial_type": "Testin-it"
     })
     last_onset = events_df['onset'].iloc[-1]
     tr = TR
     conv_vals = create_conv_mat(eventsdf=events_df, tr_dur=tr, acq_dur=last_onset)
 
     # create n = 1 compatible timeseries for test
-    convolved_stacked = np.vstack([conv_vals['Phacking101']])
+    convolved_stacked = np.vstack([conv_vals['Testin-it']])
     convolved_stacked = convolved_stacked.reshape((conv_vals.shape[0] * (conv_vals.shape[1] - 1), 1))
     timeseries_reshaped = np.reshape(convolved_stacked, (1, len(convolved_stacked), 1))
 
     events_file_name = tmp_path / "sub-01_run-01_test-events.csv"
     events_df.to_csv(events_file_name, sep='\t')
 
-    conditions = ['Phacking101']
+    conditions = ['Testin-it']
     trdelay = int(15 / tr)
     df = extract_postcue_trs_for_conditions(events_data=[events_file_name], onset='onset', trial_name='trial_type',
                                             bold_tr=TR, bold_vols=len(timeseries_reshaped[0]),
