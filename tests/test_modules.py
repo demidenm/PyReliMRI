@@ -415,7 +415,7 @@ def test_testsimtrpeak(tmp_path, TR, interval):
                                             time_series=timeseries_reshaped,
                                             conditions=conditions, tr_delay=trdelay,
                                             list_trpaths=['sub-01_run-01'])
-    tr_peak = df.groupby('TR')['Mean_Signal'].mean().idxmax()
+    tr_peak = df.loc[df['Mean_Signal'].idxmax(), 'TR']
     min_tr = np.floor(float(6 / tr))
     max_tr = np.ceil(float(10 / tr))
     peak_in_tr = np.arange(min_tr, max_tr, .1)
