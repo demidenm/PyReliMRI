@@ -16,6 +16,9 @@ from nilearn.datasets import fetch_neurovault_ids
 from nilearn.masking import compute_multi_brain_mask
 from hypothesis import given, strategies as st
 from hypothesis.extra.numpy import arrays
+import warnings
+warnings.filterwarnings("ignore", message="The nilearn.glm module is experimental.", category=FutureWarning)
+from nilearn.glm.first_level import make_first_level_design_matrix
 
 
 def generate_img_pair(r: float, dir: Path, use_mask: bool = False, tol: float = .001,
@@ -365,3 +368,57 @@ def test_runtrlocked_events(tmp_path):
 
     trlocked_events(events_path=events_path, onsets_column=onset_name, trial_name=trial_name,
                     bold_tr=bold_tr, bold_vols=bold_vols, separator=',')
+
+
+def create_conv_mat(eventsdf, tr_dur=None, acq_dur=None):
+    vol_time = acq_dur
+    tr = tr_dur
+    design_mat = make_first_level_design_matrix(
+        frame_times=np.linspace(0, vol_time, int(vol_time/tr)),
+        events=eventsdf, hrf_model='spm',
+        drift_model=None, high_pass=None)
+    return design_mat
+
+
+@pytest.mark.parametrize("TR", [.8, 1.4, 2, 2.6])
+@pytest.mark.parametrize("interval", [10, 15, 20])
+def test_testsimtrpeak(tmp_path, TR, interval):
+    onsets = np.arange(0, 160, interval)
+    dur_opts = [1.5, 2, 2.5]
+    prob_durs = [.50, .25, .25]
+    np.random.seed(11)
+    durations = np.random.choice(
+        dur_opts, size=len(onsets), p=prob_durs
+    )
+
+    events_df = pd.DataFrame({
+        "onset": onsets,
+        "duration": durations,
+        "trial_type": "Phacking101"
+    })
+    last_onset = events_df['onset'].iloc[-1]
+    tr = TR
+    conv_vals = create_conv_mat(eventsdf=events_df, tr_dur=tr, acq_dur=last_onset)
+
+    # create n = 1 compatible timeseries for test
+    convolved_stacked = np.vstack([conv_vals['Phacking101']])
+    convolved_stacked = convolved_stacked.reshape((conv_vals.shape[0] * (conv_vals.shape[1] - 1), 1))
+    timeseries_reshaped = np.reshape(convolved_stacked, (1, len(convolved_stacked), 1))
+
+    events_file_name = tmp_path / "sub-01_run-01_test-events.csv"
+    events_df.to_csv(events_file_name, sep='\t')
+
+    conditions = ['Phacking101']
+    trdelay = int(15 / tr)
+    df = extract_postcue_trs_for_conditions(events_data=[events_file_name], onset='onset', trial_name='trial_type',
+                                            bold_tr=TR, bold_vols=len(timeseries_reshaped[0]),
+                                            time_series=timeseries_reshaped,
+                                            conditions=conditions, tr_delay=trdelay,
+                                            list_trpaths=['sub-01_run-01'])
+    tr_peak = df.groupby('TR')['Mean_Signal'].mean().idxmax()
+    min_tr = np.floor(float(6 / tr))
+    max_tr = np.ceil(float(10 / tr))
+    peak_in_tr = np.arange(min_tr, max_tr, .1)
+    is_in_array = np.any(np.isclose(peak_in_tr, tr_peak))
+    print(f"Checking whether {tr_peak} TR HRF peak is between range min {min_tr} and max {max_tr}")
+    assert is_in_array, f"Peak error: Peak should occurs between 5-8sec, peak {round(tr_peak * tr, 2)}"
