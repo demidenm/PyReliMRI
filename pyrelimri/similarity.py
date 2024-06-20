@@ -13,15 +13,39 @@ def image_similarity(imgfile1: str, imgfile2: str,
                      mask: str = None, thresh: float = None,
                      similarity_type: str = 'dice') -> float:
     """
-    The image_similarity function takes in two images (3D), a binarized mask (3D), and simiarlity type.
-    Based on the specified threshold and similarity type, the ratio of intersecting and union of voxels is calculated.
-    The function returns a ratio of voxels that overlap between the two images
-    :param imgfile1: nii path to first image
-    :param imgfile2: nii path to second image
-    :param mask: path to image mask for voxel selection
-    :param thresh: specify voxel threshold to use, if any, values >0 or < 0. Default = 0
-    :param similarity_type: specify calculation, can be Dice, Jaccards, Tetrachoric, or Spearman, Default = Dice
-    :return: similarity coefficient
+    Calculate the similarity between two 3D images using a specified similarity metric.
+    The function computes the ratio of intersecting and union voxels based on the provided threshold and similarity type
+    The result is a similarity coefficient indicating the overlap between the two images.
+
+    Parameters
+    ----------
+    imgfile1 : str
+        Path to the first NIfTI image file.
+
+    imgfile2 : str
+        Path to the second NIfTI image file.
+
+    mask : str, optional
+        Path to a binarized mask image for voxel selection. Default is None.
+
+    thresh : float, optional
+        Threshold value for voxel selection. Positive values retain voxels greater than the threshold,
+        and negative values retain voxels less than the threshold. Default is None.
+
+    similarity_type : str, optional
+        Similarity calculation method. Options are 'dice', 'jaccard', 'tetrachoric', or 'spearman'. Default is 'dice'.
+
+    Returns
+    -------
+    float
+        Similarity coefficient based on the selected method.
+
+
+    Example
+    -------
+    # Example usage of image_similarity
+    similarity = image_similarity(imgfile1='./img1.nii', imgfile2='./img2.nii',
+    mask='./mask.nii', thresh=0.5, similarity_type='dice')
     """
     assert similarity_type.casefold() in ['dice', 'jaccard',
                                           'tetrachoric', 'spearman'], 'similarity_type must be ' \
@@ -72,20 +96,42 @@ def image_similarity(imgfile1: str, imgfile2: str,
 
 
 def pairwise_similarity(nii_filelist: list, mask: str = None,
-                   thresh: float = None, similarity_type: str = 'Dice') -> DataFrame:
-    """This pairwise comparison takes in a list of paths to Nifti images and creates
-    a comparsion that covers all possible combinations. For each combination, it calculates
-    the specified similarity and returns the coefficients & string combo.
+                        thresh: float = None, similarity_type: str = 'Dice') -> DataFrame:
+    """
+    Calculate pairwise similarity between a list of NIfTI images using a specified similarity metric.
+    The function generates all possible combinations of the provided NIfTI images and computes the similarity
+    coefficient for each pair.
 
-    :param nii_filelist: list of paths to NII files
-    :param mask: path to image mask for brain mask
-    :param thresh: specify voxel threshold to use, if any, values >0 or < 0. Default = 0
-    :param similarity_type: type of similarity calc, Dice or Jaccards, Tetrachoric or Spearman Correlation, default Dice
-    :return: returns similarity coefficient & labels in pandas dataframe
+    Parameters
+    ----------
+    nii_filelist : list
+        List of paths to NIfTI image files.
+
+    mask : str, optional
+        Path to the brain mask image for voxel selection. Default is None.
+
+    thresh : float, optional
+        Threshold value for voxel selection. Positive values retain voxels greater than the threshold,
+        and negative values retain voxels less than the threshold. Default is None.
+
+    similarity_type : str, optional
+        Similarity calculation method. Options are 'dice', 'jaccard', 'tetrachoric', or 'spearman'. Default is 'dice'.
+
+    Returns
+    -------
+    DataFrame
+        A pandas DataFrame containing the similarity coefficients and corresponding image labels for each pairwise comparison.
+
+
+    Example
+    -------
+    # Example usage of pairwise_similarity
+    similarity_df = pairwise_similarity(['./img1.nii', './img2.nii', './img3.nii'],
+    mask='mask.nii', thresh=0.5, similarity_type='dice')
     """
     # test whether function type is of 'Dice' or 'Jaccard', case insensitive
     assert similarity_type.casefold() in ['dice', 'jaccard',
-                                          'tetrachoric','spearman'], 'similarity_type must be ' \
+                                          'tetrachoric', 'spearman'], 'similarity_type must be ' \
                                                                      '"Dice", "Jaccard", "Tetrachoric" or ' \
                                                                      '"Spearman". Provided: {}"'.format(similarity_type)
 

@@ -5,12 +5,13 @@ import pandas as pd
 import nibabel as nib
 from pathlib import Path
 import seaborn as sns
+import statsmodels.formula.api as lme
 from pyrelimri.similarity import image_similarity
 from pyrelimri.tetrachoric_correlation import tetrachoric_corr
 from pyrelimri.brain_icc import (voxelwise_icc, setup_atlas, roi_icc)
 from pyrelimri.icc import sumsq_icc
-from pyrelimri.masked_timeseries import (trlocked_events, extract_time_series_values,
-                                         extract_time_series, extract_postcue_trs_for_conditions)
+from pyrelimri.masked_timeseries import (trlocked_events, extract_time_series, extract_postcue_trs_for_conditions)
+from pyrelimri.conn_icc import (triang_to_fullmat, edgewise_icc)
 from collections import namedtuple
 from nilearn.datasets import fetch_neurovault_ids
 from nilearn.masking import compute_multi_brain_mask
@@ -149,7 +150,35 @@ def test_image_similarity_spearman_value_error(image_pair):
     with pytest.raises(ValueError):
         image_similarity(imgfile1, imgfile2, mask=mask, thresh=thresh, similarity_type=similarity_type)
 
-#@pytest.mark.parametrize("corr", [.50, .60,.45])
+@pytest.mark.parametrize("rater", ['focused', 'divided'])
+def test_pyreli_v_lmer_icc3(rater):
+
+    data = sns.load_dataset('anagrams')  # load
+    sub_df = data[data['attnr'] == rater]  # filter
+    long_df = pd.DataFrame(
+        pd.melt(sub_df,
+                id_vars="subidr",
+                value_vars=["num1", "num2", "num3"],
+                var_name="sess",
+                value_name="vals"))
+
+    lmmod = lme.mixedlm("vals ~ sess", long_df, groups=long_df["subidr"], re_formula="~1")
+    lmmod = lmmod.fit()
+    lmmod_btwnvar = lmmod.cov_re.iloc[0, 0]
+    lmmod_wthnvar = lmmod.scale
+    lmmod_icc3 = (lmmod_btwnvar) / (lmmod_btwnvar + lmmod_wthnvar)
+    icc3_test = sumsq_icc(df_long=long_df, sub_var='subidr',
+                          sess_var='sess', value_var='vals', icc_type='icc_3')
+    iccmod_btwnvar = icc3_test[3]
+    iccmod_withinvar = icc3_test[4]
+    iccmod_icc3 = icc3_test[0]
+
+    lm_out = np.array([lmmod_btwnvar, lmmod_wthnvar, lmmod_icc3])
+    pyreli_out = np.array([iccmod_btwnvar, iccmod_withinvar, iccmod_icc3])
+
+    assert np.allclose(a=lm_out, b=pyreli_out, atol=.001)
+
+
 def test_calculate_icc1():
     data = sns.load_dataset('anagrams')
     # subset to only divided attnr measure occ
@@ -244,7 +273,7 @@ def test_roiicc_msc(tmp_path_factory):
 
     # estimate ICC for roi = 200 in shaefer
     result = roi_icc(multisession_list=[ses1, ses2], type_atlas='shaefer_2018',
-                     atlas_dir = tmpdir, icc_type='icc_3')
+                     atlas_dir=tmpdir, icc_type='icc_3')
 
     assert np.allclose(result['est'][200], .70, atol=.01)
 
@@ -263,7 +292,7 @@ def test_miss_sub_boldpath():
     roi_type = 'mask'
     roi_mask = '/tmp/roi_mask.nii.gz'
 
-    with pytest.raises(AssertionError):
+    with pytest.raises(ValueError):
         extract_time_series(bold_paths, roi_type, roi_mask=roi_mask)
 
 
@@ -298,7 +327,7 @@ def test_wrongorder_behbold_ids():
 
 def test_wrongroi_type():
     # Define invalid ROI type
-    wrong_roi_lab = 'Testin-it'
+    wrong_roi_lab = 'Testinit'
 
     # Define other function arguments
     bold_paths = ["sub-01_run-01_bold.nii.gz"]
@@ -394,21 +423,21 @@ def test_testsimtrpeak(tmp_path, TR, interval):
     events_df = pd.DataFrame({
         "onset": onsets,
         "duration": durations,
-        "trial_type": "Testin-it"
+        "trial_type": "Testinit"
     })
     last_onset = events_df['onset'].iloc[-1]
     tr = TR
     conv_vals = create_conv_mat(eventsdf=events_df, tr_dur=tr, acq_dur=last_onset)
 
     # create n = 1 compatible timeseries for test
-    convolved_stacked = np.vstack([conv_vals['Testin-it']])
+    convolved_stacked = np.vstack([conv_vals['Testinit']])
     convolved_stacked = convolved_stacked.reshape((conv_vals.shape[0] * (conv_vals.shape[1] - 1), 1))
     timeseries_reshaped = np.reshape(convolved_stacked, (1, len(convolved_stacked), 1))
 
     events_file_name = tmp_path / "sub-01_run-01_test-events.csv"
     events_df.to_csv(events_file_name, sep='\t')
 
-    conditions = ['Testin-it']
+    conditions = ['Testinit']
     trdelay = int(15 / tr)
     df = extract_postcue_trs_for_conditions(events_data=[events_file_name], onset='onset', trial_name='trial_type',
                                             bold_tr=TR, bold_vols=len(timeseries_reshaped[0]),
@@ -423,3 +452,78 @@ def test_testsimtrpeak(tmp_path, TR, interval):
     is_in_array = np.any(np.isclose(peak_in_tr, tr_peak))
     print(f"Checking whether {tr_peak} TR HRF peak is between range min {min_tr} and max {max_tr}")
     assert is_in_array, f"Peak error: Peak should occurs between 5-8sec, peak {round(tr_peak * tr, 2)}"
+
+
+# tests for conn_icc
+def test_triangtomat_valid():
+    size = 3
+    corr_1darray = np.array([1, 2, 3, 4, 5, 6])
+    expected_output = np.array([[1, 0, 0], [2, 3, 0], [4, 5, 6]])
+    output = triang_to_fullmat(corr_1darray, size)
+    assert np.array_equal(output, expected_output)
+
+
+def test_triangtomat_invalid():
+    size = 3
+    corr_1darray_invalid = np.array([1, 2, 3, 4])
+    with pytest.raises(ValueError):
+        triang_to_fullmat(corr_1darray_invalid, size)
+
+
+def test_edgewise_icc_n_cols_and_col_names_length_match():
+    multisession_list = [
+        [np.eye(3), np.eye(3)],
+        [np.eye(3), np.eye(3)]
+    ]
+    n_cols = 3
+    col_names = ["A", "B", "C"]
+    result = edgewise_icc(multisession_list, n_cols, col_names=col_names)
+    assert result['roi_labels'] == col_names
+
+def test_edgewise_icc_n_cols_and_col_names_length_mismatch():
+    multisession_list = [
+        [np.eye(3), np.eye(3)],
+        [np.eye(3), np.eye(3)]
+    ]
+    n_cols = 3
+    col_names_mismatch = ["A", "B"]
+    with pytest.raises(AssertionError):
+        edgewise_icc(multisession_list, n_cols, col_names=col_names_mismatch)
+
+def test_edgewise_difflength():
+    multisession_list = [
+        [np.eye(5)],
+        [np.eye(5), np.eye(5)]
+    ]
+    n_cols = 3
+    with pytest.raises(AssertionError):
+        edgewise_icc(multisession_list, n_cols)
+
+def test_edgewise_wrongfiletype():
+    multisession_list = [
+        [np.eye(5), "testing.xls"],
+        [np.eye(5), np.eye(5)]
+    ]
+    n_cols = 3
+    with pytest.raises(TypeError):
+        edgewise_icc(multisession_list, n_cols)
+
+def test_edgewise_filetest_result():
+    mock_matrix = np.eye(3)
+    np.save('test.npy', mock_matrix)
+    multisession_list_files = [
+        ['test.npy', 'test.npy'],
+        ['test.npy', 'test.npy']
+    ]
+    n_cols = 3
+    result = edgewise_icc(multisession_list_files, n_cols)
+    assert 'est' in result
+
+def test_edgewise_wrong_ext():
+    multisession_list_invalid_ext = [
+        ['file.wrg', 'file.wrg'],
+        ['file.wrg', 'file.wrg']
+    ]
+    n_cols = 3
+    with pytest.raises(Exception):
+        edgewise_icc(multisession_list_invalid_ext, n_cols)
