@@ -9,4 +9,5 @@ scikit-learn
 hypothesis
 matplotlib
 joblib
+statsmodels
 
