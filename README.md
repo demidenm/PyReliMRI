@@ -4,13 +4,13 @@
 [![Funded By](https://img.shields.io/badge/NIDA-F32%20DA055334--01A1-yellowgreen?style=plastic)](https://reporter.nih.gov/project-details/10525501)
 [![DOI](https://zenodo.org/badge/576430868.svg)](https://zenodo.org/badge/latestdoi/576430868)
 
-![PyReliMRI Logo](/docs/img_png/pyrelimri_logo.png)
+<img src="docs/img_png/pyrelimri_logo.png" alt="Pyrelimri Logo" style="width:50%;">
 
 # Python-based Reliability in MRI (PyReliMRI)
 
 PyReliMRI is described and used in the [Preprint](https://www.doi.org/10.1101/2024.03.19.585755)
+<img src="docs/img_png/pyrelimri_fig.png" alt="Pyrelimri Features" style="width:100%;">
 
-![PyReliMRI Features](/docs/img_png/pyrelimri_fig.png)
 
 ## Authors
 
