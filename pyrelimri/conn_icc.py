@@ -100,18 +100,6 @@ def edgewise_icc(multisession_list: list, n_cols: int, col_names: list = None,
             - 'wthn_sub': Within-subject variance as a 2D matrix.
             - 'btwn_meas': Between-measure variance as a 2D matrix.
 
-    Raises
-    ------
-    AssertionError
-        If the number of specified columns does not match the length of column names.
-    TypeError
-        If the values in `multisession_list` are not all NumPy ndarrays or strings (file paths).
-
-    Notes
-    -----
-    This function calculates ICCs for each edge in the connectivity matrix across multiple sessions.
-    It handles different types of input data (files or ndarrays) and supports different ICC types.
-
     Example
     -------
     icc_results = edgewise_icc(multisession_list=[dat_ses1, dat_ses2, dat_ses3],
@@ -125,15 +113,12 @@ def edgewise_icc(multisession_list: list, n_cols: int, col_names: list = None,
     if col_names is None:
         col_names = np.arange(1, n_cols + 1, 1)
 
-    # Test 2
     assert n_cols == len(
         col_names), f"Specified number ({n_cols}) of columns doesn't match " \
                     f"the length of column names ({len(col_names)})"
-    # Test 3
     assert session_all_same, f"Not all lists in session_files have the same length. " \
                              f"Mismatched lengths: {', '.join(str(length) for length in session_lengths)}"
 
-    # Test 4
     for i, list_set in enumerate(multisession_list):
         if all(isinstance(item, str) for item in list_set):
             print(f"All values in the list set {i} are strings")
@@ -197,9 +182,9 @@ def edgewise_icc(multisession_list: list, n_cols: int, col_names: list = None,
         'est': triang_to_fullmat(corr_1darray=np.array(est), size=corr_cols),
         'lowbound': triang_to_fullmat(corr_1darray=np.array(lowbound), size=corr_cols),
         'upbound': triang_to_fullmat(corr_1darray=np.array(upbound), size=corr_cols),
-        'btwn_sub': triang_to_fullmat(corr_1darray=np.array(btwn_sub), size=corr_cols),
-        'wthn_sub': triang_to_fullmat(corr_1darray=np.array(wthn_sub), size=corr_cols),
-        'btwn_meas': triang_to_fullmat(corr_1darray=np.array(btwn_meas), size=corr_cols)
+        'btwnsub': triang_to_fullmat(corr_1darray=np.array(btwn_sub), size=corr_cols),
+        'wthnsub': triang_to_fullmat(corr_1darray=np.array(wthn_sub), size=corr_cols),
+        'btwnmeas': triang_to_fullmat(corr_1darray=np.array(btwn_meas), size=corr_cols)
     }
 
     return result_dict

@@ -47,18 +47,18 @@ def voxelwise_icc(multisession_list: str, mask: str, icc_type='icc_3'):
     Returns
     -------
     dict
-        Dictionary containing the following 3D arrays:
-        'est' : numpy.ndarray
+        Dictionary containing the following 3D images:
+        'est' : nibabel.Nifti1Image
             Estimated ICC values.
-        'lowbound' : numpy.ndarray
+        'lowbound' : nibabel.Nifti1Image
             Lower bound of ICC confidence intervals.
-        'upbound' : numpy.ndarray
+        'upbound' : nibabel.Nifti1Image
             Upper bound of ICC confidence intervals.
-        'btwn_sub' : numpy.ndarray
+        'btwn_sub' : nibabel.Nifti1Image
             Between-subject variance.
-        'wthn_sub' : numpy.ndarray
+        'wthn_sub' : nibabel.Nifti1Image
             Within-subject variance.
-        'btwn_meas' : numpy.ndarray
+        'btwn_meas' : nibabel.Nifti1Image
             Between-measurement variance.
     """
 
@@ -113,9 +113,9 @@ def voxelwise_icc(multisession_list: str, mask: str, icc_type='icc_3'):
         'est': masker.inverse_transform(np.array(est)),
         'lowbound': masker.inverse_transform(np.array(lowbound)),
         'upbound': masker.inverse_transform(np.array(upbound)),
-        'btwn_sub': masker.inverse_transform(np.array(btwn_sub_var)),
-        'wthn_sub': masker.inverse_transform(np.array(within_sub_var)),
-        'btwn_meas': masker.inverse_transform(np.array(btwn_meas_var))
+        'btwnsub': masker.inverse_transform(np.array(btwn_sub_var)),
+        'wthnsub': masker.inverse_transform(np.array(within_sub_var)),
+        'btwnmeas': masker.inverse_transform(np.array(btwn_meas_var))
     }
 
     return result_dict
@@ -281,25 +281,24 @@ def roi_icc(multisession_list: str, type_atlas: str,
             Lower bound of ICC confidence intervals for each ROI.
         'upbound' : ndarray
             Upper bound of ICC confidence intervals for each ROI.
-        'btwn_sub' : ndarray
+        'btwnsub' : ndarray
             Between-subject variance for each ROI.
-        'wthn_sub' : ndarray
+        'wthnsub' : ndarray
             Within-subject variance for each ROI.
-        'btwn_meas' : ndarray
+        'btwnmeas' : ndarray
             Between-measurement variance for each ROI.
-
-    Raises
-    ------
-    AssertionError
-        If not all lists in `multisession_list` have the same length.
-
-    ValueError
-        If the provided atlas name (`type_atlas`) is incorrect or unsupported.
-
-    Notes
-    -----
-    Additional parameters (`**kwargs`) can be provided based on documentation from Nilearn.
-
+        'est_3d' : nibabel.Nifti1Image
+            Estimated ICC values for each ROI.
+        'lowbound_3d' : nibabel.Nifti1Image
+            Lower bound of ICC confidence intervals for each ROI.
+        'upbound_3d' : nibabel.Nifti1Image
+            Upper bound of ICC confidence intervals for each ROI.
+        'btwnsub_3d' : nibabel.Nifti1Image
+            Between-subject variance for each ROI.
+        'wthnsub_3d' : nibabel.Nifti1Image
+            Within-subject variance for each ROI.
+        'btwnmeas_3d' : nibabel.Nifti1Image
+            Between-measurement variance for each ROI.
     Example
     -------
     # Calculate ICC for ROIs using multisession data and AAL atlas
@@ -389,15 +388,15 @@ def roi_icc(multisession_list: str, type_atlas: str,
         'est': np.array(est),
         'lowbound': np.array(lowbound),
         'upbound': np.array(upbound),
-        'btwn_sub': np.array(btwn_sub_var),
-        'wthn_sub': np.array(within_sub_var),
-        'btwn_meas': np.array(btwn_meas_var)
+        'btwnsub': np.array(btwn_sub_var),
+        'wthnsub': np.array(within_sub_var),
+        'btwnmeas': np.array(btwn_meas_var)
     }
 
     est_string = {"est_3d": est,
                   "lowbound_3d": lowbound, "upbound_3d": upbound,
-                  "btwn_sub_3d": btwn_sub_var, "wthn_sub_3d": within_sub_var,
-                  "btwn_meas_3d": btwn_meas_var
+                  "btwnsub_3d": btwn_sub_var, "wthnsub_3d": within_sub_var,
+                  "btwnmeas_3d": btwn_meas_var
                   }
 
     if atlas_dim == 4:
@@ -410,9 +409,9 @@ def roi_icc(multisession_list: str, type_atlas: str,
             'est_3d': masker.inverse_transform(np.array(est)),
             'lowbound_3d': masker.inverse_transform(np.array(lowbound)),
             'upbound_3d': masker.inverse_transform(np.array(upbound)),
-            'btwn_sub_3d': masker.inverse_transform(np.array(btwn_sub_var)),
-            'wthn_sub_3d': masker.inverse_transform(np.array(within_sub_var)),
-            'btwn_meas_3d': masker.inverse_transform(np.array(within_sub_var))
+            'btwnsub_3d': masker.inverse_transform(np.array(btwn_sub_var)),
+            'wthnsub_3d': masker.inverse_transform(np.array(within_sub_var)),
+            'btwnmeas_3d': masker.inverse_transform(np.array(within_sub_var))
         }
         result_dict.update(update_values)
 

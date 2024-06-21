@@ -5,7 +5,7 @@ Python-based Reliability in MRI (PyReliMRI)
     :target: https://github.com/demidenm/PyReliMRI/actions/workflows/python-package-conda.yml
 
 
-PyReliMRI is described and applied in the `TBD Preprint <https://www.doi.org>`_.
+PyReliMRI is described and applied in the `Preprint <https://www.doi.org/10.1101/2024.03.19.585755>`_.
 
 Authors
 ~~~~~~~
@@ -61,21 +61,25 @@ probabilistic atlases will have a certain level of smoothing as a result of mask
      - Inputs
      - Purpose
 
+   * - icc
+     - sumsq_total, sumsq, sumsq_btwn, icc_confint, sumsq_icc
+     - **REQUIRED:** Panda long dataframe with a subject variable (sub_var), session variable (sess_var), the scores (value_var) and the icc type (icc_type; default = 'icc_3', options include: 'icc_3', 'icc_2', 'icc_1')
+     - Calculates different components used in calculating the ICC estimate (e.g., ICC([1]), ICC([2,1]), or ICC([3,1])), 95% lowerbound and 95% upperbound for ICC, between subject variance, within-subject variance, and in case of ICC(2,1) between measure variance. If NaN/missing values, uses mean replacement on all NaN/missing column values.
+
    * - brain_icc
      - voxelwise_icc
      - **REQUIRED:** list of session 1, session 2, etc, paths to 3D NifTi images, path to 3D NifTi brain mask
        **OPTIONAL:** ICC type (icc_type; default = 'icc_3', options include: 'icc_3', 'icc_2', 'icc_1')
-     - Calculates and returns a dictionary with intraclass correlation (e.g., ICC(1), ICC(2,1), or ICC(3,1) for 3D volumes across 1+ sessions, reflecting the ICC estimate, the 95% lowerbound for ICC estimate, 95% upperbound for ICC estimate, mean squared error between subjects, mean squared error within subjects). Ensure that your mask contains all voxels for subjects. If voxels are NaN or zero for some subjects, NaN mean-based replacement is used and/or zeros are treated as true observed zeros.
+     - Calculates and returns a dictionary with intraclass correlation (e.g., ICC(1), ICC(2,1), or ICC(3,1) for 3D volumes across 1+ sessions, reflecting the ICC estimate, the 95% lowerbound for ICC estimate, 95% upperbound for ICC estimate, and associated three variance components). Ensure that your mask contains all voxels for subjects. If voxels are NaN or zero for some subjects, NaN mean-based replacement is used and/or zeros are treated as true observed zeros.
      - roi_icc
      - **REQUIRED:** list of session 1, session 2, etc, paths to 3D NifTi images, path to 3D NifTi brain mask. Type of atlas (type_atlas) and directory to save atlas to (atlas_dir). Atlas specific requirements (see Nilearn's datasets) accepted via kwargs which are option variable names and values.
        **OPTIONAL:** ICC type (icc_type; default = 'icc_3', options include: 'icc_3', 'icc_2', 'icc_1')
-     - Calculates and returns a dictionary with intraclass correlation (e.g., ICC(1), ICC(2,1), or ICC(3,1) for 3D volumes across 1+ sessions, reflecting the ICC estimate, the 95% lowerbound for ICC estimate, 95% upperbound for ICC estimate, mean squared error between subjects, mean squared error within subjects). Ensure that your mask contains all voxels for subjects. If voxels are NaN or zero for some subjects, NaN mean-based replacement is used and/or zeros are treated as true observed zeros.
+     - Calculates and returns a dictionary with intraclass correlation (e.g., ICC(1), ICC(2,1), or ICC(3,1) for 3D volumes across 1+ sessions, reflecting the ICC estimate, the 95% lowerbound for ICC estimate, 95% upperbound for ICC estimate and three variance components. Ensure that your mask contains all voxels for subjects. If voxels are NaN or zero for some subjects, NaN mean-based replacement is used and/or zeros are treated as true observed zeros.
 
-
-   * - icc
-     - sumsq_total, sumsq, sumsq_btwn, icc_confint, sumsq_icc
-     - **REQUIRED:** Panda long dataframe with a subject variable (sub_var), session variable (sess_var), the scores (value_var) and the icc type (icc_type; default = 'icc_3', options include: 'icc_3', 'icc_2', 'icc_1')
-     - Calculates different components used in calculating the ICC estimate (e.g., ICC([1]), ICC([2,1]), or ICC([3,1])), 95% lowerbound and 95% upperbound for ICC, mean between subject variance, and mean within-subject variance. If NaN/missing values, uses mean replacement on all NaN/missing column values.
+   * - conn_icc.py
+     - conn_ivv
+     - **REQUIRED:**
+     - Calculates and returns....
 
    * - similarity
      - image_similarity, pairwise_similarity
@@ -87,6 +91,11 @@ probabilistic atlases will have a certain level of smoothing as a result of mask
      - tetrachoric_corr
      - **REQUIRED:** Binary vector NDarray, Binary vector NDarray
      - Calculate and return the tetrachoric correlation between two binary vectors.
+
+   * - masked_timeseries.py
+     - masked_timeseries
+     - **REQUIRED:**
+     - Calculates and returns....
 
 
 Citation

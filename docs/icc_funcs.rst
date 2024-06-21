@@ -154,13 +154,13 @@ package in R.
 **sumsq_icc**
 
 Now that the internal calculations of the ICC have been reviewed, I will use the package to get the values of interest. \
-The associated formulas for the ICC(1), ICC(2,1) and ICC(3,1) are described below.
+The formulas for the ICC(1), ICC(2,1) and ICC(3,1) are described below.
 
-.. math:: \text{ICC(1)} = \frac{MS_Btwn - MS_Wthn}{MS_Btwn + (sess - 1) MS_Wthn}
+.. math:: \text{ICC(1)} = \frac{MS_{Btwn} - MS_{Wthn}}{MS_{Btwn} + (\text{sess} - 1) MS_{Wthn}}
 
-.. math:: \text{ICC(2,1)} = \frac{MS_Btwn - MS_Err}{MS_Btwn + (sess - 1) * MS_Err + sessions * (MS_sess - MS_Err) / N_subjs}
+.. math:: \text{ICC(2,1)} = \frac{MS_{Btwn} - MS_{Err}}{MS_{Btwn} + (\text{sess} - 1) * MS_{Err} + \text{sessions} * \left( \frac{MS_{sess} - MS_{Err}}{N_{subjs}} \right)}
 
-.. math:: \text{ICC(3,1)} = \frac{MS_Btwn - MS_Err}{MS_Btwn + (sess - 1) * MS_Err}
+.. math:: \text{ICC(3,1)} = \frac{MS_{Btwn} - MS_{Err}}{MS_{Btwn} + (\text{sess} - 1) * MS_{Err}}
 
 
 Where:
@@ -172,6 +172,15 @@ Where:
 - Sess: is the number of sessions
 - N_subjs: numbers of subjects
 
+In terms to the above ICC(1), ICC(2,1) and ICC(3,1) formulas, these are also written in Table 1 in `Liljequist et al., 2019 <https://www.doi.org/10.1371/journal.pone.0219854>`_
+as below. These are in terms of between subject variance, measurement additive bias, and within subject measurement 'nose':
+
+.. math:: \text{ICC(1)} = \frac{\sigma_r^2}{\sigma_r^2 + \sigma_v^2}
+
+.. math:: \text{ICC(2,1)} = \frac{\sigma_r^2}{\sigma_r^2 + \sigma_c^2 + \sigma_v^2}
+
+.. math:: \text{ICC(3,1)} = \frac{\sigma_r^2}{\sigma_r^2 + \sigma_v^2}
+
 
 Hence, `sumsq_icc` can be used on a dataset with multiple subjects with 1+ measurement occasions. The ICC can be calculated \
 for the anagrams data references above.
@@ -179,27 +188,29 @@ Note: the required inputs are a long dataframe, subject variable, \
 session variable and the value scores variables that are contained in the long dataframe, plus the \
 icc to return (options: icc_1, icc_2, icc_3; default: icc_3).
 
-The `sumsq_icc` function will return five values: the ICC estimate, lower bound 95% confidence interval, \
-upper bound 95% confidence interval, mean square between subject variance, mean square within subject variance. \
-This information will print to a terminal or can be saved to five variables. Example:
+The `sumsq_icc` function will return [six] values: the ICC estimate, lower bound 95% confidence interval, \
+upper bound 95% confidence interval and specific to each computation, the between-subject variance, within subject variance, \
+and in case of ICC(2,1) between-measure variance. This information will print to the terminal or can be saved to six variables. Example:
 
 .. code-block:: python
 
     # if you havent imported the package already
     from pyrelimri import icc
 
-    icc3, icc3_lb, icc3_up, icc3_msbs, icc3_msws = icc.sumsq_icc(df_long=a_ld,sub_var="subidr",
-                                                    sess_var="sess",value_var="vals",icc_type="icc_3")
+    icc3, icc3_lb, icc3_up, icc3_btwnsub, \
+    icc3_withinsub, _ = icc.sumsq_icc(df_long=a_ld,sub_var="subidr",
+                                              sess_var="sess",value_var="vals",icc_type="icc_3")
 
 This will store the five associated values in the five variables:
     - `icc3`: ICC estimate
     - `icc3_lb`: 95% lower bound CI for ICC estimate
     - `icc3_lb`: 95% upper bound CI for ICC estimate
-    - `icc3_msbs`: Mean Squared Between Subject Variance using for ICC estimate
-    - `icc3_msws`: Mean Squared Within Subject Variance used for ICC estimate
+    - `icc3_btwnsub`: Between Subject Variance used for ICC estimate (sigma_r ^2)
+    - `icc3_withinsub`: Within Subject Variance used for ICC estimate (sigma_v ^2)
+    - `icc3_betweenmeasure`: setting to _ as between measure variance is not computed for ICC(3,1) (sigma_c ^2)
 
-Reminder: If NaN/missing values, this implements uses a mean replacement of all column values. If this is not preference, handle missing/unbalanced \
-cases before hand.
+Reminder: If NaN/missing values, `icc` implements a mean replacement of all column values. If this is not preferred, handle missing/unbalanced \
+cases beforehand.
 
 
 brain_icc
@@ -216,7 +227,7 @@ Here are the steps it uses:
     - Function concatenates the 3D images into a 4D nifti image (4th dimension is subjects) using image.concat_imgs().
     - Function uses the provided nifti mask to mask the images using NiftiMasker.
     - Function loops over the voxels in the `imgdata[0].shape[-1]` and creates a pandas DataFrame with the voxel values for each subject and session using sumsq_icc().
-    - The function calculates and returns a dictionary with five 3D volumes: est, lower (lower_bound) and upper (upper_bound) of the ICC 95% confidence interval, mean square between subjects (ms_btwn), and mean square within subjects (ms_wthn) using sumsq_icc().
+    - The function calculates and returns a dictionary with five 3D volumes: est, lower (lower_bound) and upper (upper_bound) of the ICC 95% confidence interval, and between subject, within subject and between measure variance from sumsq_icc().
     - Note, the shape of the provided 3D volume is determined using inverse_transform from NiftiMasker.
 
 **voxelwise_icc**
@@ -241,11 +252,12 @@ The function returns a dictionary with 3D volumes for:
     - ICC estimates ('est')
     - ICC lowerbound 95% CI ('lowbound')
     - ICC upperbound 95% CI ('upbound')
-    - Mean Squared Between Subject Variance ('msbtwn')
-    - Mean Squared Within Subject Variance ('mswthn')
+    - Between Subject Variance ('btwnsub')
+    - Within Subject Variance ('wthnsub')
+    - Between Measure Variance ('btwnmeas')
 
 So the resulting stored variable will be a dictionary, e.g. "brain_output", from which you can access to view and save images such \
-as the ICC estimates (brain_output['est']) and/or mean square within subject variance (brain_output['ms_wthn']).
+as the ICC estimates (brain_output['est']) and/or within subject variance (brain_output['wthnsub']).
 
 Say I have stored paths to session 1 and session 2 in the following variables (Note: subjects in list have same order!):
 
@@ -380,7 +392,7 @@ As before, you can save out the images using nibabel to a directory. Here I will
 
     import nibabel as nib
     nib.save(brain_icc_msc["est"], os.path.join('output_dir', 'MSC-LHandbeta_estimate-icc.nii.gz'))
-    nib.save(brain_icc_msc["msbtwn"], os.path.join('output_dir', 'MSC-LHandbeta_estimate-iccmsbs.nii.gz'))
+    nib.save(brain_icc_msc["btwnsub"], os.path.join('output_dir', 'MSC-LHandbeta_estimate-iccbtwnsub.nii.gz'))
 
 
 **roi_icc**
@@ -415,16 +427,18 @@ the compute time is decreased, the atlas is resampled to the data (e.g. in Nifti
 resampling_target = 'data'). Third, the resulting dictionary will contain 11 variables:
 
     - Atlas ROI Labels ('roi_labels'): This contains the order of labels (e.g., pulled from atlas.labels)
-    - ICC estimates ('est'): 1D array that contain ICCs estimated for N ROIs in atlas.
-    - ICC lower bound (lb) 95% CI ('lowbound'): 1D array that contain lb ICCs estimated for N ROIs in atlas.
-    - ICC upper bound (up) 95% CI ('upbound'): 1D array that contain ub ICCs estimated for N ROIs in atlas.
-    - Mean Squared Between Subject Variance ('msbtwn'): 1D array that contain MSBS ICCs estimated for N ROIs in atlas.
-    - Mean Squared Within Subject Variance ('mswthn'): 1D array that contain MSWS ICCs estimated for N ROIs in atlas.
+    - ICC estimates ('est'): 1D array that contains ICCs estimated for N ROIs in atlas (atlas.maps[1:] to skip background).
+    - ICC lower bound (lb) 95% CI ('lowbound'): 1D array that contains lb ICCs estimated for N ROIs in atlas.
+    - ICC upper bound (up) 95% CI ('upbound'): 1D array that contains ub ICCs estimated for N ROIs in atlas.
+    - Between Subject Variance ('btwnsub'): 1D array that contains between subject variance estimated for N ROIs in atlas.
+    - Within Subject Variance ('wthnsub'): 1D array that contains within subject variance estimated for N ROIs in atlas.
+    - Between Measure Variance ('btwnmeas'): 1D array that contains between measure variance estimated for N ROIs in atlas (ICC[2,1] only, otherwise filled None)
     - ICC estimates transformed back to space of ROI mask ('est_3d'): Nifti 3D volume of ICC estimates
     - ICC lower bound 95% CI transformed back to space of ROI mask ('lowbound_3d'): Nifti 3D volume of lb ICC estimates
     - ICC upper bound 95% CI transformed back to space of ROI mask ('upbound_3d'): Nifti 3D volume of up ICC estimates
-    - Mean Squared Between Subject Variance transformed back to space of ROI mask ('msbtwn_3d'): Nifti 3D volume of MSBS estimates
-    - Mean Squared Within Subject Variance transformed back to space of ROI mask ('mswthn_ed'): Nifti 3D volume of MSWS estimates
+    - Between Subject Variance transformed back to space of ROI mask ('btwnsub_3d'): Nifti 3D volume of between subject variance estimates
+    - Within Subject Variance transformed back to space of ROI mask ('wthnsub_3d'): Nifti 3D volume of within subject variance estimates
+    - Between Measure Variance transformed back to space of ROI mask ('btwnmeas_3d'):  Nifti 3D volume of between measure variance estimates
 
 An important caveat: Probabilistic atlases are 4D volumes for N ROIs. This is because each voxel has an associated probability \
 that it belongs to ROI A and ROI B. Thus, ROIs may overlap and so the estimates (as in example below) will be more smooth.
@@ -457,7 +471,7 @@ You can access the array of estimates and plot the Nifti image using:
     # plot estimate nifti volume
     plotting.plot_stat_map(stat_map_img=shaefer_icc_msc['est_3d'], title='ICC(1) Estimate')
 
-Figure 5 is a visual example of `est_3d`, `lower_bound_3d`, `upper_bound_3d`, `ms_wthn_3d`, `ms_btwn_3d` for the 400 \
+Figure 5 is a visual example of `est_3d`, `lowerbound_3d`, `upperbound_3d`, `btwnsub_3d`, `wthnsub_3d`, 'btwnmeas_3d' for the 400 \
 ROI Shaefer atlas.
 
 .. figure:: img_png/roiicc_ex-shaefer400.jpg
@@ -489,16 +503,74 @@ distributions and appear more smooth so interpreting the maps should be approach
    :figclass: align-center
 
 
+conn_icc
+---------
+
+The `conn_icc` module is a wrapper for for the `icc` module. \
+In short, the `edgewise_icc` function, like `voxelwise_icc` within the `brain_icc` module, calculates the ICC for an NxN matrix \
+across subjects and sessions on a cell-by-cell basis (or edge-by-edge).
+
+Here are the steps it uses:
+
+    - Function takes list of subject a) paths to .npy, .txt, .csv correlation matrices or b) numpy arrays for each session, the number of columns in each matrix (e.g., ROI names), the list of column names (if not provided, populates as 1:len(number columes) and the ICC type to be calculated.
+    - Function checks the list names and number of columns match and confirms N per session is the same.
+    - If the list of lists are strings, the files are loaded based on .npy, .txt or .csv extensive with provided separator. If .csv pandas assumes header/index col = None (e.g. read_csv(matrix, sep=separator, header=None, index_col=False).values)
+    - Once loaded, only the lower triangle and diagonal are retained as a 1D numpy array.
+    - Function loops over each edge and creates a pandas DataFrame with the edge value for each subject and session used in  sumsq_icc().
+    - The function calculates and returns a dictionary with six NxN matrices: est, lower (lower_bound) and upper (upper_bound) of the ICC 95% confidence interval, and between subject, within subject and between measure variance from sumsq_icc().
+    - Note, the number of columns is used to reshape the data from the NxN matrix to lower triangle 1D array and back to NxN lower triangle matrix.
+
+**edgewise_icc**
+
+As mentioned above, the `edgewise_icc` estimates ICC components for each edge in NxN matrix. \
+To use the `edgewise_icc` function, you have to provide the following information:
+    - multisession_list: A list of listed paths to the .txt, .csv or .npy correlation matrices, or a list t-stat or beta maps for sess1, 2, 3, etc (or run 1,2,3..)
+    - n_cols: number of columns expected in the provided matrices int, col_names: list = None,
+                 separator=None, icc_type='icc_3'
+    - col_names: A list of column names for the matrices.
+    - separator: If providing strings to paths, the separator to use to open file (e.g., ',','\t')
+    - icc_type: The ICC estimate that will be calculated for each voxel. Options: `icc_1`, `icc_2`, `icc_3`. Default: `icc_3`
+
+The function returns a dictionary with NxN matrix for:
+    - ICC estimates ('est')
+    - ICC lowerbound 95% CI ('lowbound')
+    - ICC upperbound 95% CI ('upbound')
+    - Between Subject Variance ('btwnsub')
+    - Within Subject Variance ('wthnsub')
+    - Between Measure Variance ('btwnmeas')
+
+So the resulting stored variable will be a dictionary, e.g. "icc_fcc_mat", from which you can access to view and plot matrices such \
+as the ICC estimates (icc_fcc_mat['est']) and/or within subject variance (icc_fcc_mat['wthnsub']).
+
+Say I have stored paths to session 1 and session 2 in the following variables (Note: subjects in list have same order!):
+
+.. code-block:: python
+
+
+    # session 1 paths
+    ses1_matrices = ["./scan1/sub-1_ses-1_task-fake.csv", "./scan1/sub-2_ses-1_task-fake.csv", "./scan1/sub-3_ses-1_task-fake.csv", "./scan1/sub-4_ses-1_task-fake.csv"]
+    ses2_matrices = ["./scan2/sub-1_ses-2_task-fake.csv", "./scan2/sub-2_ses-2_task-fake.csv", "./scan2/sub-3_ses-2_task-fake.csv", "./scan2/sub-4_ses-2_task-fake.csv"]
+    two_sess_matrices = [ses1_matrices, ses2_matrices]
+
+Next, we can run the edgewise ICC function. Since `col_names` is not provided, it is populated with number 1 to `n_cols`.
+
+.. code-block:: python
+
+
+    icc_fcc_mat = edgewise_icc(multisession_list=two_sess_matrices, n_cols = 96, icc_type='icc_3', separator=',')
+
+
 FAQ
 ---
 
 * `Why was a manual sum of squares used for ICC?` \
 
-The intraclass correlation can be calculated using the ANOVA or Hiearchical Linear Model. In practices, anova or hlm \
-packages could have been used to extract some of the parameters. However, the manually calculation was used because it was \
+The intraclass correlation can be calculated using the ANOVA or Hiearchical Linear Model (HLM). In practice, ANOVA or HLM \
+packages could have been used to extract some of the parameters. However, the manual calculation was used because it was \
 found to be the most efficient and transparent. In addition, several additional parameters are calculated in the ANOVA & \
 HLM packages that can cause warnings during the analyses. The goal was to make things more efficient (3x faster on average) \
-and alleviate warnings that may occur due to calculates in other packages for metrics that are not used.
+and alleviate warnings that may occur due to calculates in other packages for metrics that are not used. However, tests were used \
+to confirm ICC and between and within subject variance components were consistent across the `icc.py` and HLm method.
 
 * `Is brain_icc module only limited to fMRI voxelwise data inputs?` \
 

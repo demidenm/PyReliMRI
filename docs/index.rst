@@ -59,6 +59,7 @@ Usage Examples
    examples.rst
    similarity_funcs.rst
    icc_funcs.rst
+   timeseries_extract.rst
 
 Citing PyReliMRI
 -------------------

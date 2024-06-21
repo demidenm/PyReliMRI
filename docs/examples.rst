@@ -7,6 +7,7 @@ The examples that follow will review each to make their use and utility more cle
 be categories into two groups:
 
 * Similarity: `similarity.py` & `tetrachoric_correlation.py`
-* Intraclass Correlation: `icc.py` & `brain_icc.py`
+* Intraclass Correlation: `icc.py`, `brain_icc.py` & 'conn_icc.py'
+* Stimulus locked TR-by-TR timeseries: 'masked_timeseries.py'
 
 As such, the two categories will be discuss together.

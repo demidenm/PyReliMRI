@@ -183,8 +183,8 @@ def process_bold_roi_mask(bold_path: str, roi_mask: str, high_pass_sec: int = No
     return time_series_avg, sub_info
 
 
-def process_bold_roi_coords(bold_path: str, roi_coords: tuple, radius_mm: float,
-                            high_pass_sec: float, detrend: bool, fwhm_smooth: float, wb_mask: Nifti1Image):
+def process_bold_roi_coords(bold_path: str, roi_mask: Nifti1Image,
+                            high_pass_sec: float, detrend: bool, fwhm_smooth: float):
     """
     Processes BOLD data masked by a spherical region of interest (ROI) defined by coordinates.
     Loads the BOLD and ROI mask images, applies the spherical ROI mask to the BOLD data, performs preprocessing steps
@@ -195,11 +195,8 @@ def process_bold_roi_coords(bold_path: str, roi_coords: tuple, radius_mm: float,
     bold_path : str
         Path to the BOLD image file.
 
-    roi_coords : tuple
-        Coordinates (x, y, z) of the center of the spherical ROI in the same space as the BOLD image.
-
-    radius_mm : float
-        Radius of the spherical ROI in millimeters.
+    roi_mask : nibabel.Nifti1Image
+        ROI created to mask data
 
     high_pass_sec : float
         High pass filter cutoff in seconds. If None, no high pass filtering is applied.
@@ -209,9 +206,6 @@ def process_bold_roi_coords(bold_path: str, roi_coords: tuple, radius_mm: float,
 
     fwhm_smooth : float
         Full-width at half-maximum (FWHM) value for Gaussian smoothing of the BOLD data.
-
-    wb_mask : nibabel Nifti1Image
-        Whole brain mask image in the same space as the BOLD image, used to define the ROI.
 
     Returns
     -------
@@ -231,12 +225,7 @@ def process_bold_roi_coords(bold_path: str, roi_coords: tuple, radius_mm: float,
                                                        fwhm_smooth=5.0,
                                                        wb_mask='/path/to/whole_brain_mask.nii.gz')
     """
-
-    _, roi = nifti_spheres_masker._apply_mask_and_get_affinity(
-        seeds=[roi_coords], niimg=None, radius=radius_mm,
-        allow_overlap=False, mask_img=wb_mask)
-    coord_mask = _unmask_3d(X=roi.toarray().flatten(), mask=wb_mask.get_fdata().astype(bool))
-    coord_mask = new_img_like(wb_mask, coord_mask, wb_mask.affine)
+    coord_mask = roi_mask
 
     img = [load_img(i) for i in [bold_path, coord_mask]]
     bold_name = os.path.basename(bold_path)
@@ -257,12 +246,11 @@ def process_bold_roi_coords(bold_path: str, roi_coords: tuple, radius_mm: float,
                              high_pass=1 / high_pass_sec if high_pass_sec is not None else None)
     time_series_avg = np.mean(clean_timeseries, axis=1)[:, None]
 
-    return time_series_avg, sub_info
-
+    return time_series_avg, coord_mask, sub_info
 
 def extract_time_series(bold_paths: list, roi_type: str, high_pass_sec: int = None, roi_mask: str = None,
-                        roi_coords: tuple = None, radius_mm: int = None, detrend: bool = False , fwhm_smooth: float = None,
-                        n_jobs=1):
+                        roi_coords: tuple = None, radius_mm: int = None,
+                        detrend: bool = False, fwhm_smooth: float = None, n_jobs=1):
     """
     Extracts time series data from BOLD images for specified regions of interest (ROI) or coordinates.
     For each BOLD path, extracts time series either using a mask or ROI coordinates, leveraging
@@ -327,6 +315,7 @@ def extract_time_series(bold_paths: list, roi_type: str, high_pass_sec: int = No
                                                                      radius_mm=5, high_pass_sec=100,
                                                                      detrend=True, fwhm_smooth=5.0)
     """
+
     roi_options = ['mask', 'coords']
 
     if roi_type not in roi_options:
@@ -339,10 +328,20 @@ def extract_time_series(bold_paths: list, roi_type: str, high_pass_sec: int = No
         return list(roi_series_list), list(id_list)
 
     elif roi_type == 'coords':
+        # get a wb_mask
         wb_mask = compute_brain_mask(bold_paths[0])
+
+        # create ROI
+        _, roi = nifti_spheres_masker._apply_mask_and_get_affinity(
+            seeds=[roi_coords], niimg=None, radius=radius_mm,
+            allow_overlap=False, mask_img=wb_mask)
+        coord_mask = _unmask_3d(X=roi.toarray().flatten(), mask=wb_mask.get_fdata().astype(bool))
+        coord_mask = new_img_like(wb_mask, coord_mask, wb_mask.affine)
+
         results = Parallel(n_jobs=n_jobs)(delayed(process_bold_roi_coords)(
-            bold_path, roi_coords, radius_mm, high_pass_sec, detrend, fwhm_smooth, wb_mask) for bold_path in bold_paths)
-        coord_series_list, coord_mask, id_list = zip(*results)
+            bold_path, coord_mask, high_pass_sec, detrend, fwhm_smooth, wb_mask) for bold_path in bold_paths)
+        coord_series_list, id_list = zip(*results)
+
         return list(coord_series_list), coord_mask, list(id_list)
 
     else:
@@ -530,3 +529,4 @@ def plot_responses(df, tr: int, delay: int, style: str = 'white', save_path: str
     # Show plot if show_plot is True
     if not show_plot:
         plt.close()
+
