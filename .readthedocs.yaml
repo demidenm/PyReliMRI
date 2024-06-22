@@ -11,13 +11,9 @@ build:
 sphinx:
   configuration: docs/conf.py
 
-# Explicitly set the version of Python and its requirements
+# Explicitly set the version of Python and its requirements & install local pyreli
 python:
   install:
-    - requirements: docs/requirements.txt
-
-# Install from the local `pyrelimri` directory
-python:
-  install:
-    - method: setuptools
+    - method: pip
       path: ./pyrelimri
+    - requirements: docs/requirements.txt
