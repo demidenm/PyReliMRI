@@ -20,14 +20,14 @@ import sys
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 sys.path.insert(0, os.path.abspath("sphinxext"))
-sys.path.insert(0, os.path.abspath("../imgreliability"))
+sys.path.insert(0, os.path.abspath("../pyrelimri"))
 
 
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = 'Python-based Reliability in MRI (PyReliMRI)'
-copyright = '2023, Michael I. Demidenko & Russell A. Poldrack'
+copyright = '2024, Michael I. Demidenko & Russell A. Poldrack'
 author = 'Michael I. Demidenko & Russell A. Poldrack'
 
 # -- General configuration ---------------------------------------------------
@@ -48,6 +48,8 @@ add_module_names = True
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.napoleon',
+    'sphinx.ext.intersphinx',
+    'sphinx.ext.viewcode',
     'sphinx_rtd_theme',
 ]
 
