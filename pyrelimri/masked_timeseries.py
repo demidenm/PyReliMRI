@@ -254,68 +254,64 @@ def extract_time_series(bold_paths: list, roi_type: str, high_pass_sec: int = No
     """
     Extracts time series data from BOLD images for specified regions of interest (ROI) or coordinates.
     For each BOLD path, extracts time series either using a mask or ROI coordinates, leveraging
-    Nilearn's NiftiLabelsMasker (for mask) or NiftiSpheresMasker (for coordinates).
+    Nilearn's NiftiLabelsMasker (for mask) or nifti_spheres_masker (for coordinates).
 
     Parameters
     ----------
-    bold_paths : list
-        List of paths to BOLD image files for subjects/runs/tasks. The order should match the order of events or
-        conditions for each subject.
+        bold_paths : list
+            List of paths to BOLD image files for subjects/runs/tasks. The order should match the order of events or
+            conditions for each subject.
 
-    roi_type : str
-        Type of ROI ('mask' or 'coords').
+        roi_type : str
+            Type of ROI ('mask' or 'coords').
 
-    high_pass_sec : int, optional
-        High-pass filter cutoff in seconds. If provided, converted to frequency (1/high_pass_sec). Default is None.
+        high_pass_sec : int, optional
+            High-pass filter cutoff in seconds. If provided, converted to frequency (1/high_pass_sec). Default is None.
 
-    roi_mask : str or None, optional
-        Path to the ROI mask image. Required if roi_type is 'mask'. Default is None.
+        roi_mask : str or None, optional
+            Path to the ROI mask image. Required if roi_type is 'mask'. Default is None.
 
-    roi_coords : tuple or None, optional
-        Coordinates (x, y, z) for the center of the sphere ROI. *Required if* roi_type is 'coords'. Default is None.
+        roi_coords : tuple or None, optional
+            Coordinates (x, y, z) for the center of the sphere ROI. *Required if* roi_type is 'coords'. Default is None.
 
-    radius_mm : int or None, optional
-        Radius of the sphere in millimeters. Required if roi_type is 'coords'. Default is None.
+        radius_mm : int or None, optional
+            Radius of the sphere in millimeters. Required if roi_type is 'coords'. Default is None.
 
-    detrend : bool, optional
-        Whether to detrend the BOLD signal using Nilearn's detrend function. Default is False.
+        detrend : bool, optional
+            Whether to detrend the BOLD signal using Nilearn's detrend function. Default is False.
 
-    fwhm_smooth : float or None, optional
-        Full-width at half-maximum (FWHM) value for Gaussian smoothing of the BOLD data. Default is None.
+        fwhm_smooth : float or None, optional
+            Full-width at half-maximum (FWHM) value for Gaussian smoothing of the BOLD data. Default is None.
 
-    n_jobs : int, optional
-        Number of CPUs to use for parallel processing. Default is 1.
+        n_jobs : int, optional
+            Number of CPUs to use for parallel processing. Default is 1.
 
     Returns
     -------
-    list or tuple
-        - If roi_type is 'mask':
-            - List of numpy arrays containing the time series data for each subject/run.
-            - List of subject information strings formatted as 'sub-{sub_id}_run-{run_id}'.
-        - If roi_type is 'coords':
-            - List of numpy arrays containing the averaged time series data for each subject/run.
-            - Nifti1Image object representing the coordinate mask used.
-            - List of subject information strings formatted as 'sub-{sub_id}_run-{run_id}'.
+        list or tuple
+            - If roi_type is 'mask':
+                - List of numpy arrays containing the time series data for each subject/run.
+                - List of subject information strings formatted as 'sub-{sub_id}_run-{run_id}'.
+            - If roi_type is 'coords':
+                - List of numpy arrays containing the averaged time series data for each subject/run.
+                - Nifti1Image object representing the coordinate mask used.
+                - List of subject information strings formatted as 'sub-{sub_id}_run-{run_id}'.
 
 
     Example
     -------
-    # Extract time series for BOLD data using a mask ROI
-    roi_type = 'mask'
-    bold_paths = ['./sub-01_ses-01_task-lit_bold.nii.gz', './sub-02_ses-01_task-lit_bold.nii.gz']
-    roi_mask = './siq-roi_mask.nii.gz'
-    time_series_list, sub_info_list = extract_time_series(bold_paths, roi_type, roi_mask=roi_mask,
-                                                         high_pass_sec=100, detrend=True, fwhm_smooth=5.0)
+        # Extract time series for BOLD data using a mask ROI
+        roi_type = 'mask'
+        bold_paths = ['./sub-01_ses-01_task-lit_bold.nii.gz', './sub-02_ses-01_task-lit_bold.nii.gz']
+        roi_mask = './siq-roi_mask.nii.gz'
+        time_series_list, sub_info_list = extract_time_series(bold_paths, roi_type, roi_mask=roi_mask, high_pass_sec=100, detrend=True, fwhm_smooth=5.0)
 
-    # Extract time series for BOLD data using coordinates ROI
-    roi_type = 'coords'
-    bold_paths = ['./sub-01_ses-01_task-lit_bold.nii.gz', './sub-02_ses_1_task-lit_bold.nii.gz']
-    roi_coords = (30, -15, 0)
-    time_series_list, coord_mask, sub_info_list = extract_time_series(bold_paths, roi_type, roi_coords=roi_coords,
-                                                                     radius_mm=5, high_pass_sec=100,
-                                                                     detrend=True, fwhm_smooth=5.0)
+        # Extract time series for BOLD data using coordinates ROI
+        roi_type = 'coords'
+        bold_paths = ['./sub-01_ses-01_task-lit_bold.nii.gz', './sub-02_ses_1_task-lit_bold.nii.gz']
+        roi_coords = (30, -15, 0)
+        time_series_list, coord_mask, sub_info_list = extract_time_series(bold_paths, roi_type, roi_coords=roi_coords, radius_mm=5, high_pass_sec=100, detrend=True, fwhm_smooth=5.0)
     """
-
     roi_options = ['mask', 'coords']
 
     if roi_type not in roi_options:
