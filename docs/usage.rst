@@ -105,6 +105,13 @@ masked_timeseries
 
 The `masked_timeseries` module extracts timeseries data from BOLD images for regions of interest (ROI).
 
+.. figure:: img_png/maskedtimeseries_example.png
+   :align: center
+   :alt: Masked Timeseries Example
+   :figclass: align-center
+
+   Figure 4. Masked Timeseries Illustration
+
 extract_time_series
 ~~~~~~~~~~~~~~~~~~~
 
