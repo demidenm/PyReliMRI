@@ -9,3 +9,6 @@ scipy
 seaborn
 scikit-learn
 hypothesis
+matplotlib
+joblib
+statsmodels

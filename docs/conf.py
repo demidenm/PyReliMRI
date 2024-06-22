@@ -45,7 +45,10 @@ add_module_names = True
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = ['sphinx_rtd_theme']
+extensions = [
+    'sphinx.ext.autodoc',
+    'sphinx_rtd_theme',
+]
 
 # -- meta tags for base URL ---
 html_context = {

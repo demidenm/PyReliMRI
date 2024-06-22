@@ -5,22 +5,11 @@
 
 Welcome to PyReliMRI's documentation!
 =======================================================================
-Python-based Reliability in MRI (PyReliMRI) is an open-source python \
-tool to calculate multiple group- and individual-level reliability metrics. This package is released \
-for researchers using MRI data to easily report reliability estimates in their manuscripts in cases of multi-run \
-and/or multi-session data are acquired.
+Python-based Reliability in MRI (PyReliMRI) is an open-source Python tool to calculate multiple group- and individual-level reliability metrics. This package is designed for researchers using MRI data to easily report reliability estimates in their manuscripts, particularly for multi-run and/or multi-session data.
 
-There are a number of packages available to achieve different aspects contained in this package. \
-Specifically, tools exist to calculate either simiarity coefficient, intraclass corelations (e.g., 3dICC in AFNI) \
-or both (e.g., in python based `nipype <https://nipype.readthedocs.io/en/latest/>`_ or matlab `fmreli <https://github.com/nkroemer/reliability>`_). \
-Alternatively, if you have data in .csv format, Ting Xu has a `Shiny App <https://tingsterx.shinyapps.io/ReliabilityExplorer/>`_ that calculates univariate and multivariate ICCs. \
-However, in some cases the flexibility is limited or some features are not available when working with preprocessed MRI data. \
-For example, `ICC_rep_anova` is limited to ICC(3,1) and the `fmreli` is not accessible without \
-a matlab license and does not deploy the the tetrachoric correlation, pairwise comparisons across images or atlas \
-based reliability estimates.
+Several packages exist to address different aspects covered in this package. Specifically, tools are available for calculating similarity coefficients, intraclass correlations (e.g., 3dICC in AFNI), or both (e.g., in Python-based `nipype <https://nipype.readthedocs.io/en/latest/>`_ or Matlab's `fmreli <https://github.com/nkroemer/reliability>`_). Alternatively, Ting Xu offers a `Shiny App <https://tingsterx.shinyapps.io/ReliabilityExplorer/>`_ for calculating univariate and multivariate ICCs from .csv data. However, some flexibility may be limited or certain features unavailable when working with preprocessed MRI data. For example, `ICC_rep_anova` is restricted to ICC(3,1), and `fmreli` requires a Matlab license and does not support tetrachoric correlation, pairwise comparisons across images, or atlas-based reliability estimates.
 
-Our attempt here is to integrate different functions (see Figure 1) within the same package that anyone can use by \
-downloading python and importing the package onto their machine.
+Our goal is to integrate various functions (see Figure 1) into a single package that can be easily downloaded and imported into Python for universal use.
 
 .. figure:: img_png/pyrelimri_fig.png
    :align: center
@@ -59,6 +48,7 @@ Usage Examples
    examples.rst
    similarity_funcs.rst
    icc_funcs.rst
+   timeseries_extract.rst
 
 Citing PyReliMRI
 -------------------

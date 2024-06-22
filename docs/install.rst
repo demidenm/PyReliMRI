@@ -1,5 +1,6 @@
 PyReliMRI Installation
 -----------------------
+
 You can install the PyReliMRI package directly from your terminal using *pip install* for a (A) specific tagged release \
 or (B) latest release that is on PyPI
 
@@ -11,7 +12,6 @@ or (B) latest release that is on PyPI
    # [B] latest release on PyPI
    pip install pyrelimri
 
-
 If the installation is successful, you will see something along the lines of *Successfully installed PyReliMRI-2.0.0* into your terminal.
 
 Once the package is installed, you can import the `pyrelimri` module using:
@@ -19,7 +19,6 @@ Once the package is installed, you can import the `pyrelimri` module using:
 .. code-block:: python
 
    import pyrelimri
-
 
 Alternatively, you can load a specific function from the available modules. For example, if you're only interested in \
 calculating the similarity between 3D Nifti images, you can load
@@ -30,14 +29,6 @@ calculating the similarity between 3D Nifti images, you can load
 
 Once the module is loaded, the functions within the module can be used. You can check with suffix '?' what input \
 is required to run the function.
-
-.. code-block:: python
-
-    # how to use
-    similarity.image_similarity(imgfile1 = path_to_img, imgfile2 = path_to_img,
-                                mask=  path_to_mash, thresh = 1.25, similarity_type = 'dice')
-    # required input
-    similarity.image_similarity?
 
 
 Required dependencies

@@ -14,41 +14,51 @@ from nilearn.datasets import (
     fetch_atlas_msdl,
     fetch_atlas_pauli_2017,
     fetch_atlas_schaefer_2018,
-    fetch_atlas_smith_2009,
     fetch_atlas_talairach
 )
+SKLEARN_ALLOW_DEPRECATED_SKLEARN_PACKAGE_INSTALL = True
 
 
-SKLEARN_ALLOW_DEPRECATED_SKLEARN_PACKAGE_INSTALL=True
-
-def voxelwise_icc(multisession_list: str, mask: str, icc_type='icc_3'):
+def voxelwise_icc(multisession_list: list, mask: str, icc_type: str = 'icc_3') -> dict:
     """
-    voxelwise_icc: calculates the ICC (+lower bound & upper bound CI)
-    by voxel for specified input files using manual sumsq calculations.
-    The path to the subject's data should be provided as a list of lists for sessions, i.e.
-    dat_ses1 = ["./ses1/sub-00_Contrast-A_bold.nii.gz","./ses1/sub-01_Contrast-A_bold.nii.gz",
-        "./ses1/sub-03_Contrast-A_bold.nii.gz"]
-    dat_ses2 = ["./ses2/sub-00_Contrast-A_bold.nii.gz","./ses2/sub-01_Contrast-A_bold.nii.gz",
-        "./ses2/sub-03_Contrast-A_bold.nii.gz"]
-    dat_ses3 = ["./ses3/sub-00_Contrast-A_bold.nii.gz","./ses3/sub-01_Contrast-A_bold.nii.gz",
-        "./ses3/sub-03_Contrast-A_bold.nii.gz"]
+    voxelwise_icc: Calculate the Intraclass Correlation Coefficient (ICC) along with lower and upper bound confidence intervals
+    by voxel for specified input files using manual sum of squares calculations.
 
-    ** The order of the subjects in each list has to be the same **
+    Parameters
+    ----------
+    multisession_list : list of list of str
+        List of lists containing paths to subject 3D volumes for each session.
 
-    Two session example:
-    multisession_list  = [dat_ses1, dat_ses2]
-    Three session example:
-    multisession_list  = [dat_ses1, dat_ses2, dat_ses3]
+        Example:
+        dat_ses1 = ["./ses1/sub-00_Contrast-A_bold.nii.gz", "./ses1/sub-01_Contrast-A_bold.nii.gz", "./ses1/sub-03_Contrast-A_bold.nii.gz"]
+        dat_ses2 = ["./ses2/sub-00_Contrast-A_bold.nii.gz", "./ses2/sub-01_Contrast-A_bold.nii.gz", "./ses2/sub-03_Contrast-A_bold.nii.gz"]
+        dat_ses3 = ["./ses3/sub-00_Contrast-A_bold.nii.gz", "./ses3/sub-01_Contrast-A_bold.nii.gz", "./ses3/sub-03_Contrast-A_bold.nii.gz"]
+        The order of the subjects in each list has to be the same.
 
-    Inter-subject variance would be: between subjects in session 1, 2 & 3
-    Intra-subject variance would be: within subject across session 1, 2 & 3.
+    mask : str
+        Path to 3D mask in NIfTI format.
 
-    :param multisession_list: list of a list, a variable containing path to subjects 3D volumes for each session
-    :param mask: path to nii MNI path object
-    :param icc_type: provide icc type, default is icc_3, options: icc_1, icc_2, icc_3
-    :return: returns 3D shaped array of ICCs in shape of provided 3D  mask
+    icc_type : str, optional
+        Type of ICC to compute, default is 'icc_3'.
+        Options: 'icc_1', 'icc_2', 'icc_3'.
+
+    Returns
+    -------
+    dict
+        Dictionary containing the following 3D images:
+        'est' : nibabel.Nifti1Image
+            Estimated ICC values.
+        'lowbound' : nibabel.Nifti1Image
+            Lower bound of ICC confidence intervals.
+        'upbound' : nibabel.Nifti1Image
+            Upper bound of ICC confidence intervals.
+        'btwn_sub' : nibabel.Nifti1Image
+            Between-subject variance.
+        'wthn_sub' : nibabel.Nifti1Image
+            Within-subject variance.
+        'btwn_meas' : nibabel.Nifti1Image
+            Between-measurement variance.
     """
-
     session_lengths = [len(session) for session in multisession_list]
     session_all_same = all(length == session_lengths[0] for length in session_lengths)
 
@@ -77,7 +87,8 @@ def voxelwise_icc(multisession_list: str, mask: str, icc_type='icc_3'):
     voxel_n = imgdata[0].shape[-1]
 
     # empty list for icc, low/upper bound 95% ICC, mean square between & within subject
-    est, lowbound, upbound, msbs, msws = np.empty((5, voxel_n))
+    est, lowbound, upbound, \
+        btwn_sub_var, within_sub_var, btwn_meas_var = np.empty((6, voxel_n))
 
     for voxel in range(voxel_n):
         np_voxdata = np.column_stack((np.tile(subj_list, num_sessions),
@@ -90,22 +101,47 @@ def voxelwise_icc(multisession_list: str, mask: str, icc_type='icc_3'):
         vox_pd = vox_pd.astype({"subj": int, "sess": "category", "vals": float})
 
         est[voxel], lowbound[voxel], upbound[voxel], \
-            msbs[voxel], msws[voxel] = sumsq_icc(df_long=vox_pd, sub_var="subj", sess_var="sess",
-                                                 value_var="vals", icc_type=icc_type)
+            btwn_sub_var[voxel], within_sub_var[voxel], \
+            btwn_meas_var[voxel] = sumsq_icc(df_long=vox_pd, sub_var="subj", sess_var="sess",
+                                             value_var="vals", icc_type=icc_type)
 
     # using unmask to reshape the 1D voxels back to 3D specified mask and saving to dictionary
     result_dict = {
         'est': masker.inverse_transform(np.array(est)),
         'lowbound': masker.inverse_transform(np.array(lowbound)),
         'upbound': masker.inverse_transform(np.array(upbound)),
-        'msbtwn': masker.inverse_transform(np.array(msbs)),
-        'mswthn': masker.inverse_transform(np.array(msws))
+        'btwnsub': masker.inverse_transform(np.array(btwn_sub_var)),
+        'wthnsub': masker.inverse_transform(np.array(within_sub_var)),
+        'btwnmeas': masker.inverse_transform(np.array(btwn_meas_var))
     }
 
     return result_dict
 
 
-def setup_atlas(name_atlas: str, **kwargs):
+def setup_atlas(name_atlas: str, **kwargs) -> nib.Nifti1Image:
+    """
+    Setup & fetch a brain atlas based on the provided atlas name & optional parameters via kwargs associated
+    with documentation from Nilearn.
+
+    Parameters
+    ----------
+    name_atlas : str
+        Name of the atlas to fetch. Available options are:
+        'aal', 'destrieux_2009', 'difumo', 'harvard_oxford', 'juelich',
+        'msdl', 'pauli_2017', 'schaefer_2018', 'talairach'.
+
+    **kwargs : keyword arguments, optional
+        Additional parameters to customize the fetching process. Examples:
+        - 'data_dir': str, default='/tmp/'
+            Directory where the fetched atlas data will be stored.
+        - 'verbose': int, default=0
+            Verbosity level of process.
+
+    Returns
+    -------
+    fetched_atlas : Nifti1Image
+        Fetched brain atlas in NIfTI format.
+    """
     default_params = {
         'data_dir': '/tmp/',
         'verbose': 0
@@ -139,16 +175,26 @@ def setup_atlas(name_atlas: str, **kwargs):
 
 def prob_atlas_scale(nifti_map, estimate_array):
     """
-    Rescales a probabilistic 3D Nifti map to the range of estimated values.
+    Rescales a probabilistic 3D Nifti map to match the range of estimated values.
 
-    :param nifti_map: Nifti1Image (3D)
-        The input Nifti image to be rescaled.
-    :param estimate_array: ndarray (1D)
-        A NumPy array containing the estimates used for scaling.
-    :return: Nifti1Image
-        Returns a 3D rescaled image based on the min/max of estimate_array.
+    Parameters
+    ----------
+    nifti_map : Nifti1Image
+        Input 3D Nifti image to be rescaled.
+
+    estimate_array : ndarray
+        1D NumPy array containing the estimates used for scaling.
+
+    Returns
+    -------
+    Nifti1Image
+        Rescaled 3D image where non-zero values are scaled to match the range of `estimate_array`.
+
+    Notes
+    -----
+    This function rescales the non-zero values in the input Nifti image `nifti_map` using the minimum and maximum
+    values of `estimate_array`. The spatial/header info from `nifti_map` is preserved.
     """
-
     temp_img_array = nifti_map.get_fdata().flatten()
     non_zero_mask = temp_img_array != 0
 
@@ -168,38 +214,90 @@ def prob_atlas_scale(nifti_map, estimate_array):
 def roi_icc(multisession_list: str, type_atlas: str,
             atlas_dir: str, icc_type='icc_3', **kwargs):
     """
-    roi_icc: calculates the ICC for each ROI in atlas (+lower bound & upper bound CI)
-        for specified input files using manual sumsq calculations.
-    The path to the subject's data should be provided as a list of lists for sessions, i.e.
-    dat_ses1 = ["./ses1/sub-00_Contrast-A_bold.nii.gz","./ses1/sub-01_Contrast-A_bold.nii.gz",
-        "./ses1/sub-03_Contrast-A_bold.nii.gz"]
-    dat_ses2 = ["./ses2/sub-00_Contrast-A_bold.nii.gz","./ses2/sub-01_Contrast-A_bold.nii.gz",
-        "./ses2/sub-03_Contrast-A_bold.nii.gz"]
-    dat_ses3 = ["./ses3/sub-00_Contrast-A_bold.nii.gz","./ses3/sub-01_Contrast-A_bold.nii.gz",
-        "./ses3/sub-03_Contrast-A_bold.nii.gz"]
+    roi_icc: Calculate the Intraclass Correlation Coefficient (ICC) for each ROI in a specified atlas
+    (+lower bound & upper bound CI) for input files using manual sum of squares calculations. It also provides
+    associated between subject variance, within subject variance and between measure variance estimates.
+
+    The function expects the subject's data paths to be provided as a list of lists for sessions:
+    Example:
+    dat_ses1 = ["./ses1/sub-00_Contrast-A_bold.nii.gz", "./ses1/sub-01_Contrast-A_bold.nii.gz", "./ses1/sub-03_Contrast-A_bold.nii.gz"]
+    dat_ses2 = ["./ses2/sub-00_Contrast-A_bold.nii.gz", "./ses2/sub-01_Contrast-A_bold.nii.gz", "./ses2/sub-03_Contrast-A_bold.nii.gz"]
+    dat_ses3 = ["./ses3/sub-00_Contrast-A_bold.nii.gz", "./ses3/sub-01_Contrast-A_bold.nii.gz", "./ses3/sub-03_Contrast-A_bold.nii.gz"]
 
     ** The order of the subjects in each list has to be the same **
 
-    Two session example:
-    multisession_list  = [dat_ses1, dat_ses2]
-    Three session example:
-    multisession_list  = [dat_ses1, dat_ses2, dat_ses3]
+    Examples:
+    # Two-session example:
+    multisession_list = [dat_ses1, dat_ses2]
+    # Three-session example:
+    multisession_list = [dat_ses1, dat_ses2, dat_ses3]
 
-    Inter-subject variance would be: between subjects in session 1, 2 & 3
-    Intra-subject variance would be: within subject across session 1, 2 & 3.
+    Inter-subject variance corresponds to variance between subjects across all sessions (1, 2, 3).
+    Intra-subject variance corresponds to variance within subjects across all sessions (1, 2, 3).
 
-    The atlas name is based on the probabilistic and ROI parcellations listed:
+    The atlas name should be one of the probabilistic and ROI parcellations listed:
     https://nilearn.github.io/dev/modules/datasets.html#atlases
 
-    :param multisession_list: list of a list, a variable containing path to subjects 3D volumes for each session
-    :param type_atlas: name of atlas type provided within nilearn atlases
-    :param atlas_dir: location to download/store downloaded atlas. Recommended: '/tmp/'
-    :param icc_type: provide icc type, default is icc_3, options: icc_1, icc_2, icc_3
-    :param kwargs: each nilearn atlas has additional options, only defaults:
-        data_dir = '/tmp', verbose = 0. These defaults will be updated with provided kwargs
-    :return: returns 3D shaped array of ICCs in shape of provided 3D volumes
-    """
+    Parameters
+    ----------
+    multisession_list : list of list of str
+        List of lists containing paths to subject 3D volumes for each session.
 
+    type_atlas : str
+        Name of the atlas type provided within Nilearn atlases.
+
+    atlas_dir : str
+        Location to download/store downloaded atlas. Recommended: '/tmp/'.
+
+    icc_type : str, optional
+        Type of ICC to compute, default is 'icc_3'.
+        Options: 'icc_1', 'icc_2', 'icc_3'.
+
+    **kwargs : keyword arguments, optional
+        Additional parameters to customize the atlas fetching process and masker settings.
+        Default options:
+        - 'data_dir': str, default='/tmp/'
+            Directory where the fetched atlas data will be stored.
+        - 'verbose': int, default=0
+            Verbosity level of the fetching process.
+
+    Returns
+    -------
+    dict
+        Dictionary containing the following arrays and values:
+        'roi_labels' : list
+            Labels of the ROIs in the atlas.
+        'est' : ndarray
+            Estimated ICC values for each ROI.
+        'lowbound' : ndarray
+            Lower bound of ICC confidence intervals for each ROI.
+        'upbound' : ndarray
+            Upper bound of ICC confidence intervals for each ROI.
+        'btwnsub' : ndarray
+            Between-subject variance for each ROI.
+        'wthnsub' : ndarray
+            Within-subject variance for each ROI.
+        'btwnmeas' : ndarray
+            Between-measurement variance for each ROI.
+        'est_3d' : nibabel.Nifti1Image
+            Estimated ICC values for each ROI.
+        'lowbound_3d' : nibabel.Nifti1Image
+            Lower bound of ICC confidence intervals for each ROI.
+        'upbound_3d' : nibabel.Nifti1Image
+            Upper bound of ICC confidence intervals for each ROI.
+        'btwnsub_3d' : nibabel.Nifti1Image
+            Between-subject variance for each ROI.
+        'wthnsub_3d' : nibabel.Nifti1Image
+            Within-subject variance for each ROI.
+        'btwnmeas_3d' : nibabel.Nifti1Image
+            Between-measurement variance for each ROI.
+
+    Example
+    -------
+    # Calculate ICC for ROIs using multisession data and AAL atlas
+    result = roi_icc(multisession_list=multisession_list, type_atlas='aal',
+                     atlas_dir='/tmp/', icc_type='icc_2')
+    """
     # combine brain data
     session_lengths = [len(session) for session in multisession_list]
     session_all_same = all(length == session_lengths[0] for length in session_lengths)
@@ -215,7 +313,6 @@ def roi_icc(multisession_list: str, type_atlas: str,
         print("Error when attempting to concatenate images. Confirm affine/size of images.")
 
     # grab atlas data
-    atlas = None
     try:
         atlas = setup_atlas(name_atlas=type_atlas, data_dir=atlas_dir, **kwargs)
     except TypeError as e:
@@ -224,8 +321,6 @@ def roi_icc(multisession_list: str, type_atlas: str,
 
     # Atlases are either deterministic (3D) or probabilistic (4D). Try except to circumvent error
     # Get dimensions and then mask
-    atlas_dim = None
-
     try:
         atlas_dim = len(atlas.maps.shape)
     except AttributeError:
@@ -260,8 +355,9 @@ def roi_icc(multisession_list: str, type_atlas: str,
     sess_labels = [f"sess{i + 1}" for i in range(num_sessions)]
     roi_n = imgdata[0].shape[-1]
 
-    # empty list for icc, low/upper bound 95% ICC, mean square between & within subject
-    est, lowbound, upbound, msbs, msws = np.empty((5, roi_n))
+    # empty list for icc, low/upper bound 95% ICC, between sub, within sub and between measure var
+    est, lowbound, upbound, \
+        btwn_sub_var, within_sub_var, btwn_meas_var = np.empty((6, roi_n))
 
     for roi in range(roi_n):
         np_roidata = np.column_stack((np.tile(subj_list, num_sessions),
@@ -274,22 +370,25 @@ def roi_icc(multisession_list: str, type_atlas: str,
         roi_pd = roi_pd.astype({"subj": int, "sess": "category", "vals": float})
 
         est[roi], lowbound[roi], upbound[roi], \
-            msbs[roi], msws[roi] = sumsq_icc(df_long=roi_pd, sub_var="subj", sess_var="sess",
-                                             value_var="vals", icc_type=icc_type)
+            btwn_sub_var[roi], within_sub_var[roi], \
+            btwn_meas_var[roi] = sumsq_icc(df_long=roi_pd, sub_var="subj", sess_var="sess",
+                                           value_var="vals", icc_type=icc_type)
 
     # using unmask to reshape the 1D ROI data back to 3D specified mask and saving to dictionary
     result_dict = {
-        'roi_labels': atlas.labels,
+        'roi_labels': atlas.labels[1:],
         'est': np.array(est),
         'lowbound': np.array(lowbound),
         'upbound': np.array(upbound),
-        'msbtwn': np.array(msbs),
-        'mswthn': np.array(msws)
+        'btwnsub': np.array(btwn_sub_var),
+        'wthnsub': np.array(within_sub_var),
+        'btwnmeas': np.array(btwn_meas_var)
     }
 
     est_string = {"est_3d": est,
                   "lowbound_3d": lowbound, "upbound_3d": upbound,
-                  "msbtwn": msbs, "mswthn_3d": msws
+                  "btwnsub_3d": btwn_sub_var, "wthnsub_3d": within_sub_var,
+                  "btwnmeas_3d": btwn_meas_var
                   }
 
     if atlas_dim == 4:
@@ -302,8 +401,9 @@ def roi_icc(multisession_list: str, type_atlas: str,
             'est_3d': masker.inverse_transform(np.array(est)),
             'lowbound_3d': masker.inverse_transform(np.array(lowbound)),
             'upbound_3d': masker.inverse_transform(np.array(upbound)),
-            'msbtwn_3d': masker.inverse_transform(np.array(msbs)),
-            'mswthn_3d': masker.inverse_transform(np.array(msws))
+            'btwnsub_3d': masker.inverse_transform(np.array(btwn_sub_var)),
+            'wthnsub_3d': masker.inverse_transform(np.array(within_sub_var)),
+            'btwnmeas_3d': masker.inverse_transform(np.array(within_sub_var))
         }
         result_dict.update(update_values)
 

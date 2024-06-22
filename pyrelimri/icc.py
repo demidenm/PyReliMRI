@@ -6,45 +6,80 @@ from numpy.typing import NDArray
 
 def sumsq_total(df_long: DataFrame, values: str) -> NDArray:
     """
-    calculates the sum of square total
-    the difference between each value and the global mean
-    :param df_long: A pandas DataFrame in long format.
-    :param values: variable string for values containing scores
-    :return:
+    Calculate the total sum of squares for a given column in a DataFrame.
+    The total sum of squares is the sum of the squared differences between each value in the column
+    and the overall mean of that column.
+    Parameters
+    ----------
+    df_long : DataFrame
+        A pandas DataFrame in long format.
+    values : str
+        The name of the column containing the values for which to calculate the total sum of squares.
+
+    Returns
+    -------
+    NDArray
+        The total sum of squares of the specified values column.
+
     """
     return np.sum((df_long[values] - df_long[values].mean()) ** 2)
 
 
 def sumsq_within(df_long: DataFrame, sessions: str, values: str, n_subjects: int) -> NDArray:
     """
-    calculates the sum of squared Intra-subj variance,
-    the average session value subtracted from overall avg of values
-    :param df_long: A pandas DataFrame in long format (e.g scores across subjects and 1+ sessions)
-    :param sessions: session (repeated measurement) variable in df, string
-    :param values: variable for values for subjects across sessions, str
-    :param n_subjects: number of subjects
-    :return: returns sumsqured within
+    Calculate the sum of squared within-subject variance.
+    This function computes the sum of the squared differences between the average session value and the overall average
+    of values, multiplied by the number of subjects.
+
+    Parameters
+    ----------
+    df_long : DataFrame
+        A pandas DataFrame in long format, e.g., scores across subjects and 1+ sessions.
+    sessions : str
+        The name of the column representing sessions (repeated measurements) in the DataFrame.
+    values : str
+        The name of the column containing the values for subjects across sessions.
+    n_subjects : int
+        The number of subjects.
+
+    Returns
+    -------
+    NDArray
+        The sum of squared within-subject variance.
+
     """
 
     return np.sum(
         ((df_long[values].mean() -
-          df_long[[sessions, values]].groupby(by=sessions)[values].mean()) ** 2) * n_subjects
+          df_long[[sessions, values]].groupby(by=sessions, observed=False)[values].mean()) ** 2) * n_subjects
     )
 
 
 def sumsq_btwn(df_long: DataFrame, subj: str, values: str, n_sessions: int) -> NDArray:
     """
-    calculates the sum of squared between-subj variance,
-    the average subject value subtracted from overall avg of values
+    Calculate the sum of squared between-subject variance.
+    This function computes the sum of the squared differences between the average subject value and the overall average
+    of values, multiplied by the number of sessions.
 
-    :param df_long: A pandas DataFrame in long format (e.g scores across subjects and 1+ sessions)
-    :param subj: subj variable in df, string
-    :param values: variable for values for subjects across sessions, str
-    :param n_sessions: number of sessions
-    :return: returns sumsqured within
+    Parameters
+    ----------
+    df_long : DataFrame
+        A pandas DataFrame in long format, e.g. scores across subjects and 1+ sessions.
+    subj : str
+        The name of the column representing subjects (i.e. targets) in the DataFrame.
+    values : str
+        The name of the column containing the values for subjects (i.e. ratings) across sessions.
+    n_sessions : int
+        The number of sessions (i.e. raters)
+
+    Returns
+    -------
+    NDArray
+        The sum of squared between-subject variance.
+
     """
     return np.sum(
-        ((df_long[values].mean() - df_long[[subj, values]].groupby(by=subj)[values].mean()) ** 2) * n_sessions
+        ((df_long[values].mean() - df_long[[subj, values]].groupby(by=subj, observed=False)[values].mean()) ** 2) * n_sessions
     )
 
 
@@ -59,25 +94,40 @@ def check_icc_type(icc_type, allowed_types=None):
 def icc_confint(msbs: float, msws: float, mserr: float, msc: float,
                 n_subjs: int, n_sess: int, icc_2=None, alpha=0.05, icc_type='icc_3'):
     """
-    Calculates the confidence interval for ICC(1), ICC(2,1), or ICC(3,1) using the F-distribution method.
-    Default = 95% CI. Adopts technique from Pinguin's (https://pingouin-stats.org/build/html/index.html) ICC
-    confidence interval calculation
+    Calculate the confidence interval for ICC(1), ICC(2,1), or ICC(3,1) using the F-distribution method.
+    This function computes the 95% confidence interval for the Intraclass Correlation Coefficient (ICC) based on
+    the specified ICC type (1, 2, or 3). The technique is adopted from the Pinguin library, see:
+    https://pingouin-stats.org/build/html/index.html, which is based on the ICC() function from Psych package in R:
+    https://www.rdocumentation.org/packages/psych/versions/2.4.3/topics/ICC
 
-    :param msbs: The mean square between-subject (float)
-    :param msws: The mean square within-subject.
-    :param mserr: The mean square error.
-    :param msc: The mean square for the rater effect.
-    :param n_subjs: The number of subjects.
-    :param n_sess: The number of raters.
-    :param icc_2: ICC(2,1) estimate to be used in calculating upper/lower CI
-    :param alpha: The significance level for the confidence interval. Default is 0.05.
-    :param icc_type: Confidence interval for specified ICC, default ICC(3,1)
+    Parameters
+    ----------
+    msbs : float
+        The mean square between-subject.
+    msws : float
+        The mean square within-subject.
+    mserr : float
+        The mean square error.
+    msc : float
+        The mean square for the rater/session effect.
+    n_subjs : int
+        The number of subjects/targets.
+    n_sess : int
+        The number of sessions/raters.
+    icc_2 : float, optional
+        ICC(2,1) estimate used in calculating the confidence interval. Default is None.
+    alpha : float, optional
+        The significance level for the confidence interval. Default is 0.05.
+    icc_type : str, optional
+        The type of ICC for which the confidence interval is to be calculated. Default is 'icc_3'.
+        Must be one of 'icc_1', 'icc_2', or 'icc_3'.
 
     Returns
     -------
-    icc1_ci, icc21_ci or icc31_ci : tuple
-        The 95% confidence intervals for ICC(1), ICC(2,1), and ICC(3,1), respectively.
+    tuple
+        The lower and upper bounds of the 95% confidence interval for the specified ICC type.
     """
+
     check_icc_type(icc_type)
 
     # Calculate F, df, and p-values
@@ -96,7 +146,7 @@ def icc_confint(msbs: float, msws: float, mserr: float, msc: float,
         ub_ci = (f_ub - 1) / (f_ub + (n_sess - 1))
     elif icc_type == 'icc_2':
         fc = msc / mserr
-        vn = df2kd * ((n_sess * icc_2 * fc + n_subjs * (1 + (n_sess - 1) * icc_2) - n_sess * icc_2)) ** 2
+        vn = df2kd * (n_sess * icc_2 * fc + n_subjs * (1 + (n_sess - 1) * icc_2) - n_sess * icc_2) ** 2
         vd = df1 * n_sess ** 2 * icc_2 ** 2 * fc ** 2 + (n_subjs * (1 + (n_sess - 1) * icc_2) - n_sess * icc_2) ** 2
         v = vn / vd
         f2u = f.ppf(1 - alpha / 2, n_subjs - 1, v)
@@ -116,17 +166,39 @@ def icc_confint(msbs: float, msws: float, mserr: float, msc: float,
 
 def sumsq_icc(df_long: DataFrame, sub_var: str,
               sess_var: str, value_var: str, icc_type: str = 'icc_3'):
-    """ This ICC calculation uses the SS calculation, which are similar to ANOVA, but fewer estimates are used.
-    It takes in a long format pandas DF, where subjects repeat for sessions
-    The total variance (SS_T) is squared difference each value and the overall mean.
-    This is then decomposed into INTER (between) and INTRA (within) subject variance.
+    """
+    Calculate the Intraclass Correlation Coefficient (ICC) using the sum of squares method.
+    This function calculates the ICC based on a long format DataFrame where subjects (targets) are repeated for multiple sessions (raters).
+    It decomposes the total variance into total, between-subject and within-subject variance components and computes the ICC
+    for the specified type (ICC(1), ICC(2,1), or ICC(3,1)).
 
-    :param df_long: Data of subjects & sessions, long format (i.e., subjs repeating, for 1+ sessions).
-    :param sub_var: str of column in dataframe w/ subject identifying variable
-    :param sess_var: str of column in dataframe that is repeat session variables
-    :param value_var: str in dataframe that contains values for each session
-    :param icc_type: default is ICC(3,1), alternative is ICC(1,1) via icc_1 or ICC(2,1) via icc_2
-    :return: icc calculation, icc low bound conf, icc upper bound conf, msbs, msws
+    Parameters
+    ----------
+    df_long : DataFrame
+        A pandas DataFrame containing the data of subjects and sessions in long format (i.e., subjects repeating for 1+ sessions).
+    sub_var : str
+        The column name in the DataFrame representing the subject identifier.
+    sess_var : str
+        The column name in the DataFrame representing the session (repeated measurement) variable.
+    value_var : str
+        The column name in the DataFrame containing the values for each session (rater)
+    icc_type : str, optional
+        The type of ICC to calculate. Default is 'icc_3'. Must be one of 'icc_1', 'icc_2', or 'icc_3'.
+
+    Returns
+    -------
+    estimate : float
+        The ICC estimate for the specified type.
+    lowerbound : float
+        The lower bound of the 95% confidence interval for the ICC estimate.
+    upperbound : float
+        The upper bound of the 95% confidence interval for the ICC estimate.
+    btwn_sub : float
+        The between-subject variance component.
+    within_sub : float
+        The within-subject variance component.
+    btwn_measure : float, optional
+        The between-measure variance component for ICC(2,1), otherwise None.
     """
     assert sub_var in df_long.columns, \
         f'sub_var {sub_var} must be a column in the data frame'
@@ -166,21 +238,27 @@ def sumsq_icc(df_long: DataFrame, sub_var: str,
 
     # Calculate ICCs
     lowerbound, upperbound = None, None  # set to None in case they are skipped
+    btwn_measure = None  # ICC(2,1) for absolute agreement includes a bias term for measures
+
     if icc_type == 'icc_1':
         # ICC(1), Model 1
         try:
             estimate = (MSBtw - MSWtn) / (MSBtw + (num_sess - 1) * MSWtn)
+            btwn_sub = (MSBtw - MSWtn) / num_sess
+            within_sub = MSWtn
         except RuntimeWarning:
             estimate = 0
 
         if MSWtn > 0 and MSErr > 0:
             lowerbound, upperbound = icc_confint(msbs=MSBtw, msws=MSWtn, mserr=MSErr, msc=MSc,
                                                  n_subjs=num_subjs, n_sess=num_sess, alpha=0.05, icc_type='icc_1')
-
     elif icc_type == 'icc_2':
         # ICC(2,1)
         try:
             estimate = (MSBtw - MSErr) / (MSBtw + (num_sess - 1) * MSErr + num_sess * (MSc - MSErr) / num_subjs)
+            btwn_sub = (MSBtw - MSErr) / num_sess
+            within_sub = MSErr
+            btwn_measure = (MSc - MSErr) / num_subjs
         except RuntimeWarning:
             estimate = 0
 
@@ -188,11 +266,12 @@ def sumsq_icc(df_long: DataFrame, sub_var: str,
             lowerbound, upperbound = icc_confint(msbs=MSBtw, msws=MSWtn, mserr=MSErr, msc=MSc,
                                                  n_subjs=num_subjs, n_sess=num_sess, icc_2=estimate, alpha=0.05,
                                                  icc_type='icc_2')
-
     elif icc_type == 'icc_3':
         # ICC(3,1)
         try:
             estimate = (MSBtw - MSErr) / (MSBtw + (num_sess - 1) * MSErr)
+            btwn_sub = (MSBtw - MSErr) / num_sess
+            within_sub = MSErr
         except RuntimeWarning:
             estimate = 0
 
@@ -200,4 +279,4 @@ def sumsq_icc(df_long: DataFrame, sub_var: str,
             lowerbound, upperbound = icc_confint(msbs=MSBtw, msws=MSWtn, mserr=MSErr, msc=MSc,
                                                  n_subjs=num_subjs, n_sess=num_sess, alpha=0.05, icc_type='icc_3')
 
-    return estimate, lowerbound, upperbound, MSBtw, MSWtn
+    return estimate, lowerbound, upperbound, btwn_sub, within_sub, btwn_measure
