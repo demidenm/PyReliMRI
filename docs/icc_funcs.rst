@@ -503,6 +503,7 @@ distributions and appear more smooth so interpreting the maps should be approach
    :figclass: align-center
 
 
+
 conn_icc
 ---------
 
@@ -524,14 +525,15 @@ Here are the steps it uses:
 
 As mentioned above, the `edgewise_icc` estimates ICC components for each edge in NxN matrix. \
 To use the `edgewise_icc` function, you have to provide the following information:
+
     - multisession_list: A list of listed paths to the .txt, .csv or .npy correlation matrices, or a list t-stat or beta maps for sess1, 2, 3, etc (or run 1,2,3..)
-    - n_cols: number of columns expected in the provided matrices int, col_names: list = None,
-                 separator=None, icc_type='icc_3'
+    - n_cols: number of columns expected in the provided matrices int
     - col_names: A list of column names for the matrices.
     - separator: If providing strings to paths, the separator to use to open file (e.g., ',','\t')
     - icc_type: The ICC estimate that will be calculated for each voxel. Options: `icc_1`, `icc_2`, `icc_3`. Default: `icc_3`
 
 The function returns a dictionary with NxN matrix for:
+
     - ICC estimates ('est')
     - ICC lowerbound 95% CI ('lowbound')
     - ICC upperbound 95% CI ('upbound')
