@@ -14,6 +14,6 @@ sphinx:
 # Explicitly set the version of Python and its requirements & install local pyreli
 python:
   install:
-    - method: pip
-      path: ./pyrelimri
+    - method: setuptools
+      path: .
     - requirements: docs/requirements.txt

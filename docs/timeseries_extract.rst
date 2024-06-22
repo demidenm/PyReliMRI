@@ -90,7 +90,7 @@ It is a bit challenging to make out which even is where. Let's add sticks at whi
 Now, let's combine the two to see how the fake BOLD response is delayed after each cue but follows some ordered structure. \
 The trend of the data becomes more apparent.
 
-.. figure:: img_png/fake_events.png
+.. figure:: img_png/fake_events-timeseries.png
    :align: center
    :alt: Figure 5: Fake Happy & Sad Event Sticks with Timeseries.
 
