@@ -21,43 +21,35 @@ SKLEARN_ALLOW_DEPRECATED_SKLEARN_PACKAGE_INSTALL = True
 
 def voxelwise_icc(multisession_list: list, mask: str, icc_type: str = 'icc_3') -> dict:
     """
-    voxelwise_icc: Calculate the Intraclass Correlation Coefficient (ICC) along with lower and upper bound confidence intervals
+    Calculate the Intraclass Correlation Coefficient (ICC) along with lower and upper bound confidence intervals
     by voxel for specified input files using manual sum of squares calculations.
 
-    Parameters
-    ----------
-    multisession_list : list of list of str
-        List of lists containing paths to subject 3D volumes for each session.
+    Args:
+        multisession_list (list of list of str):
+            List of lists containing paths to subject 3D volumes for each session.
 
-        Example:
-        dat_ses1 = ["./ses1/sub-00_Contrast-A_bold.nii.gz", "./ses1/sub-01_Contrast-A_bold.nii.gz", "./ses1/sub-03_Contrast-A_bold.nii.gz"]
-        dat_ses2 = ["./ses2/sub-00_Contrast-A_bold.nii.gz", "./ses2/sub-01_Contrast-A_bold.nii.gz", "./ses2/sub-03_Contrast-A_bold.nii.gz"]
-        dat_ses3 = ["./ses3/sub-00_Contrast-A_bold.nii.gz", "./ses3/sub-01_Contrast-A_bold.nii.gz", "./ses3/sub-03_Contrast-A_bold.nii.gz"]
-        The order of the subjects in each list has to be the same.
+            Example:
+                dat_ses1 = ["./ses1/sub-00_Contrast-A_bold.nii.gz", "./ses1/sub-01_Contrast-A_bold.nii.gz", "./ses1/sub-03_Contrast-A_bold.nii.gz"]
+                dat_ses2 = ["./ses2/sub-00_Contrast-A_bold.nii.gz", "./ses2/sub-01_Contrast-A_bold.nii.gz", "./ses2/sub-03_Contrast-A_bold.nii.gz"]
+                dat_ses3 = ["./ses3/sub-00_Contrast-A_bold.nii.gz", "./ses3/sub-01_Contrast-A_bold.nii.gz", "./ses3/sub-03_Contrast-A_bold.nii.gz"]
+                The order of the subjects in each list has to be the same.
 
-    mask : str
-        Path to 3D mask in NIfTI format.
+        mask (str):
+            Path to 3D mask in NIfTI format.
 
-    icc_type : str, optional
-        Type of ICC to compute, default is 'icc_3'.
-        Options: 'icc_1', 'icc_2', 'icc_3'.
+        icc_type (str, optional):
+            Type of ICC to compute, default is 'icc_3'.
+            Options: 'icc_1', 'icc_2', 'icc_3'.
 
-    Returns
-    -------
-    dict
-        Dictionary containing the following 3D images:
-        'est' : nibabel.Nifti1Image
-            Estimated ICC values.
-        'lowbound' : nibabel.Nifti1Image
-            Lower bound of ICC confidence intervals.
-        'upbound' : nibabel.Nifti1Image
-            Upper bound of ICC confidence intervals.
-        'btwn_sub' : nibabel.Nifti1Image
-            Between-subject variance.
-        'wthn_sub' : nibabel.Nifti1Image
-            Within-subject variance.
-        'btwn_meas' : nibabel.Nifti1Image
-            Between-measurement variance.
+    Returns:
+        dict:
+            Dictionary containing the following 3D images:
+                'est' (nibabel.Nifti1Image): Estimated ICC values.
+                'lowbound' (nibabel.Nifti1Image): Lower bound of ICC confidence intervals.
+                'upbound' (nibabel.Nifti1Image): Upper bound of ICC confidence intervals.
+                'btwn_sub' (nibabel.Nifti1Image): Between-subject variance.
+                'wthn_sub' (nibabel.Nifti1Image): Within-subject variance.
+                'btwn_meas' (nibabel.Nifti1Image): Between-measurement variance.
     """
     session_lengths = [len(session) for session in multisession_list]
     session_all_same = all(length == session_lengths[0] for length in session_lengths)
@@ -123,24 +115,20 @@ def setup_atlas(name_atlas: str, **kwargs) -> nib.Nifti1Image:
     Setup & fetch a brain atlas based on the provided atlas name & optional parameters via kwargs associated
     with documentation from Nilearn.
 
-    Parameters
-    ----------
-    name_atlas : str
-        Name of the atlas to fetch. Available options are:
-        'aal', 'destrieux_2009', 'difumo', 'harvard_oxford', 'juelich',
-        'msdl', 'pauli_2017', 'schaefer_2018', 'talairach'.
+    Args:
+        name_atlas (str):
+            Name of the atlas to fetch. Available options are:
+            'aal', 'destrieux_2009', 'difumo', 'harvard_oxford', 'juelich',
+            'msdl', 'pauli_2017', 'schaefer_2018', 'talairach'.
 
-    **kwargs : keyword arguments, optional
-        Additional parameters to customize the fetching process. Examples:
-        - 'data_dir': str, default='/tmp/'
-            Directory where the fetched atlas data will be stored.
-        - 'verbose': int, default=0
-            Verbosity level of process.
+        **kwargs:
+            Additional parameters to customize the fetching process. Examples:
+                - 'data_dir' (str): Directory where the fetched atlas data will be stored. Default is '/tmp/'.
+                - 'verbose' (int): Verbosity level of the process. Default is 0.
 
-    Returns
-    -------
-    fetched_atlas : Nifti1Image
-        Fetched brain atlas in NIfTI format.
+    Returns:
+        nib.Nifti1Image:
+            Fetched brain atlas in NIfTI format.
     """
     default_params = {
         'data_dir': '/tmp/',
@@ -177,23 +165,20 @@ def prob_atlas_scale(nifti_map, estimate_array):
     """
     Rescales a probabilistic 3D Nifti map to match the range of estimated values.
 
-    Parameters
-    ----------
-    nifti_map : Nifti1Image
-        Input 3D Nifti image to be rescaled.
+    Args:
+        nifti_map (Nifti1Image):
+            Input 3D Nifti image to be rescaled.
 
-    estimate_array : ndarray
-        1D NumPy array containing the estimates used for scaling.
+        estimate_array (ndarray):
+            1D NumPy array containing the estimates used for scaling.
 
-    Returns
-    -------
-    Nifti1Image
-        Rescaled 3D image where non-zero values are scaled to match the range of `estimate_array`.
+    Returns:
+        Nifti1Image:
+            Rescaled 3D image where non-zero values are scaled to match the range of `estimate_array`.
 
-    Notes
-    -----
-    This function rescales the non-zero values in the input Nifti image `nifti_map` using the minimum and maximum
-    values of `estimate_array`. The spatial/header info from `nifti_map` is preserved.
+    Notes:
+        This function rescales the non-zero values in the input Nifti image `nifti_map` using the minimum and maximum
+        values of `estimate_array`. The spatial/header info from `nifti_map` is preserved.
     """
     temp_img_array = nifti_map.get_fdata().flatten()
     non_zero_mask = temp_img_array != 0
@@ -211,26 +196,25 @@ def prob_atlas_scale(nifti_map, estimate_array):
     return image.new_img_like(nifti_map, new_img_shape)
 
 
-def roi_icc(multisession_list: str, type_atlas: str,
-            atlas_dir: str, icc_type='icc_3', **kwargs):
+def roi_icc(multisession_list: list, type_atlas: str, atlas_dir: str, icc_type='icc_3', **kwargs):
     """
-    roi_icc: Calculate the Intraclass Correlation Coefficient (ICC) for each ROI in a specified atlas
-    (+lower bound & upper bound CI) for input files using manual sum of squares calculations. It also provides
-    associated between subject variance, within subject variance and between measure variance estimates.
-
+    Calculate the Intraclass Correlation Coefficient (ICC) for each ROI in a specified atlas
+    (+lower bound & upper bound CI) for input files using manual sum of squares calculations.
+    It also provides associated between subject variance, within subject variance and between
+    measure variance estimates.
     The function expects the subject's data paths to be provided as a list of lists for sessions:
-    Example:
-    dat_ses1 = ["./ses1/sub-00_Contrast-A_bold.nii.gz", "./ses1/sub-01_Contrast-A_bold.nii.gz", "./ses1/sub-03_Contrast-A_bold.nii.gz"]
-    dat_ses2 = ["./ses2/sub-00_Contrast-A_bold.nii.gz", "./ses2/sub-01_Contrast-A_bold.nii.gz", "./ses2/sub-03_Contrast-A_bold.nii.gz"]
-    dat_ses3 = ["./ses3/sub-00_Contrast-A_bold.nii.gz", "./ses3/sub-01_Contrast-A_bold.nii.gz", "./ses3/sub-03_Contrast-A_bold.nii.gz"]
 
-    ** The order of the subjects in each list has to be the same **
+    Example:
+        dat_ses1 = ["./ses1/sub-00_Contrast-A_bold.nii.gz", "./ses1/sub-01_Contrast-A_bold.nii.gz", "./ses1/sub-03_Contrast-A_bold.nii.gz"]
+        dat_ses2 = ["./ses2/sub-00_Contrast-A_bold.nii.gz", "./ses2/sub-01_Contrast-A_bold.nii.gz", "./ses2/sub-03_Contrast-A_bold.nii.gz"]
+        dat_ses3 = ["./ses3/sub-00_Contrast-A_bold.nii.gz", "./ses3/sub-01_Contrast-A_bold.nii.gz", "./ses3/sub-03_Contrast-A_bold.nii.gz"]
+        ** The order of the subjects in each list has to be the same **
 
     Examples:
-    # Two-session example:
-    multisession_list = [dat_ses1, dat_ses2]
-    # Three-session example:
-    multisession_list = [dat_ses1, dat_ses2, dat_ses3]
+        # Two-session example:
+        multisession_list = [dat_ses1, dat_ses2]
+        # Three-session example:
+        multisession_list = [dat_ses1, dat_ses2, dat_ses3]
 
     Inter-subject variance corresponds to variance between subjects across all sessions (1, 2, 3).
     Intra-subject variance corresponds to variance within subjects across all sessions (1, 2, 3).
@@ -238,65 +222,35 @@ def roi_icc(multisession_list: str, type_atlas: str,
     The atlas name should be one of the probabilistic and ROI parcellations listed:
     https://nilearn.github.io/dev/modules/datasets.html#atlases
 
-    Parameters
-    ----------
-    multisession_list : list of list of str
-        List of lists containing paths to subject 3D volumes for each session.
+    Args:
+        multisession_list (list of list of str): List of lists containing paths to subject 3D volumes for each session.
+        type_atlas (str): Name of the atlas type provided within Nilearn atlases.
+        atlas_dir (str): Location to download/store downloaded atlas. Recommended: '/tmp/'.
+        icc_type (str, optional): Type of ICC to compute, default is 'icc_3'. Options: 'icc_1', 'icc_2', 'icc_3'.
+        **kwargs (optional): Additional parameters to customize the atlas fetching process and masker
+            settings.
+            - data_dir (str): Directory where the fetched atlas data will be stored. Default is '/tmp/'.
+            - verbose (int): Verbosity level of the fetching process. Default is 0.
 
-    type_atlas : str
-        Name of the atlas type provided within Nilearn atlases.
+    Returns:
+        dict: Dictionary containing the following arrays and values:
+            - roi_labels (list): Labels of the ROIs in the atlas.
+            - est (ndarray): Estimated ICC values for each ROI.
+            - lowbound (ndarray): Lower bound of ICC confidence intervals for each ROI.
+            - upbound (ndarray): Upper bound of ICC confidence intervals for each ROI.
+            - btwnsub (ndarray): Between-subject variance for each ROI.
+            - wthnsub (ndarray): Within-subject variance for each ROI.
+            - btwnmeas (ndarray): Between-measurement variance for each ROI.
+            - est_3d (nibabel.Nifti1Image): Estimated ICC values for each ROI.
+            - lowbound_3d (nibabel.Nifti1Image): Lower bound of ICC confidence intervals for each ROI.
+            - upbound_3d (nibabel.Nifti1Image): Upper bound of ICC confidence intervals for each ROI.
+            - btwnsub_3d (nibabel.Nifti1Image): Between-subject variance for each ROI.
+            - wthnsub_3d (nibabel.Nifti1Image): Within-subject variance for each ROI.
+            - btwnmeas_3d (nibabel.Nifti1Image): Between-measurement variance for each ROI.
 
-    atlas_dir : str
-        Location to download/store downloaded atlas. Recommended: '/tmp/'.
-
-    icc_type : str, optional
-        Type of ICC to compute, default is 'icc_3'.
-        Options: 'icc_1', 'icc_2', 'icc_3'.
-
-    **kwargs : keyword arguments, optional
-        Additional parameters to customize the atlas fetching process and masker settings.
-        Default options:
-        - 'data_dir': str, default='/tmp/'
-            Directory where the fetched atlas data will be stored.
-        - 'verbose': int, default=0
-            Verbosity level of the fetching process.
-
-    Returns
-    -------
-    dict
-        Dictionary containing the following arrays and values:
-        'roi_labels' : list
-            Labels of the ROIs in the atlas.
-        'est' : ndarray
-            Estimated ICC values for each ROI.
-        'lowbound' : ndarray
-            Lower bound of ICC confidence intervals for each ROI.
-        'upbound' : ndarray
-            Upper bound of ICC confidence intervals for each ROI.
-        'btwnsub' : ndarray
-            Between-subject variance for each ROI.
-        'wthnsub' : ndarray
-            Within-subject variance for each ROI.
-        'btwnmeas' : ndarray
-            Between-measurement variance for each ROI.
-        'est_3d' : nibabel.Nifti1Image
-            Estimated ICC values for each ROI.
-        'lowbound_3d' : nibabel.Nifti1Image
-            Lower bound of ICC confidence intervals for each ROI.
-        'upbound_3d' : nibabel.Nifti1Image
-            Upper bound of ICC confidence intervals for each ROI.
-        'btwnsub_3d' : nibabel.Nifti1Image
-            Between-subject variance for each ROI.
-        'wthnsub_3d' : nibabel.Nifti1Image
-            Within-subject variance for each ROI.
-        'btwnmeas_3d' : nibabel.Nifti1Image
-            Between-measurement variance for each ROI.
-
-    Example
-    -------
-    # Calculate ICC for ROIs using multisession data and AAL atlas
-    result = roi_icc(multisession_list=multisession_list, type_atlas='aal',
-                     atlas_dir='/tmp/', icc_type='icc_2')
+    Example:
+        # Calculate ICC for ROIs using multisession data and AAL atlas
+        result = roi_icc(multisession_list=multisession_list, type_atlas='aal', atlas_dir='/tmp/', icc_type='icc_2')
     """
     # combine brain data
     session_lengths = [len(session) for session in multisession_list]

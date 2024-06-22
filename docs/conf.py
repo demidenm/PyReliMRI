@@ -47,6 +47,7 @@ add_module_names = True
 # ones.
 extensions = [
     'sphinx.ext.autodoc',
+    'sphinx.ext.napoleon',
     'sphinx_rtd_theme',
 ]
 
