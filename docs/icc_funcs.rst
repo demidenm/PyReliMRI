@@ -5,11 +5,12 @@ The intraclass correlation (ICC) estimates are a complement to the similarity fu
 in the data can be parsed in several ways. One can estimate how similar things are above a threshold (e.g., 1/0) or \
 how similar specific continuous estimates are across subjects. The ICC is used for the latter.
 
-Two modules with examples are reviewed here: The  `icc` and `brain_icc` modules. The first is the manual estimation \
-of the ICC estimates, such the the (1) sum of squared total,  the (2) sum of squared within, (3) sum of squared between \
-their associated mean sums of squared (which is 1-3 divided by the degrees of freedom) in the `icc` module. \
+Two modules with examples are reviewed here: The  `icc`, `brain_icc` and `conn_icc` modules. The first is the manual estimation \
+of the ICC estimates, such as the (1) :math:`SS_{total}`,  the (2) :math:`SS_{within}`, (3) :math:`SS_{Between}` \
+their associated mean sums of squares (which is a decomposition of variance 1-3 divided by specific degrees of freedoms) in the `icc` module. \
 Then, these ICC estimates are calculated on a voxel-by-voxel basis (or if you wanted to, ROI by ROI) using `brain` module. \
-and roi-by-roi basis using 'roi_icc'
+and roi-by-roi basis using 'roi_icc'. Finally, an example is provided using the `conn_icc` module to estimate edgewise ICC \
+on matrices.
 
 
 icc
@@ -58,7 +59,7 @@ by formula:
 
 .. math::
 
-    \text{sumsq_total}(df_{long}, values) = \sum_{i=1}^{n}(x_i - \bar{x})^2
+    \text{sumsq_{total}}(df_{long}, values) = \sum_{i=1}^{n}(x_i - \bar{x})^2
 
 where:
     * :math:`df_{long}` = pandas DataFrame (df) in long format \
@@ -98,7 +99,7 @@ We can calculate the sum of squares within using the below:
 
     # if you havent imported the package already
     from pyrelimri import icc
-    icc.sumsq_within(df_long=a_ld,sessions="sess", values="vals", n_subjects=10)
+    icc.sumsq_within(df_long=long_df, sessions="sess", values="vals", n_subjects=10)
 
 We will get the result of 29.2 sum of squares `between` subject factor.
 
@@ -121,7 +122,7 @@ where:
 
     # if you havent imported the package already
     from pyrelimri import icc
-    icc.sumsq_btwn(df_long=a_ld,subj="subidr", values="vals", n_sessions=3) # 3 = num1-num3
+    icc.sumsq_btwn(df_long=long_df, subj="subidr", values="vals", n_sessions=3) # 3 = num1-num3
 
 We will get the result of 20.0 sum of squares `between` subject factor.
 
@@ -129,14 +130,20 @@ Note: If you recall that ICC is the decomposition of `total` variance, you'll no
 do not sum to the total variance, 71.8. This is because there is the subj*sess variance component \
 and the residual variance, too. You can review this in an ANOVA table:
 
+.. code-block:: python
+
+    # if you havent imported the package already
+    from pinguin import anova
+    round(anova(dv='vals', between=['subidr','sess'], data=long_df, detailed=True),3)
+
 +---------------+-----------+----+-----------+-----+
 |     Source    |     SS    | DF |     MS    | np2 |
 +===============+===========+====+===========+=====+
-|     subidr    | 20.008333 |  9 | 2.223148  | 1.0 |
+|     subidr    | 20.008 |  9 | 2.223  | 1.0 |
 +---------------+-----------+----+-----------+-----+
-|      sess     | 29.216667 |  2 | 14.608333 | 1.0 |
+|      sess     | 29.217 |  2 | 14.608 | 1.0 |
 +---------------+-----------+----+-----------+-----+
-| subidr * sess | 22.616667 | 18 | 1.256481  | 1.0 |
+| subidr * sess | 22.617 | 18 | 1.256  | 1.0 |
 +---------------+-----------+----+-----------+-----+
 |    Residual   |   0.000000|  0 |    -      | -   |
 +---------------+-----------+----+-----------+-----+
@@ -173,7 +180,9 @@ Where:
 - :math:`N_{subjs}`: numbers of subjects
 
 In terms to the above ICC(1), ICC(2,1) and ICC(3,1) formulas, these are also written in Table 1 in `Liljequist et al., 2019 <https://www.doi.org/10.1371/journal.pone.0219854>`_
-as below. These are in terms of between subject variance, measurement additive bias, and within subject measurement 'nose':
+as below. These are in terms of between subject variance (deviation from mean for :math:`subject_i` = :math:`\sigma_r^2`), \
+noise/within subject variance (variance in measurement :math:`j` for :math:`subject_i` = :math:`\sigma_v^2`), and \
+measurement additive bias (bias in measurement :math:`j` = :math:`\sigma_c^2`):
 
 .. math:: \text{ICC(1)} = \frac{\sigma_r^2}{\sigma_r^2 + \sigma_v^2}
 
@@ -189,8 +198,9 @@ session variable and the value scores variables that are contained in the long d
 icc to return (options: icc_1, icc_2, icc_3; default: icc_3).
 
 The `sumsq_icc` function will return [six] values: the ICC estimate, lower bound 95% confidence interval, \
-upper bound 95% confidence interval and specific to each computation, the between-subject variance, within subject variance, \
-and in case of ICC(2,1) between-measure variance. This information will print to the terminal or can be saved to six variables. Example:
+upper bound 95% confidence interval and specific to each computation, the between-subject variance (:math:`\sigma_r^2`), \
+within subject variance (:math:`\sigma_v^2`), and in case of ICC(2,1) between-measure variance (:math:`\sigma_c^2`). \
+This information will print to the terminal or can be saved to six variables. Example:
 
 .. code-block:: python
 
@@ -205,9 +215,9 @@ This will store the five associated values in the five variables:
     - `icc3`: ICC estimate
     - `icc3_lb`: 95% lower bound CI for ICC estimate
     - `icc3_lb`: 95% upper bound CI for ICC estimate
-    - `icc3_btwnsub`: Between Subject Variance used for ICC estimate (sigma_r ^2)
-    - `icc3_withinsub`: Within Subject Variance used for ICC estimate (sigma_v ^2)
-    - `icc3_btwnmeas`: setting to _ as between measure variance is not computed for ICC(3,1) (sigma_c ^2)
+    - `icc3_btwnsub`: Between Subject Variance used for ICC estimate (:math:`\sigma_r^r`)
+    - `icc3_withinsub`: Within Subject Variance used for ICC estimate (:math:`\sigma_r^v`)
+    - `icc3_btwnmeas`: setting to _ as between measure variance is not computed for ICC(3,1) (:math:`\sigma_c^2`)
 
 Reminder: If NaN/missing values, `icc` implements a mean replacement of all column values. If this is not preferred, handle missing/unbalanced \
 cases beforehand.

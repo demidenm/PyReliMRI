@@ -47,9 +47,9 @@ def voxelwise_icc(multisession_list: list, mask: str, icc_type: str = 'icc_3') -
                 'est' (nibabel.Nifti1Image): Estimated ICC values.
                 'lowbound' (nibabel.Nifti1Image): Lower bound of ICC confidence intervals.
                 'upbound' (nibabel.Nifti1Image): Upper bound of ICC confidence intervals.
-                'btwn_sub' (nibabel.Nifti1Image): Between-subject variance.
-                'wthn_sub' (nibabel.Nifti1Image): Within-subject variance.
-                'btwn_meas' (nibabel.Nifti1Image): Between-measurement variance.
+                'btwnsub' (nibabel.Nifti1Image): Between-subject variance.
+                'wthnsub' (nibabel.Nifti1Image): Within-subject variance.
+                'btwnmeas' (nibabel.Nifti1Image): Between-measurement variance.
     """
     session_lengths = [len(session) for session in multisession_list]
     session_all_same = all(length == session_lengths[0] for length in session_lengths)
