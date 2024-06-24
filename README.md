@@ -2,6 +2,7 @@
 
 [![Python package](https://github.com/demidenm/PyReliMRI/actions/workflows/python-package-conda.yml/badge.svg?style=plastic&logo=Python)](https://github.com/demidenm/PyReliMRI/actions/workflows/python-package-conda.yml)
 [![Documentation Status](https://readthedocs.org/projects/pyrelimri/badge/?version=latest&style=plastic)](https://pyrelimri.readthedocs.io/en/latest/?badge=latest&style=plastic)
+[![PyPI](https://img.shields.io/pypi/v/PyReliMRI.svg)](https://pypi.org/project/PyReliMRI/)
 [![Funded By](https://img.shields.io/badge/NIDA-F32%20DA055334--01A1-yellowgreen?style=plastic)](https://reporter.nih.gov/project-details/10525501)
 [![DOI](https://zenodo.org/badge/576430868.svg)](https://zenodo.org/badge/latestdoi/576430868)
 

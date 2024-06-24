@@ -2,8 +2,12 @@ import setuptools
 
 setuptools.setup(
     name="PyReliMRI",
-    version="2.0.0",
-    description="A package for computing reliability of fMRI images",
+    version="2.1.0",
+    description="A package for computing reliability of MRI/fMRI images",
+    author="Michael Demidenko",
+    author_email="demidenko.michael@gmail.com",
+    url="https://github.com/demidenm/PyReliMRI",
+    license="MIT",
     packages=setuptools.find_packages(),
     install_requires=[
         "numpy",
@@ -14,7 +18,10 @@ setuptools.setup(
         "scipy",
         "seaborn",
         "scikit-learn",
-        "hypothesis"
+        "hypothesis",
+        "matplotlib",
+        "joblib",
+        "statsmodels",
     ],
     classifiers=[
         "Programming Language :: Python :: 3",

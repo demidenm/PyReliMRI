@@ -125,6 +125,7 @@ def process_bold_roi_mask(bold_path: str, roi_mask: str, high_pass_sec: int = No
         Processes BOLD data masked by a region of interest (ROI) mask file.
         Loads the BOLD and ROI mask images, applies the mask to the BOLD data, performs preprocessing (optional)
         steps including smoothing, cleaning (detrending and standardization), and averaging across time series.
+        Standardizes BOLD signal using Nilearn's percent signal change ('psc')
 
         Parameters
         ----------
@@ -189,6 +190,7 @@ def process_bold_roi_coords(bold_path: str, roi_mask: Nifti1Image,
     Processes BOLD data masked by a spherical region of interest (ROI) defined by coordinates.
     Loads the BOLD and ROI mask images, applies the spherical ROI mask to the BOLD data, performs preprocessing steps
     including smoothing, cleaning (detrending and standardization), and averaging across time series.
+    Standardizes BOLD signal using Nilearn's percent signal change ('psc')
 
     Parameters
     ----------
@@ -255,6 +257,8 @@ def extract_time_series(bold_paths: list, roi_type: str, high_pass_sec: int = No
     Extracts time series data from BOLD images for specified regions of interest (ROI) or coordinates.
     For each BOLD path, extracts time series either using a mask or ROI coordinates, leveraging
     Nilearn's NiftiLabelsMasker (for mask) or nifti_spheres_masker (for coordinates).
+    BOLD signal using Nilearn's percent signal change ('psc')
+
 
     Parameters
     ----------
@@ -290,23 +294,23 @@ def extract_time_series(bold_paths: list, roi_type: str, high_pass_sec: int = No
     -------
         list or tuple
             - If roi_type is 'mask':
-                - List of numpy arrays containing the time series data for each subject/run.
+                - List of numpy arrays containing the time series (% mean signal change) data for each subject/run.
                 - List of subject information strings formatted as 'sub-{sub_id}_run-{run_id}'.
             - If roi_type is 'coords':
-                - List of numpy arrays containing the averaged time series data for each subject/run.
+                - List of numpy arrays containing the averaged time series (% mean signal change) data for each subject/run.
                 - Nifti1Image object representing the coordinate mask used.
                 - List of subject information strings formatted as 'sub-{sub_id}_run-{run_id}'.
 
 
     Example
     -------
-        # Extract time series for BOLD data using a mask ROI
+        # Extract percent mean signal change time series for BOLD data using a mask ROI
         roi_type = 'mask'
         bold_paths = ['./sub-01_ses-01_task-lit_bold.nii.gz', './sub-02_ses-01_task-lit_bold.nii.gz']
         roi_mask = './siq-roi_mask.nii.gz'
         time_series_list, sub_info_list = extract_time_series(bold_paths, roi_type, roi_mask=roi_mask, high_pass_sec=100, detrend=True, fwhm_smooth=5.0)
 
-        # Extract time series for BOLD data using coordinates ROI
+        # Extract percent mean signal change time series for BOLD data using coordinates ROI
         roi_type = 'coords'
         bold_paths = ['./sub-01_ses-01_task-lit_bold.nii.gz', './sub-02_ses_1_task-lit_bold.nii.gz']
         roi_coords = (30, -15, 0)
@@ -384,7 +388,7 @@ def extract_postcue_trs_for_conditions(events_data: list, onset: str, trial_name
     Returns
     -------
     pd.DataFrame
-        DataFrame containing mean signal intensity values, subject labels, trial labels, TR values,
+        DataFrame containing percent mean signal change values, subject labels, trial labels, TR values,
         and cue labels for all specified conditions.
 
     Example
