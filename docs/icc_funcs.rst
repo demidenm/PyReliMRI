@@ -61,10 +61,10 @@ by formula:
     \text{sumsq_total}(df_{long}, values) = \sum_{i=1}^{n}(x_i - \bar{x})^2
 
 where:
-    * df_long = pandas DataFrame (df) in long format \
+    * :math:`df_{long}` = pandas DataFrame (df) in long format \
     * values = is a variable string for the values containing the scores in df \
-    * x_i = is each value in the column specified by values column in df \
-    * x_bar = is the global mean specified by 'values' column in df
+    * :math:`x_i` = is each value in the column specified by values column in df \
+    * :math:`\bar x` = is the global mean specified by 'values' column in df
 
 Using the anagrams `long_df` I'll calculate the sum of square total using:
 
@@ -83,12 +83,12 @@ We will get the result of 71.8 sum of squared `total`.
     \text{sumsq_within}(df_{long}, sessions, values, n_{subjects}) = n_{subjects} \sum_{i=1}^m (\overline{x}_i - \overline{x})^2
 
 where:
-    * df_long = pandas DataFrame in long format \
+    * :math:`df_{long}` = pandas DataFrame in long format \
     * sessions = is a session (repeated measurement) variable, string, in df \
     * values = is a variable, string, for the values containing the scores in df \
-    * n_subjects = the number of subjects in df \
-    * x_i_bar = is the mean of the `values` column for session `i` in df \
-    * x_bar = is the global mean specified by 'values' column in df
+    * :math:`n_{subjects}` = the number of subjects in df \
+    * :math:`\bar x_i` = is the mean of the `values` column for session `i` in df \
+    * :math:`\bar x` = is the global mean specified by 'values' column in df
     * m = is the number of sessions
 
 
@@ -109,12 +109,12 @@ We will get the result of 29.2 sum of squares `between` subject factor.
     \text{sumsq_btwn}(df_{long}, subj, values, n_{sessions}) = n_{sessions} \sum_{i=1}^s (\overline{x}_i - \overline{x})^2
 
 where:
-    * df_long = pandas DataFrame in long format \
+    * :math:`df_{long}` = pandas DataFrame in long format \
     * subj = is the subject variable, string, in df \
     * values = is a variable, string, for the values containing the scores in df \
-    * n_sessions = the number of sessions in df \
-    * x_i_bar = is the mean of the `values` column for subject `i` in df \
-    * x_bar = is the global mean specified by 'values' column in df
+    * :math:`n_{sessions}` = the number of sessions in df \
+    * :math:`\bar x_i` = is the mean of the `values` column for subject `i` in df \
+    * :math:`\bar x` = is the global mean specified by 'values' column in df
     * s = is the number of subjects
 
 .. code-block:: python
@@ -165,12 +165,12 @@ The formulas for the ICC(1), ICC(2,1) and ICC(3,1) are described below.
 
 Where:
 
-- MS_Btwn: mean square between subjects
-- MS_Wthn: mean square within subjects
-- MS_Err: mean squared residual error
-- MS_Sess: mean squared error of sessions
-- Sess: is the number of sessions
-- N_subjs: numbers of subjects
+- :math:`BS_{Btwn}`: mean square between subjects
+- :math:`MS_{Wthn}`: mean square within subjects
+- :math:`MS_{Err}`: mean squared residual error
+- :math:`MS_{Sess}`: mean squared error of sessions
+- :math:`\bar x`: is the number of sessions
+- :math:`N_{subjs}`: numbers of subjects
 
 In terms to the above ICC(1), ICC(2,1) and ICC(3,1) formulas, these are also written in Table 1 in `Liljequist et al., 2019 <https://www.doi.org/10.1371/journal.pone.0219854>`_
 as below. These are in terms of between subject variance, measurement additive bias, and within subject measurement 'nose':
@@ -207,7 +207,7 @@ This will store the five associated values in the five variables:
     - `icc3_lb`: 95% upper bound CI for ICC estimate
     - `icc3_btwnsub`: Between Subject Variance used for ICC estimate (sigma_r ^2)
     - `icc3_withinsub`: Within Subject Variance used for ICC estimate (sigma_v ^2)
-    - `icc3_betweenmeasure`: setting to _ as between measure variance is not computed for ICC(3,1) (sigma_c ^2)
+    - `icc3_btwnmeas`: setting to _ as between measure variance is not computed for ICC(3,1) (sigma_c ^2)
 
 Reminder: If NaN/missing values, `icc` implements a mean replacement of all column values. If this is not preferred, handle missing/unbalanced \
 cases beforehand.
