@@ -18,13 +18,16 @@ for assessing the consistency and reproducibility of MRI-based research. The pac
 ## Authors
 
 - [Michael I. Demidenko](https://orcid.org/0000-0001-9270-0124)
+- [Jeanette A. Mumford](https://orcid.org/0000-0002-0926-3531)
 - [Russell A. Poldrack](https://orcid.org/0000-0001-6755-0259)
 
 ### Citation
 
 If you use PyReliMRI in your research, please cite it using the following DOI:
 
-Demidenko, M. I., & Poldrack, R. A. (2023). PyReliMRI: An Open-source Python Tool for Estimates of Reliability in MRI Data [Computer software]. https://zenodo.org/record/8387971
+Demidenko, M., Mumford, J., & Poldrack, R. (2024). PyReliMRI: An Open-source Python tool for Estimates of Reliability \
+in MRI Data (2.1.0) [Computer software]. Zenodo. https://doi.org/10.5281/zenodo.12522260
+
 
 ## Purpose
 

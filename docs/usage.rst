@@ -1,6 +1,6 @@
-=========
-PyReliMRI
-=========
+===============
+PyReliMRI Usage
+===============
 
 The `pyrelimri` package contains multiple modules for calculating image reliability measures.
 

@@ -1,5 +1,5 @@
-Description
-===========
+Brief Description
+=================
 
 The PyReliMRI package intergrates several modules designed to facilitate reliability estimation on MRI data. \
 The code is simplified by leveraging features from `Nilearn <https://nilearn.github.io/stable/index.html>`_. \
