@@ -41,7 +41,7 @@ Reliability questions for [task fMRI](https://www.doi.org/10.1177/09567976209167
   - `icc.py`: Computes Intraclass Correlation Coefficients (ICC) across subjects.
 
 - **Individual Level:**
-  - `brain_icc.py`: Computes voxel-wise and atlas-based ICC.
+  - `brain_icc.py`: Computes voxel-wise (can parallelize w/ `n_jobs`) and atlas-based ICC.
   - `conn_icc.py`: Estimates ICC for precomputed correlation matrices.
 
 - **Utility:**
