@@ -280,13 +280,13 @@ Say I have stored paths to session 1 and session 2 in the following variables (N
     scan2 = ["./scan2/sub-1_t-stat.nii.gz", "./scan2/sub-2_t-stat.nii.gz", "./scan2/sub-3_t-stat.nii.gz", "./scan2/sub-4_t-stat.nii.gz", "./scan2/sub-5_t-stat.nii.gz",
              "./scan2/sub-6_t-stat.nii.gz", "./scan2/sub-7_t-stat.nii.gz", "./scan2/sub-8_t-stat.nii.gz"]
 
-Next, I can call these images paths in the function and save the 3d volumes using:
+Next, I can call these images paths in the function and save the 3d volumes using (running 4 processes in parallel with `n_jobs = 4`):
 
 .. code-block:: python
 
     from pyrelimri import brain_icc
 
-    brain_icc_dict = brain_icc.voxelwise_icc(multisession_list = [scan1, scan2], mask = "./mask/brain_mask.nii.gz", icc_type = "icc_3")
+    brain_icc_dict = brain_icc.voxelwise_icc(multisession_list = [scan1, scan2], mask = "./mask/brain_mask.nii.gz", icc_type = "icc_3", n_jobs = 4)
 
 This will return the associated dictionary with nifti 3D volumes which can be manipulated further.
 
@@ -380,7 +380,7 @@ Okay, now I have everything I need: the paths to the images and to the mask.
     from pyrelimri import brain_icc
 
     brain_icc_msc = brain_icc.voxelwise_icc(multisession_list = [sess1_paths, sess2_paths ],
-                                            mask=mask_path, icc_type='icc_1')
+                                            mask=mask_path, icc_type='icc_1', n_jobs = 4)
 
 Since the dictionary is saved within the environment, you should see the dictionary with five items. On my mac (i9, 16GM mem),
 it took ~4minutes to run this and get the results. Time will depend on the size of data and your machine. \

@@ -75,12 +75,16 @@ def image_similarity(imgfile1: str, imgfile2: str,
     if similarity_type.casefold() in ['dice', 'jaccard']:
         # Intersection of images
         intersect = np.logical_and(imgdata[0, :], imgdata[1, :])
-        union = np.logical_or(imgdata[0, :], imgdata[1, :])
-        dice_coeff = (intersect.sum()) / (float(union.sum()) + np.finfo(float).eps)
+        
         if similarity_type.casefold() == 'dice':
-            coeff = dice_coeff
+            # Dice coefficient: 2 * |A ∩ B| / (|A| + |B|)
+            sum_a_b = imgdata[0, :].sum() + imgdata[1, :].sum()
+            coeff = (2.0 * intersect.sum()) / (float(sum_a_b) + np.finfo(float).eps)
         else:
-            coeff = dice_coeff / (2 - dice_coeff)
+            # Jaccard coefficient: |A ∩ B| / |A ∪ B|
+            union = np.logical_or(imgdata[0, :], imgdata[1, :])
+            coeff = intersect.sum() / (float(union.sum()) + np.finfo(float).eps)
+            
     elif similarity_type.casefold() == 'tetrachoric':
         warnings.filterwarnings('ignore')
         coeff = tet_corr(vec1=imgdata[0, :], vec2=imgdata[1, :])

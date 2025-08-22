@@ -1,6 +1,7 @@
 import numpy as np
 import nibabel as nib
 from pandas import DataFrame
+from joblib import Parallel, delayed
 from sklearn.preprocessing import minmax_scale
 from pyrelimri.icc import sumsq_icc
 from nilearn import image
@@ -19,10 +20,37 @@ from nilearn.datasets import (
 SKLEARN_ALLOW_DEPRECATED_SKLEARN_PACKAGE_INSTALL = True
 
 
-def voxelwise_icc(multisession_list: list, mask: str, icc_type: str = 'icc_3') -> dict:
+def process_voxel(voxel_data, subj_list, sess_labels, icc_type):
+    """
+    Process a single voxel's ICC calculation.
+    
+    Args:
+        voxel_data: List of arrays, one per session containing voxel values for all subjects
+        subj_list: Array of subject indices
+        sess_labels: List of session labels
+        icc_type: Type of ICC to compute
+    
+    Returns:
+        Tuple of ICC metrics for this voxel
+    """
+    num_sessions = len(sess_labels)
+    
+    np_voxdata = np.column_stack((np.tile(subj_list, num_sessions),
+                                  np.hstack([[sess_labels[j]] * len(voxel_data[j]) 
+                                            for j in range(num_sessions)]),
+                                  np.hstack(voxel_data)))
+
+    vox_pd = DataFrame(data=np_voxdata, columns=["subj", "sess", "vals"])
+    vox_pd = vox_pd.astype({"subj": int, "sess": "category", "vals": float})
+
+    return sumsq_icc(df_long=vox_pd, sub_var="subj", sess_var="sess",
+                     value_var="vals", icc_type=icc_type)
+
+
+def voxelwise_icc(multisession_list: list, mask: str, icc_type: str = 'icc_3', n_jobs: int = -1) -> dict:
     """
     Calculate the Intraclass Correlation Coefficient (ICC) along with lower and upper bound confidence intervals
-    by voxel for specified input files using manual sum of squares calculations.
+    by voxel for specified input files using manual sum of squares calculations. Now parallelized!
 
     Args:
         multisession_list (list of list of str):
@@ -40,6 +68,9 @@ def voxelwise_icc(multisession_list: list, mask: str, icc_type: str = 'icc_3') -
         icc_type (str, optional):
             Type of ICC to compute, default is 'icc_3'.
             Options: 'icc_1', 'icc_2', 'icc_3'.
+
+        n_jobs (int, optional):
+            Number of parallel jobs. Default is -1 (use all available cores).
 
     Returns:
         dict:
@@ -78,33 +109,34 @@ def voxelwise_icc(multisession_list: list, mask: str, icc_type: str = 'icc_3') -
     sess_labels = [f"sess{i + 1}" for i in range(num_sessions)]
     voxel_n = imgdata[0].shape[-1]
 
-    # empty list for icc, low/upper bound 95% ICC, mean square between & within subject
-    est, lowbound, upbound, \
-        btwn_sub_var, within_sub_var, btwn_meas_var = np.empty((6, voxel_n))
+    # Prepare data for parallel processing
+    voxel_data_list = [[imgdata[j][:, voxel] for j in range(num_sessions)] 
+                       for voxel in range(voxel_n)]
 
-    for voxel in range(voxel_n):
-        np_voxdata = np.column_stack((np.tile(subj_list, num_sessions),
-                                      np.hstack(
-                                          [[sess_labels[j]] * len(imgdata[j][:, voxel]) for j in range(num_sessions)]),
-                                      np.hstack([imgdata[j][:, voxel] for j in range(num_sessions)])
-                                      ))
+    # Parallel processing of voxels
+    print(f"Processing {voxel_n} voxels using {n_jobs} jobs...")
+    results = Parallel(n_jobs=n_jobs)(
+        delayed(process_voxel)(voxel_data, subj_list, sess_labels, icc_type)
+        for voxel_data in voxel_data_list
+    )
 
-        vox_pd = DataFrame(data=np_voxdata, columns=["subj", "sess", "vals"])
-        vox_pd = vox_pd.astype({"subj": int, "sess": "category", "vals": float})
-
-        est[voxel], lowbound[voxel], upbound[voxel], \
-            btwn_sub_var[voxel], within_sub_var[voxel], \
-            btwn_meas_var[voxel] = sumsq_icc(df_long=vox_pd, sub_var="subj", sess_var="sess",
-                                             value_var="vals", icc_type=icc_type)
+    # Unpack results
+    results_array = np.array(results)
+    est = results_array[:, 0]
+    lowbound = results_array[:, 1] 
+    upbound = results_array[:, 2]
+    btwn_sub_var = results_array[:, 3]
+    within_sub_var = results_array[:, 4]
+    btwn_meas_var = results_array[:, 5]
 
     # using unmask to reshape the 1D voxels back to 3D specified mask and saving to dictionary
     result_dict = {
-        'est': masker.inverse_transform(np.array(est)),
-        'lowbound': masker.inverse_transform(np.array(lowbound)),
-        'upbound': masker.inverse_transform(np.array(upbound)),
-        'btwnsub': masker.inverse_transform(np.array(btwn_sub_var)),
-        'wthnsub': masker.inverse_transform(np.array(within_sub_var)),
-        'btwnmeas': masker.inverse_transform(np.array(btwn_meas_var))
+        'est': masker.inverse_transform(est),
+        'lowbound': masker.inverse_transform(lowbound),
+        'upbound': masker.inverse_transform(upbound),
+        'btwnsub': masker.inverse_transform(btwn_sub_var),
+        'wthnsub': masker.inverse_transform(within_sub_var),
+        'btwnmeas': masker.inverse_transform(btwn_meas_var)
     }
 
     return result_dict
