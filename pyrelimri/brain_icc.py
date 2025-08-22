@@ -345,8 +345,9 @@ def roi_icc(multisession_list: list, type_atlas: str, atlas_dir: str, icc_type='
     roi_n = imgdata[0].shape[-1]
 
     # empty list for icc, low/upper bound 95% ICC, between sub, within sub and between measure var
+    # handle np.nan for btwn_meas, as it is empty for icc 1 & icc 3
     est, lowbound, upbound, \
-        btwn_sub_var, within_sub_var, btwn_meas_var = np.empty((6, roi_n))
+        btwn_sub_var, within_sub_var, btwn_meas_var = np.full((6, roi_n), np.nan)
 
     for roi in range(roi_n):
         np_roidata = np.column_stack((np.tile(subj_list, num_sessions),
@@ -362,6 +363,10 @@ def roi_icc(multisession_list: list, type_atlas: str, atlas_dir: str, icc_type='
             btwn_sub_var[roi], within_sub_var[roi], \
             btwn_meas_var[roi] = sumsq_icc(df_long=roi_pd, sub_var="subj", sess_var="sess",
                                            value_var="vals", icc_type=icc_type)
+        
+        # if btwn measure variance is None, set as nan
+        if btwn_meas_var[roi] is None:
+            btwn_meas_var[roi] = np.nan
 
     # using unmask to reshape the 1D ROI data back to 3D specified mask and saving to dictionary
     result_dict = {
@@ -392,7 +397,7 @@ def roi_icc(multisession_list: list, type_atlas: str, atlas_dir: str, icc_type='
             'upbound_3d': masker.inverse_transform(np.array(upbound)),
             'btwnsub_3d': masker.inverse_transform(np.array(btwn_sub_var)),
             'wthnsub_3d': masker.inverse_transform(np.array(within_sub_var)),
-            'btwnmeas_3d': masker.inverse_transform(np.array(within_sub_var))
+            'btwnmeas_3d': masker.inverse_transform(np.array(btwn_meas_var))
         }
         result_dict.update(update_values)
 
