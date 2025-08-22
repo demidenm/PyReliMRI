@@ -43,8 +43,11 @@ def process_voxel(voxel_data, subj_list, sess_labels, icc_type):
     vox_pd = DataFrame(data=np_voxdata, columns=["subj", "sess", "vals"])
     vox_pd = vox_pd.astype({"subj": int, "sess": "category", "vals": float})
 
-    return sumsq_icc(df_long=vox_pd, sub_var="subj", sess_var="sess",
-                     value_var="vals", icc_type=icc_type)
+    result = sumsq_icc(df_long=vox_pd, sub_var="subj", sess_var="sess",
+                       value_var="vals", icc_type=icc_type)
+    
+    # Convert None to np.nan to ensure consistent data types, as between-measure is None when ICC 1 / ICC 3
+    return tuple(np.nan if x is None else x for x in result)
 
 
 def voxelwise_icc(multisession_list: list, mask: str, icc_type: str = 'icc_3', n_jobs: int = -1) -> dict:
