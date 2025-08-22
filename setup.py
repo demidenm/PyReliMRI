@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="PyReliMRI",
-    version="2.2.01",
+    version="2.2.1",
     description="A package for computing reliability of MRI/fMRI images",
     long_description=long_description,
     long_description_content_type="text/markdown",
