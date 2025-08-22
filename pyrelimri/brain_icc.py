@@ -346,8 +346,7 @@ def roi_icc(multisession_list: list, type_atlas: str, atlas_dir: str, icc_type='
 
     # empty list for icc, low/upper bound 95% ICC, between sub, within sub and between measure var
     # handle np.nan for btwn_meas, as it is empty for icc 1 & icc 3
-    est, lowbound, upbound, \
-        btwn_sub_var, within_sub_var, btwn_meas_var = np.full((6, roi_n), np.nan)
+    est, lowbound, upbound, btwn_sub_var, within_sub_var, btwn_meas_var = np.empty((6, roi_n))
 
     for roi in range(roi_n):
         np_roidata = np.column_stack((np.tile(subj_list, num_sessions),
