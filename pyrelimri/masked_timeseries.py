@@ -339,7 +339,7 @@ def extract_time_series(bold_paths: list, roi_type: str, high_pass_sec: int = No
         coord_mask = new_img_like(wb_mask, coord_mask, wb_mask.affine)
 
         results = Parallel(n_jobs=n_jobs)(delayed(process_bold_roi_coords)(
-            bold_path, coord_mask, high_pass_sec, detrend, fwhm_smooth, wb_mask) for bold_path in bold_paths)
+            bold_path, coord_mask, high_pass_sec, detrend, fwhm_smooth) for bold_path in bold_paths)
         coord_series_list, id_list = zip(*results)
 
         return list(coord_series_list), coord_mask, list(id_list)
