@@ -176,6 +176,10 @@ def edgewise_icc(multisession_list: list, n_cols: int, col_names: list = None,
             btwn_sub[edge], wthn_sub[edge], \
             btwn_meas[edge] = sumsq_icc(df_long=roi_pd, sub_var="subj", sess_var="sess",
                                         value_var="vals", icc_type=icc_type)
+        
+    # incase between measure variance i none, in case of icc 3/1
+    if btwn_meas[edge] is None:
+        btwn_meas[edge] = np.nan
 
     result_dict = {
         'roi_labels': col_names,
