@@ -71,6 +71,11 @@ def image_similarity(imgfile1: str, imgfile2: str,
 
         elif thresh < 0:
             imgdata = imgdata < thresh
+    
+    # Imgs must be 1/0 binary images, ensure correct format for each similarity type
+    if similarity_type in ['dice', 'jaccard', 'tetrachoric']:
+        # Binarize input for these metrics
+        imgdata = imgdata.astype(bool)
 
     if similarity_type.casefold() in ['dice', 'jaccard']:
         # Intersection of images
